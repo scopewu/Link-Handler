@@ -1,0 +1,276 @@
+{
+  "extName": {
+    "message": "連結處理器",
+    "description": "擴充功能名稱"
+  },
+  "extDescription": {
+    "message": "智慧處理網頁連結：移除同域名 target 屬性、解析重定向連結、清理追蹤參數",
+    "description": "擴充功能描述"
+  },
+  "optionsTitle": {
+    "message": "連結處理器 - 設定",
+    "description": "設定頁面標題"
+  },
+  "popupTitle": {
+    "message": "連結處理器",
+    "description": "彈出視窗標題"
+  },
+  "redirectRules": {
+    "message": "重定向連結規則",
+    "description": "重定向規則標題"
+  },
+  "trackingRules": {
+    "message": "追蹤清理規則",
+    "description": "追蹤規則標題"
+  },
+  "globalSettings": {
+    "message": "全域設定",
+    "description": "全域設定標題"
+  },
+  "addRule": {
+    "message": "新增規則",
+    "description": "新增規則按鈕"
+  },
+  "deleteRule": {
+    "message": "刪除",
+    "description": "刪除規則按鈕"
+  },
+  "saveSettings": {
+    "message": "儲存設定",
+    "description": "儲存設定按鈕"
+  },
+  "resetSettings": {
+    "message": "恢復預設",
+    "description": "恢復預設按鈕"
+  },
+  "importSettings": {
+    "message": "匯入設定",
+    "description": "匯入設定按鈕"
+  },
+  "exportSettings": {
+    "message": "匯出設定",
+    "description": "匯出設定按鈕"
+  },
+  "domain": {
+    "message": "網域",
+    "description": "網域標籤"
+  },
+  "param": {
+    "message": "參數名稱",
+    "description": "參數名稱標籤"
+  },
+  "description": {
+    "message": "描述",
+    "description": "描述標籤"
+  },
+  "enabled": {
+    "message": "啟用",
+    "description": "啟用標籤"
+  },
+  "removeAttributes": {
+    "message": "移除屬性",
+    "description": "移除屬性標籤"
+  },
+  "preventClickRewrite": {
+    "message": "阻止點擊重寫",
+    "description": "阻止點擊重寫標籤"
+  },
+  "cleanUrlParams": {
+    "message": "清理 URL 參數",
+    "description": "清理 URL 參數標籤"
+  },
+  "removeTargetSameOrigin": {
+    "message": "同網域連結在同一分頁開啟",
+    "description": "同網域設定"
+  },
+  "removeTargetRelative": {
+    "message": "相對位址連結在同一分頁開啟",
+    "description": "相對位址設定"
+  },
+  "removeTargetAfterUnwrap": {
+    "message": "解析重定向連結後在同一分頁開啟",
+    "description": "解析後設定"
+  },
+  "enableForDynamicContent": {
+    "message": "處理動態載入的內容（SPA 頁面）",
+    "description": "動態內容設定"
+  },
+  "processExistingLinks": {
+    "message": "頁面載入時處理現有連結",
+    "description": "處理現有連結設定"
+  },
+  "savedSuccess": {
+    "message": "設定已儲存",
+    "description": "儲存成功訊息"
+  },
+  "savedError": {
+    "message": "儲存失敗",
+    "description": "儲存失敗訊息"
+  },
+  "resetConfirm": {
+    "message": "確定要恢復預設設定嗎？所有自訂規則將會遺失。",
+    "description": "恢復確認訊息"
+  },
+  "importError": {
+    "message": "匯入失敗：無效的設定檔",
+    "description": "匯入錯誤訊息"
+  },
+  "ruleNumber": {
+    "message": "規則 #$number$",
+    "description": "規則編號標籤",
+    "placeholders": {
+      "number": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "redirectRulesDesc": {
+    "message": "自動解析中間跳轉頁面的真實連結（如掘金、知乎的外部連結）",
+    "description": "重定向規則描述"
+  },
+  "trackingRulesDesc": {
+    "message": "移除連結上的追蹤屬性和統計參數（如 Bilibili、微博）",
+    "description": "追蹤規則描述"
+  },
+  "quickToggle": {
+    "message": "啟用連結處理",
+    "description": "快速切換標籤"
+  },
+  "openSettings": {
+    "message": "⚙️ 開啟設定頁面",
+    "description": "開啟設定按鈕"
+  },
+  "processNow": {
+    "message": "🔄 立即處理目前頁面",
+    "description": "立即處理按鈕"
+  },
+  "processingSuccess": {
+    "message": "✓ 已處理",
+    "description": "處理成功訊息"
+  },
+  "processingError": {
+    "message": "✗ 無法處理",
+    "description": "處理錯誤訊息"
+  },
+  "noRules": {
+    "message": "暫無規則，點擊新增",
+    "description": "空白規則訊息"
+  },
+  "domainPlaceholder": {
+    "message": "如：link.example.com",
+    "description": "網域輸入提示"
+  },
+  "paramPlaceholder": {
+    "message": "如：target, url",
+    "description": "參數輸入提示"
+  },
+  "descPlaceholder": {
+    "message": "規則的簡短描述",
+    "description": "描述輸入提示"
+  },
+  "attrsPlaceholder": {
+    "message": "輸入後按 Enter 新增",
+    "description": "屬性輸入提示"
+  },
+  "statsRedirect": {
+    "message": "重定向規則",
+    "description": "統計重定向標籤"
+  },
+  "statsTracking": {
+    "message": "清理規則",
+    "description": "統計追蹤標籤"
+  },
+  "statsProcessed": {
+    "message": "已處理",
+    "description": "統計已處理標籤"
+  },
+  "headerTitle": {
+    "message": "連結處理器",
+    "description": "標題"
+  },
+  "headerSubtitle": {
+    "message": "智慧處理網頁連結，提升瀏覽體驗",
+    "description": "副標題"
+  },
+  "toggleHint": {
+    "message": "點擊擴充功能圖示可快速切換啟用狀態",
+    "description": "切換提示文字"
+  },
+  "preventClickRewriteDesc": {
+    "message": "強制直接跳轉，阻止點擊統計",
+    "description": "阻止點擊重寫描述"
+  },
+  "globalSettingsDesc": {
+    "message": "設定連結處理的全域行為",
+    "description": "全域設定描述"
+  },
+  "quickToggleDesc": {
+    "message": "正在處理所有頁面上的活躍連結",
+    "description": "快速切換描述"
+  },
+  "tabGeneral": {
+    "message": "一般",
+    "description": "一般標籤"
+  },
+  "tabRedirects": {
+    "message": "重定向",
+    "description": "重定向標籤"
+  },
+  "tabTracking": {
+    "message": "追蹤清理",
+    "description": "追蹤標籤"
+  },
+  "tabBackup": {
+    "message": "備份",
+    "description": "備份標籤"
+  },
+  "removeTargetSameOriginDesc": {
+    "message": "指向同一網站的連結將在目前分頁開啟",
+    "description": "同網域設定描述"
+  },
+  "removeTargetRelativeDesc": {
+    "message": "相對位址連結將在目前分頁開啟",
+    "description": "相對位址設定描述"
+  },
+  "removeTargetAfterUnwrapDesc": {
+    "message": "移除重定向包裝後，在目前分頁開啟",
+    "description": "解析後設定描述"
+  },
+  "enableForDynamicContentDesc": {
+    "message": "支援單頁應用（SPA）頁面",
+    "description": "動態內容設定描述"
+  },
+  "backupSettings": {
+    "message": "備份與還原",
+    "description": "備份設定標題"
+  },
+  "backupSettingsDesc": {
+    "message": "儲存設定或從備份還原",
+    "description": "備份設定描述"
+  },
+  "exportSettingsDesc": {
+    "message": "將設定下載為 JSON 檔案",
+    "description": "匯出設定描述"
+  },
+  "importSettingsDesc": {
+    "message": "從 JSON 檔案還原設定",
+    "description": "匯入設定描述"
+  },
+  "resetSettingsDesc": {
+    "message": "將所有設定恢復為出廠預設值",
+    "description": "恢復預設描述"
+  },
+  "export": {
+    "message": "匯出",
+    "description": "匯出按鈕"
+  },
+  "import": {
+    "message": "匯入",
+    "description": "匯入按鈕"
+  },
+  "reset": {
+    "message": "重設",
+    "description": "重設按鈕"
+  }
+}

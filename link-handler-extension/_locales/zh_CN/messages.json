@@ -1,0 +1,276 @@
+{
+  "extName": {
+    "message": "链接处理器",
+    "description": "扩展名称"
+  },
+  "extDescription": {
+    "message": "智能处理网页链接：移除同域名 target 属性、解析重定向链接、清理跟踪参数",
+    "description": "扩展描述"
+  },
+  "optionsTitle": {
+    "message": "链接处理器 - 设置",
+    "description": "设置页面标题"
+  },
+  "popupTitle": {
+    "message": "链接处理器",
+    "description": "弹出窗口标题"
+  },
+  "redirectRules": {
+    "message": "重定向链接规则",
+    "description": "重定向规则标题"
+  },
+  "trackingRules": {
+    "message": "跟踪清理规则",
+    "description": "跟踪规则标题"
+  },
+  "globalSettings": {
+    "message": "全局设置",
+    "description": "全局设置标题"
+  },
+  "globalSettingsDesc": {
+    "message": "配置链接处理的全局行为",
+    "description": "全局设置描述"
+  },
+  "addRule": {
+    "message": "添加规则",
+    "description": "添加规则按钮"
+  },
+  "deleteRule": {
+    "message": "删除",
+    "description": "删除规则按钮"
+  },
+  "saveSettings": {
+    "message": "保存设置",
+    "description": "保存设置按钮"
+  },
+  "resetSettings": {
+    "message": "恢复默认",
+    "description": "恢复默认按钮"
+  },
+  "importSettings": {
+    "message": "导入配置",
+    "description": "导入配置按钮"
+  },
+  "exportSettings": {
+    "message": "导出配置",
+    "description": "导出配置按钮"
+  },
+  "domain": {
+    "message": "域名",
+    "description": "域名标签"
+  },
+  "param": {
+    "message": "参数名",
+    "description": "参数名标签"
+  },
+  "description": {
+    "message": "描述",
+    "description": "描述标签"
+  },
+  "enabled": {
+    "message": "启用",
+    "description": "启用标签"
+  },
+  "removeAttributes": {
+    "message": "移除属性",
+    "description": "移除属性标签"
+  },
+  "preventClickRewrite": {
+    "message": "阻止点击重写",
+    "description": "阻止点击重写标签"
+  },
+  "preventClickRewriteDesc": {
+    "message": "强制直接跳转，阻止点击统计",
+    "description": "阻止点击重写描述"
+  },
+  "cleanUrlParams": {
+    "message": "清理 URL 参数",
+    "description": "清理 URL 参数标签"
+  },
+  "removeTargetSameOrigin": {
+    "message": "同域名链接在同一标签页打开",
+    "description": "同域名设置"
+  },
+  "removeTargetRelative": {
+    "message": "相对地址链接在同一标签页打开",
+    "description": "相对地址设置"
+  },
+  "removeTargetAfterUnwrap": {
+    "message": "解析重定向链接后在同一标签页打开",
+    "description": "解析后设置"
+  },
+  "enableForDynamicContent": {
+    "message": "处理动态加载的内容（SPA 页面）",
+    "description": "动态内容设置"
+  },
+  "processExistingLinks": {
+    "message": "页面加载时处理现有链接",
+    "description": "处理现有链接设置"
+  },
+  "savedSuccess": {
+    "message": "设置已保存",
+    "description": "保存成功提示"
+  },
+  "savedError": {
+    "message": "保存失败",
+    "description": "保存失败提示"
+  },
+  "resetConfirm": {
+    "message": "确定要恢复默认设置吗？所有自定义规则将会丢失。",
+    "description": "恢复确认提示"
+  },
+  "importError": {
+    "message": "导入失败：无效的配置文件",
+    "description": "导入错误提示"
+  },
+  "ruleNumber": {
+    "message": "规则 #$number$",
+    "description": "规则编号标签",
+    "placeholders": {
+      "number": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "redirectRulesDesc": {
+    "message": "自动解析中间跳转页面的真实链接（如掘金、知乎的外部链接）",
+    "description": "重定向规则描述"
+  },
+  "trackingRulesDesc": {
+    "message": "移除链接上的跟踪属性和统计参数（如 Bilibili、微博）",
+    "description": "跟踪规则描述"
+  },
+  "quickToggle": {
+    "message": "启用链接处理",
+    "description": "快速切换标签"
+  },
+  "openSettings": {
+    "message": "打开设置",
+    "description": "打开设置按钮"
+  },
+  "processNow": {
+    "message": "处理当前页面",
+    "description": "立即处理按钮"
+  },
+  "processingSuccess": {
+    "message": "✓ 已处理",
+    "description": "处理成功提示"
+  },
+  "processingError": {
+    "message": "✗ 无法处理",
+    "description": "处理错误提示"
+  },
+  "noRules": {
+    "message": "暂无规则，点击添加",
+    "description": "空白规则提示"
+  },
+  "domainPlaceholder": {
+    "message": "如：link.example.com",
+    "description": "域名输入提示"
+  },
+  "paramPlaceholder": {
+    "message": "如：target, url",
+    "description": "参数输入提示"
+  },
+  "descPlaceholder": {
+    "message": "规则的简短描述",
+    "description": "描述输入提示"
+  },
+  "attrsPlaceholder": {
+    "message": "输入后按 Enter 添加",
+    "description": "属性输入提示"
+  },
+  "statsRedirect": {
+    "message": "重定向规则",
+    "description": "统计重定向标签"
+  },
+  "statsTracking": {
+    "message": "清理规则",
+    "description": "统计跟踪标签"
+  },
+  "statsProcessed": {
+    "message": "已处理",
+    "description": "统计已处理标签"
+  },
+  "headerTitle": {
+    "message": "链接处理器",
+    "description": "标题"
+  },
+  "headerSubtitle": {
+    "message": "智能处理网页链接，提升浏览体验",
+    "description": "副标题"
+  },
+  "toggleHint": {
+    "message": "点击扩展图标可快速切换启用状态",
+    "description": "切换提示文字"
+  },
+  "quickToggleDesc": {
+    "message": "正在处理所有页面上的活跃链接",
+    "description": "快速切换描述"
+  },
+  "tabGeneral": {
+    "message": "通用",
+    "description": "通用标签"
+  },
+  "tabRedirects": {
+    "message": "重定向",
+    "description": "重定向标签"
+  },
+  "tabTracking": {
+    "message": "跟踪清理",
+    "description": "跟踪标签"
+  },
+  "tabBackup": {
+    "message": "备份",
+    "description": "备份标签"
+  },
+  "removeTargetSameOriginDesc": {
+    "message": "指向同一网站的链接将在当前标签页打开",
+    "description": "同域名设置描述"
+  },
+  "removeTargetRelativeDesc": {
+    "message": "相对地址链接将在当前标签页打开",
+    "description": "相对地址设置描述"
+  },
+  "removeTargetAfterUnwrapDesc": {
+    "message": "移除重定向包装后，在当前标签页打开",
+    "description": "解析后设置描述"
+  },
+  "enableForDynamicContentDesc": {
+    "message": "支持单页应用（SPA）页面",
+    "description": "动态内容设置描述"
+  },
+  "backupSettings": {
+    "message": "备份与恢复",
+    "description": "备份设置标题"
+  },
+  "backupSettingsDesc": {
+    "message": "保存配置或从备份恢复",
+    "description": "备份设置描述"
+  },
+  "exportSettingsDesc": {
+    "message": "将配置下载为 JSON 文件",
+    "description": "导出设置描述"
+  },
+  "importSettingsDesc": {
+    "message": "从 JSON 文件恢复配置",
+    "description": "导入设置描述"
+  },
+  "resetSettingsDesc": {
+    "message": "将所有设置恢复为出厂默认值",
+    "description": "恢复默认描述"
+  },
+  "export": {
+    "message": "导出",
+    "description": "导出按钮"
+  },
+  "import": {
+    "message": "导入",
+    "description": "导入按钮"
+  },
+  "reset": {
+    "message": "重置",
+    "description": "重置按钮"
+  }
+}

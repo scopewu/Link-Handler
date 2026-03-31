@@ -1,0 +1,276 @@
+{
+  "extName": {
+    "message": "Link Handler",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Smart link processing: remove same-origin target attributes, unwrap redirect links, clean tracking parameters",
+    "description": "Extension description"
+  },
+  "optionsTitle": {
+    "message": "Link Handler - Settings",
+    "description": "Options page title"
+  },
+  "popupTitle": {
+    "message": "Link Handler",
+    "description": "Popup window title"
+  },
+  "redirectRules": {
+    "message": "Redirect Link Rules",
+    "description": "Redirect rules section title"
+  },
+  "trackingRules": {
+    "message": "Tracking Cleanup Rules",
+    "description": "Tracking rules section title"
+  },
+  "globalSettings": {
+    "message": "Global Settings",
+    "description": "Global settings section title"
+  },
+  "addRule": {
+    "message": "Add Rule",
+    "description": "Add rule button"
+  },
+  "deleteRule": {
+    "message": "Delete",
+    "description": "Delete rule button"
+  },
+  "saveSettings": {
+    "message": "Save Settings",
+    "description": "Save settings button"
+  },
+  "resetSettings": {
+    "message": "Reset to Default",
+    "description": "Reset settings button"
+  },
+  "importSettings": {
+    "message": "Import Config",
+    "description": "Import config button"
+  },
+  "exportSettings": {
+    "message": "Export Config",
+    "description": "Export config button"
+  },
+  "domain": {
+    "message": "Domain",
+    "description": "Domain label"
+  },
+  "param": {
+    "message": "Parameter",
+    "description": "Parameter label"
+  },
+  "description": {
+    "message": "Description",
+    "description": "Description label"
+  },
+  "enabled": {
+    "message": "Enabled",
+    "description": "Enabled label"
+  },
+  "removeAttributes": {
+    "message": "Remove Attributes",
+    "description": "Remove attributes label"
+  },
+  "preventClickRewrite": {
+    "message": "Prevent Click Rewrite",
+    "description": "Prevent click rewrite label"
+  },
+  "cleanUrlParams": {
+    "message": "Clean URL Parameters",
+    "description": "Clean URL parameters label"
+  },
+  "removeTargetSameOrigin": {
+    "message": "Open same-origin links in same tab",
+    "description": "Same origin setting"
+  },
+  "removeTargetRelative": {
+    "message": "Open relative links in same tab",
+    "description": "Relative URL setting"
+  },
+  "removeTargetAfterUnwrap": {
+    "message": "Open unwrapped redirect links in same tab",
+    "description": "After unwrap setting"
+  },
+  "enableForDynamicContent": {
+    "message": "Process dynamically loaded content (SPA)",
+    "description": "Dynamic content setting"
+  },
+  "processExistingLinks": {
+    "message": "Process existing links on page load",
+    "description": "Process existing links setting"
+  },
+  "savedSuccess": {
+    "message": "Settings saved successfully",
+    "description": "Save success message"
+  },
+  "savedError": {
+    "message": "Failed to save settings",
+    "description": "Save error message"
+  },
+  "resetConfirm": {
+    "message": "Are you sure you want to reset to default settings? All custom rules will be lost.",
+    "description": "Reset confirmation message"
+  },
+  "importError": {
+    "message": "Import failed: Invalid configuration file",
+    "description": "Import error message"
+  },
+  "ruleNumber": {
+    "message": "Rule #$number$",
+    "description": "Rule number label",
+    "placeholders": {
+      "number": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "redirectRulesDesc": {
+    "message": "Automatically unwrap redirect links from intermediate pages (e.g., Juejin, Zhihu)",
+    "description": "Redirect rules description"
+  },
+  "trackingRulesDesc": {
+    "message": "Remove tracking attributes and parameters from links (e.g., Bilibili, Weibo)",
+    "description": "Tracking rules description"
+  },
+  "quickToggle": {
+    "message": "Enable Link Processing",
+    "description": "Quick toggle label"
+  },
+  "openSettings": {
+    "message": "Open Settings",
+    "description": "Open settings button"
+  },
+  "processNow": {
+    "message": "Process Current Page",
+    "description": "Process now button"
+  },
+  "processingSuccess": {
+    "message": "✓ Processed",
+    "description": "Processing success message"
+  },
+  "processingError": {
+    "message": "✗ Cannot process",
+    "description": "Processing error message"
+  },
+  "noRules": {
+    "message": "No rules yet. Click to add.",
+    "description": "Empty rules message"
+  },
+  "domainPlaceholder": {
+    "message": "e.g., link.example.com",
+    "description": "Domain input placeholder"
+  },
+  "paramPlaceholder": {
+    "message": "e.g., target, url",
+    "description": "Parameter input placeholder"
+  },
+  "descPlaceholder": {
+    "message": "Brief description of this rule",
+    "description": "Description input placeholder"
+  },
+  "attrsPlaceholder": {
+    "message": "Type and press Enter to add",
+    "description": "Attributes input placeholder"
+  },
+  "statsRedirect": {
+    "message": "Redirect Rules",
+    "description": "Stats redirect label"
+  },
+  "statsTracking": {
+    "message": "Cleanup Rules",
+    "description": "Stats tracking label"
+  },
+  "statsProcessed": {
+    "message": "Processed",
+    "description": "Stats processed label"
+  },
+  "headerTitle": {
+    "message": "Link Handler",
+    "description": "Header title"
+  },
+  "headerSubtitle": {
+    "message": "Smart link processing for better browsing",
+    "description": "Header subtitle"
+  },
+  "toggleHint": {
+    "message": "Click the extension icon to quickly toggle",
+    "description": "Toggle hint text"
+  },
+  "preventClickRewriteDesc": {
+    "message": "Force direct navigation, bypass click tracking",
+    "description": "Prevent click rewrite description"
+  },
+  "globalSettingsDesc": {
+    "message": "Configure how links are processed across all websites",
+    "description": "Global settings description"
+  },
+  "quickToggleDesc": {
+    "message": "Processing active links on all pages",
+    "description": "Quick toggle description"
+  },
+  "tabGeneral": {
+    "message": "General",
+    "description": "General tab label"
+  },
+  "tabRedirects": {
+    "message": "Redirects",
+    "description": "Redirects tab label"
+  },
+  "tabTracking": {
+    "message": "Tracking",
+    "description": "Tracking tab label"
+  },
+  "tabBackup": {
+    "message": "Backup",
+    "description": "Backup tab label"
+  },
+  "removeTargetSameOriginDesc": {
+    "message": "Links to the same website will open in the current tab",
+    "description": "Same origin setting description"
+  },
+  "removeTargetRelativeDesc": {
+    "message": "Relative URLs will open in the current tab",
+    "description": "Relative URL setting description"
+  },
+  "removeTargetAfterUnwrapDesc": {
+    "message": "After removing redirect wrappers, open in current tab",
+    "description": "After unwrap setting description"
+  },
+  "enableForDynamicContentDesc": {
+    "message": "Works with Single Page Applications (SPA)",
+    "description": "Dynamic content setting description"
+  },
+  "backupSettings": {
+    "message": "Backup & Restore",
+    "description": "Backup settings section title"
+  },
+  "backupSettingsDesc": {
+    "message": "Save your configuration or restore from a backup",
+    "description": "Backup settings description"
+  },
+  "exportSettingsDesc": {
+    "message": "Download your configuration as a JSON file",
+    "description": "Export settings description"
+  },
+  "importSettingsDesc": {
+    "message": "Restore configuration from a JSON file",
+    "description": "Import settings description"
+  },
+  "resetSettingsDesc": {
+    "message": "Restore all settings to factory defaults",
+    "description": "Reset settings description"
+  },
+  "export": {
+    "message": "Export",
+    "description": "Export button text"
+  },
+  "import": {
+    "message": "Import",
+    "description": "Import button text"
+  },
+  "reset": {
+    "message": "Reset",
+    "description": "Reset button text"
+  }
+}

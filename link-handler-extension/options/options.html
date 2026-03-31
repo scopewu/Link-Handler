@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="optionsTitle">Link Handler - Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <header class="app-header">
+      <div class="header-content">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1 data-i18n="headerTitle">Link Handler</h1>
+            <p data-i18n="headerSubtitle">Smart link processing for better browsing</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-main">
+      
+      <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="general">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v6m0 6v6m4.22-10.22l4.24-4.24M6.34 17.66l-4.24 4.24M23 12h-6m-6 0H1m20.24 4.24l-4.24-4.24M6.34 6.34L2.1 2.1"/>
+          </svg>
+          <span data-i18n="tabGeneral">General</span>
+        </button>
+        <button class="tab-btn" data-tab="redirects">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
+          </svg>
+          <span data-i18n="tabRedirects">Redirects</span>
+        </button>
+        <button class="tab-btn" data-tab="tracking">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+          <span data-i18n="tabTracking">Tracking</span>
+        </button>
+        <button class="tab-btn" data-tab="backup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span data-i18n="tabBackup">Backup</span>
+        </button>
+      </nav>
+
+      <div class="tab-content">
+        
+        <div class="tab-panel active" id="tab-general">
+          <div class="panel-header">
+            <h2 data-i18n="globalSettings">General Settings</h2>
+            <p data-i18n="globalSettingsDesc">Configure how links are processed across all websites</p>
+          </div>
+          
+          <div class="settings-list">
+            <label class="setting-item">
+              <input type="checkbox" id="removeTargetSameOrigin" checked>
+              <span class="checkmark"></span>
+              <span class="setting-content">
+                <span class="setting-title" data-i18n="removeTargetSameOrigin">Open same-origin links in same tab</span>
+                <span class="setting-desc" data-i18n="removeTargetSameOriginDesc">Links to the same website will open in the current tab</span>
+              </span>
+            </label>
+            
+            <label class="setting-item">
+              <input type="checkbox" id="removeTargetRelative" checked>
+              <span class="checkmark"></span>
+              <span class="setting-content">
+                <span class="setting-title" data-i18n="removeTargetRelative">Open relative links in same tab</span>
+                <span class="setting-desc" data-i18n="removeTargetRelativeDesc">Relative URLs will open in the current tab</span>
+              </span>
+            </label>
+            
+            <label class="setting-item">
+              <input type="checkbox" id="removeTargetAfterUnwrap" checked>
+              <span class="checkmark"></span>
+              <span class="setting-content">
+                <span class="setting-title" data-i18n="removeTargetAfterUnwrap">Open unwrapped redirect links in same tab</span>
+                <span class="setting-desc" data-i18n="removeTargetAfterUnwrapDesc">After removing redirect wrappers, open in current tab</span>
+              </span>
+            </label>
+            
+            <label class="setting-item">
+              <input type="checkbox" id="enableForDynamicContent" checked>
+              <span class="checkmark"></span>
+              <span class="setting-content">
+                <span class="setting-title" data-i18n="enableForDynamicContent">Process dynamically loaded content</span>
+                <span class="setting-desc" data-i18n="enableForDynamicContentDesc">Works with Single Page Applications (SPA)</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-redirects">
+          <div class="panel-header">
+            <h2 data-i18n="redirectRules">Redirect Link Rules</h2>
+            <p data-i18n="redirectRulesDesc">Automatically unwrap redirect links from intermediate pages</p>
+          </div>
+          
+          <div id="redirectRules" class="rules-container"></div>
+          
+          <button class="btn btn-primary btn-add" id="addRedirectRule">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span data-i18n="addRule">Add Redirect Rule</span>
+          </button>
+        </div>
+
+        <div class="tab-panel" id="tab-tracking">
+          <div class="panel-header">
+            <h2 data-i18n="trackingRules">Tracking Cleanup Rules</h2>
+            <p data-i18n="trackingRulesDesc">Remove tracking attributes and parameters from links</p>
+          </div>
+          
+          <div id="trackingRules" class="rules-container"></div>
+          
+          <button class="btn btn-primary btn-add" id="addTrackingRule">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span data-i18n="addRule">Add Tracking Rule</span>
+          </button>
+        </div>
+
+        <div class="tab-panel" id="tab-backup">
+          <div class="panel-header">
+            <h2 data-i18n="backupSettings">Backup & Restore</h2>
+            <p data-i18n="backupSettingsDesc">Save your configuration or restore from a backup</p>
+          </div>
+          
+          <div class="backup-actions">
+            <div class="backup-card">
+              <div class="backup-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+              </div>
+              <div class="backup-content">
+                <h3 data-i18n="exportSettings">Export Settings</h3>
+                <p data-i18n="exportSettingsDesc">Download your configuration as a JSON file</p>
+              </div>
+              <button class="btn btn-secondary" id="exportSettings">
+                <span data-i18n="export">Export</span>
+              </button>
+            </div>
+            
+            <div class="backup-card">
+              <div class="backup-icon import">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+              <div class="backup-content">
+                <h3 data-i18n="importSettings">Import Settings</h3>
+                <p data-i18n="importSettingsDesc">Restore configuration from a JSON file</p>
+              </div>
+              <button class="btn btn-secondary" id="importSettings">
+                <span data-i18n="import">Import</span>
+              </button>
+              <input type="file" id="importFile" accept=".json" style="display: none;">
+            </div>
+            
+            <div class="backup-card danger">
+              <div class="backup-icon reset">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+              </div>
+              <div class="backup-content">
+                <h3 data-i18n="resetSettings">Reset to Default</h3>
+                <p data-i18n="resetSettingsDesc">Restore all settings to factory defaults</p>
+              </div>
+              <button class="btn btn-danger" id="resetSettings">
+                <span data-i18n="reset">Reset</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-bar">
+        <div class="save-status" id="saveStatus"></div>
+        <button class="btn btn-success" id="saveSettings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span data-i18n="saveSettings">Save Changes</span>
+        </button>
+      </div>
+    </main>
+
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <script src="../config.js"></script>
+  <script src="i18n.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

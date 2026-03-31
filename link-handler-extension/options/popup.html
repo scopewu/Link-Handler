@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="popupTitle">Link Handler</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+      </div>
+      <div class="header-content">
+        <h1 data-i18n="headerTitle">Link Handler</h1>
+        <p data-i18n="headerSubtitle">Smart link processing</p>
+      </div>
+      <div class="header-glow"></div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-section">
+      <div class="stat-card">
+        <div class="stat-icon redirect">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value" id="redirectCount">-</div>
+          <div class="stat-label" data-i18n="statsRedirect">Redirects</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon clean">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value" id="trackingCount">-</div>
+          <div class="stat-label" data-i18n="statsTracking">Cleaned</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon total">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value" id="totalProcessed">-</div>
+          <div class="stat-label" data-i18n="statsProcessed">Total</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Toggle -->
+    <div class="toggle-card">
+      <div class="toggle-content">
+        <div class="toggle-icon-wrapper enabled">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <div class="toggle-text">
+          <span class="toggle-title" data-i18n="quickToggle">Extension Enabled</span>
+          <span class="toggle-desc" data-i18n="quickToggleDesc">Processing active links</span>
+        </div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="enableExtension">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <a href="options.html" target="_blank" class="btn btn-primary" id="openSettings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v6m0 6v6m4.22-10.22l4.24-4.24M6.34 17.66l-4.24 4.24M23 12h-6m-6 0H1m20.24 4.24l-4.24-4.24M6.34 6.34L2.1 2.1"/>
+        </svg>
+        <span data-i18n="openSettings">Settings</span>
+      </a>
+      <button class="btn btn-secondary" id="processNow">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        <span data-i18n="processNow">Process Page</span>
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span class="footer-dot"></span>
+      <span data-i18n="toggleHint">Click icon to toggle</span>
+    </div>
+  </div>
+
+  <script src="../config.js"></script>
+  <script src="i18n.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
