@@ -6,7 +6,7 @@
   --bg-secondary: #FFFFFF;
   --bg-tertiary: #F5F3EF;
   --bg-hover: #EDE9E3;
-  
+
   /* Primary - Ocean Teal */
   --primary-50: #F0FDFA;
   --primary-100: #CCFBF1;
@@ -16,7 +16,7 @@
   --primary-500: #14B8A6;
   --primary-600: #0D9488;
   --primary-700: #0F766E;
-  
+
   /* Accent Colors */
   --accent-coral: #FF6B6B;
   --accent-coral-light: #FFF1F0;
@@ -24,34 +24,34 @@
   --accent-sage-light: #E8F5E9;
   --accent-amber: #FBBF24;
   --accent-amber-light: #FEF3C7;
-  
+
   /* Text Colors */
   --text-primary: #1F2937;
   --text-secondary: #6B7280;
   --text-tertiary: #9CA3AF;
   --text-muted: #D1D5DB;
-  
+
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
   --gradient-success: linear-gradient(135deg, var(--accent-sage) 0%, #66BB6A 100%);
   --gradient-danger: linear-gradient(135deg, var(--accent-coral) 0%, #EF5350 100%);
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
   --shadow-glow: 0 4px 20px rgba(20, 184, 166, 0.25);
-  
+
   /* Typography */
   --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  
+
   /* Spacing */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
-  
+
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -197,7 +197,7 @@ body {
 /* Tab Content */
 .tab-content {
   flex: 1;
-  padding: 28px;
+  padding: 28px 28px 100px;
   overflow-y: auto;
 }
 
@@ -359,8 +359,11 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
+}
+
+.rule-enabled {
+  display: flex;
+  gap: 4px;
 }
 
 /* Form Elements */
@@ -539,9 +542,16 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 28px;
-  background: var(--bg-tertiary);
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-lg);
+  /*min-width: 320px;*/
+  /*max-width: calc(100% - 48px);*/
 }
 
 .save-status {
@@ -702,34 +712,34 @@ body {
   .app-container {
     padding: 16px;
   }
-  
+
   .header-content {
     padding: 20px 24px;
   }
-  
+
   .brand-text h1 {
     font-size: 1.25rem;
   }
-  
+
   .tab-content {
     padding: 20px;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .backup-card {
     flex-direction: column;
     text-align: center;
     padding: 20px;
   }
-  
+
   .actions-bar {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .actions-bar .btn {
     width: 100%;
   }

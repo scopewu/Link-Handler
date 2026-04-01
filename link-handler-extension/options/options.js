@@ -45,16 +45,16 @@
     div.dataset.index = index;
     div.dataset.type = 'redirect';
 
-    const ruleTitle = rule.description 
+    const ruleTitle = rule.description
       ? `${i18n.getMessage('ruleNumber', (index + 1).toString())} - ${rule.description}`
       : i18n.getMessage('ruleNumber', (index + 1).toString());
 
     div.innerHTML = `
       <div class="rule-header">
         <h3>${ruleTitle}</h3>
-        <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="rule-toggle">
           <label class="rule-enabled">
-            <input type="checkbox" class="rule-toggle" ${rule.enabled !== false ? 'checked' : ''}>
+            <input type="checkbox" ${rule.enabled !== false ? 'checked' : ''}>
             <span>${i18n.getMessage('enabled')}</span>
           </label>
           <button class="btn btn-danger delete-rule">${i18n.getMessage('deleteRule')}</button>
@@ -104,16 +104,16 @@
     div.dataset.index = index;
     div.dataset.type = 'tracking';
 
-    const ruleTitle = rule.description 
+    const ruleTitle = rule.description
       ? `${i18n.getMessage('ruleNumber', (index + 1).toString())} - ${rule.description}`
       : i18n.getMessage('ruleNumber', (index + 1).toString());
 
     div.innerHTML = `
       <div class="rule-header">
         <h3>${ruleTitle}</h3>
-        <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="rule-toggle">
           <label class="rule-enabled">
-            <input type="checkbox" class="rule-toggle" ${rule.enabled !== false ? 'checked' : ''}>
+            <input type="checkbox" ${rule.enabled !== false ? 'checked' : ''}>
             <span>${i18n.getMessage('enabled')}</span>
           </label>
           <button class="btn btn-danger delete-rule">${i18n.getMessage('deleteRule')}</button>
@@ -374,7 +374,7 @@
     const dataStr = JSON.stringify(currentConfig, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    
+
     const a = document.createElement('a');
     a.href = url;
     a.download = `link-handler-config-${new Date().toISOString().split('T')[0]}.json`;
@@ -382,7 +382,7 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     showToast(i18n.getMessage('exportSettings'), 'success');
   }
 
@@ -395,7 +395,7 @@
     reader.onload = (event) => {
       try {
         const imported = JSON.parse(event.target.result);
-        
+
         // 验证配置结构
         if (!imported.redirectRules || !imported.trackingRules || !imported.global) {
           throw new Error('无效的配置文件');
@@ -412,7 +412,7 @@
       }
     };
     reader.readAsText(file);
-    
+
     // 清空 input
     e.target.value = '';
   }
@@ -422,7 +422,7 @@
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.className = 'toast show ' + type;
-    
+
     setTimeout(() => {
       toast.classList.remove('show');
     }, 3000);

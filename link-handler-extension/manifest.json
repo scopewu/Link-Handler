@@ -6,7 +6,11 @@
   "default_locale": "en",
   "browser_specific_settings": {
     "gecko": {
-      "id": "link-handler@example.com"
+      "id": "wu@tie.pub",
+      "strict_min_version": "130.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   },
   "permissions": [
@@ -28,13 +32,14 @@
     "default_popup": "options/popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "32": "icons/icon32.png"
     }
   },
   "icons": {
     "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
     "48": "icons/icon48.png",
+    "96": "icons/icon96.png",
     "128": "icons/icon128.png"
   }
 }
