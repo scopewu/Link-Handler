@@ -138,7 +138,7 @@
     try {
       const url = new URL(href);
       return config.redirectRules.find(rule => {
-        if (!rule.enabled) return false;
+        if (!rule.enabled || !url.searchParams.has(rule.param)) return false;
         return url.hostname === rule.domain || url.hostname.endsWith('.' + rule.domain);
       });
     } catch {
@@ -192,25 +192,16 @@
   function shouldRemoveTarget(link) {
     if (!link.hasAttribute('target')) return false;
     if (link.getAttribute('target') !== '_blank') return false;
+    if (config.global.removeTargetSameOrigin === false) return false;
 
     const href = link.getAttribute('href') || '';
 
-    // 相对地址
-    if (config.global.removeTargetRelative && isRelativeUrl(href)) {
-      return true;
-    }
-
-    // 同域名
-    if (config.global.removeTargetSameOrigin && isSameOrigin(link)) {
-      return true;
-    }
-
-    return false;
+    return isSameOrigin(link) || isRelativeUrl(href);
   }
 
   // 判断是否为相对地址
   function isRelativeUrl(href) {
-    return href && !href.match(/^[a-z][a-z0-9+.-]*:/i);
+    return href && !href.match(/^(?!(?:[a-z][a-z0-9+\-.]*:)?\/\/).+$/);
   }
 
   // 判断是否为同域名

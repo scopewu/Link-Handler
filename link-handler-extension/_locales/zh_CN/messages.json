@@ -88,12 +88,8 @@
     "description": "清理 URL 参数标签"
   },
   "removeTargetSameOrigin": {
-    "message": "同域名链接在同一标签页打开",
-    "description": "同域名设置"
-  },
-  "removeTargetRelative": {
-    "message": "相对地址链接在同一标签页打开",
-    "description": "相对地址设置"
+    "message": "同一网站内链接在同一标签页打开",
+    "description": "同网站设置"
   },
   "enableRedirect": {
     "message": "启用重定向解析",
@@ -226,12 +222,8 @@
     "description": "备份标签"
   },
   "removeTargetSameOriginDesc": {
-    "message": "指向同一网站的链接将在当前标签页打开",
-    "description": "同域名设置描述"
-  },
-  "removeTargetRelativeDesc": {
-    "message": "相对地址链接将在当前标签页打开",
-    "description": "相对地址设置描述"
+    "message": "包括同域名和相对地址的链接，都将在当前标签页打开",
+    "description": "同网站设置描述"
   },
   "enableRedirectDesc": {
     "message": "自动解析中间跳转页面的真实链接",

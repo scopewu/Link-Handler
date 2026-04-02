@@ -34,13 +34,13 @@ const DEFAULT_CONFIG = {
     },
     {
       domain: 'link.segmentfault.com',
-      param: 'url',
+      param: 'enc',
       enabled: true,
       description: 'SegmentFault 链接跳转'
     },
     {
-      domain: 'www.jianshu.com',
-      param: 'url',
+      domain: 'jianshu.com',
+      param: 'to',
       enabled: true,
       description: '简书外链跳转'
     },
@@ -106,7 +106,7 @@ const DEFAULT_CONFIG = {
       description: '知乎跟踪清理',
       removeAttributes: ['data-za-detail-view-id', 'data-za-element-name', 'data-za-extra-module'],
       preventClickRewrite: false,
-      cleanUrlParams: ['utm_source', 'utm_medium']
+      cleanUrlParams: ['utm_content', 'utm_medium', 'utm_source']
     },
     {
       domain: 'juejin.cn',
@@ -128,9 +128,9 @@ const DEFAULT_CONFIG = {
       domain: 'csdn.net',
       enabled: true,
       description: 'CSDN 跟踪清理',
-      removeAttributes: ['data-report-click', 'data-report-view'],
+      removeAttributes: ['data-report-query', 'data-report-click'],
       preventClickRewrite: false,
-      cleanUrlParams: ['utm_source', 'spm']
+      cleanUrlParams: []
     },
     {
       domain: 'baidu.com',
@@ -145,8 +145,7 @@ const DEFAULT_CONFIG = {
   // 全局设置
   global: {
     enabled: true,                    // 全局启用/禁用
-    removeTargetSameOrigin: true,    // 同域名移除 target
-    removeTargetRelative: true,      // 相对地址移除 target
+    removeTargetSameOrigin: true,    // 同域名/相对地址移除 target
     enableRedirect: true,            // 启用重定向解析
     enableTracking: true,            // 启用跟踪清理
     processExistingLinks: true       // 处理已有链接

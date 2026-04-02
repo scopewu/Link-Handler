@@ -80,12 +80,8 @@
     "description": "清理 URL 參數標籤"
   },
   "removeTargetSameOrigin": {
-    "message": "同網域連結在同一分頁開啟",
-    "description": "同網域設定"
-  },
-  "removeTargetRelative": {
-    "message": "相對位址連結在同一分頁開啟",
-    "description": "相對位址設定"
+    "message": "同一網站內連結在同一分頁開啟",
+    "description": "同網站設定"
   },
   "enableRedirect": {
     "message": "啟用重定向解析",
@@ -226,12 +222,8 @@
     "description": "備份標籤"
   },
   "removeTargetSameOriginDesc": {
-    "message": "指向同一網站的連結將在目前分頁開啟",
-    "description": "同網域設定描述"
-  },
-  "removeTargetRelativeDesc": {
-    "message": "相對位址連結將在目前分頁開啟",
-    "description": "相對位址設定描述"
+    "message": "包含同網域和相對位址的連結，都將在目前分頁開啟",
+    "description": "同網站設定描述"
   },
   "enableRedirectDesc": {
     "message": "自動解析中間跳轉頁面的真實連結",

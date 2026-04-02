@@ -20,7 +20,6 @@
   function renderGlobalSettings() {
     const global = currentConfig.global;
     document.getElementById('removeTargetSameOrigin').checked = global.removeTargetSameOrigin !== false;
-    document.getElementById('removeTargetRelative').checked = global.removeTargetRelative !== false;
     document.getElementById('enableRedirect').checked = global.enableRedirect !== false;
     document.getElementById('enableTracking').checked = global.enableTracking !== false;
   }
@@ -399,7 +398,6 @@
     // 收集全局设置
     currentConfig.global = {
       removeTargetSameOrigin: document.getElementById('removeTargetSameOrigin').checked,
-      removeTargetRelative: document.getElementById('removeTargetRelative').checked,
       enableRedirect: document.getElementById('enableRedirect').checked,
       enableTracking: document.getElementById('enableTracking').checked
     };

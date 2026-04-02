@@ -80,12 +80,8 @@
     "description": "Clean URL parameters label"
   },
   "removeTargetSameOrigin": {
-    "message": "Open same-origin links in same tab",
-    "description": "Same origin setting"
-  },
-  "removeTargetRelative": {
-    "message": "Open relative links in same tab",
-    "description": "Relative URL setting"
+    "message": "Open same-site links in same tab",
+    "description": "Same site setting"
   },
   "enableRedirect": {
     "message": "Enable redirect unwrapping",
@@ -226,12 +222,8 @@
     "description": "Backup tab label"
   },
   "removeTargetSameOriginDesc": {
-    "message": "Links to the same website will open in the current tab",
-    "description": "Same origin setting description"
-  },
-  "removeTargetRelativeDesc": {
-    "message": "Relative URLs will open in the current tab",
-    "description": "Relative URL setting description"
+    "message": "Links to the same website (including relative URLs) will open in the current tab",
+    "description": "Same site setting description"
   },
   "enableRedirectDesc": {
     "message": "Automatically unwrap redirect links from intermediate pages",
