@@ -4,6 +4,9 @@
 
   let currentConfig = null;
 
+  let redirectSearchKeyword = '';
+  let trackingSearchKeyword = '';
+
   // 初始化
   async function init() {
     currentConfig = await getConfig();
@@ -16,10 +19,10 @@
   // 渲染全局设置
   function renderGlobalSettings() {
     const global = currentConfig.global;
-    document.getElementById('removeTargetSameOrigin').checked = global.removeTargetSameOrigin;
-    document.getElementById('removeTargetRelative').checked = global.removeTargetRelative;
-    document.getElementById('removeTargetAfterUnwrap').checked = global.removeTargetAfterUnwrap !== false;
-    document.getElementById('enableForDynamicContent').checked = global.enableForDynamicContent !== false;
+    document.getElementById('removeTargetSameOrigin').checked = global.removeTargetSameOrigin !== false;
+    document.getElementById('removeTargetRelative').checked = global.removeTargetRelative !== false;
+    document.getElementById('enableRedirect').checked = global.enableRedirect !== false;
+    document.getElementById('enableTracking').checked = global.enableTracking !== false;
   }
 
   // 渲染重定向规则
@@ -27,12 +30,22 @@
     const container = document.getElementById('redirectRules');
     container.innerHTML = '';
 
-    if (currentConfig.redirectRules.length === 0) {
-      container.innerHTML = `<div class="empty-state">${i18n.getMessage('noRules')}</div>`;
+    const filteredRules = filterRules(currentConfig.redirectRules, redirectSearchKeyword);
+
+    if (filteredRules.length === 0) {
+      container.innerHTML = `<div class="empty-state">${redirectSearchKeyword ? i18n.getMessage('noSearchResults') : i18n.getMessage('noRules')}</div>`;
       return;
     }
 
-    currentConfig.redirectRules.forEach((rule, index) => {
+    // 显示搜索结果统计
+    if (redirectSearchKeyword) {
+      const statsEl = document.createElement('div');
+      statsEl.className = 'search-stats';
+      statsEl.textContent = i18n.getMessage('searchResults', [filteredRules.length.toString(), currentConfig.redirectRules.length.toString()]);
+      container.appendChild(statsEl);
+    }
+
+    filteredRules.forEach(({ rule, index }) => {
       const ruleEl = createRedirectRuleElement(rule, index);
       container.appendChild(ruleEl);
     });
@@ -86,12 +99,22 @@
     const container = document.getElementById('trackingRules');
     container.innerHTML = '';
 
-    if (currentConfig.trackingRules.length === 0) {
-      container.innerHTML = `<div class="empty-state">${i18n.getMessage('noRules')}</div>`;
+    const filteredRules = filterRules(currentConfig.trackingRules, trackingSearchKeyword);
+
+    if (filteredRules.length === 0) {
+      container.innerHTML = `<div class="empty-state">${trackingSearchKeyword ? i18n.getMessage('noSearchResults') : i18n.getMessage('noRules')}</div>`;
       return;
     }
 
-    currentConfig.trackingRules.forEach((rule, index) => {
+    // 显示搜索结果统计
+    if (trackingSearchKeyword) {
+      const statsEl = document.createElement('div');
+      statsEl.className = 'search-stats';
+      statsEl.textContent = i18n.getMessage('searchResults', [filteredRules.length.toString(), currentConfig.trackingRules.length.toString()]);
+      container.appendChild(statsEl);
+    }
+
+    filteredRules.forEach(({ rule, index }) => {
       const ruleEl = createTrackingRuleElement(rule, index);
       container.appendChild(ruleEl);
     });
@@ -160,6 +183,24 @@
     return div;
   }
 
+  // 过滤规则（根据域名或描述搜索）
+  function filterRules(rules, keyword) {
+    if (!keyword || !keyword.trim()) {
+      return rules.map((rule, index) => ({ rule, index }));
+    }
+
+    const lowerKeyword = keyword.toLowerCase().trim();
+    const result = [];
+    rules.forEach((rule, index) => {
+      const domainMatch = (rule.domain || '').toLowerCase().includes(lowerKeyword);
+      const descMatch = (rule.description || '').toLowerCase().includes(lowerKeyword);
+      if (domainMatch || descMatch) {
+        result.push({ rule, index });
+      }
+    });
+    return result;
+  }
+
   // 从 DOM 收集当前表单值到 currentConfig（重新渲染前调用，防止丢失未保存的编辑）
   function collectCurrentValues() {
     // 收集重定向规则
@@ -223,6 +264,24 @@
 
   function bindEvents() {
     initTabs();
+
+    // 重定向规则搜索
+    const redirectSearchInput = document.getElementById('redirectSearch');
+    if (redirectSearchInput) {
+      redirectSearchInput.addEventListener('input', (e) => {
+        redirectSearchKeyword = e.target.value;
+        renderRedirectRules();
+      });
+    }
+
+    // 跟踪规则搜索
+    const trackingSearchInput = document.getElementById('trackingSearch');
+    if (trackingSearchInput) {
+      trackingSearchInput.addEventListener('input', (e) => {
+        trackingSearchKeyword = e.target.value;
+        renderTrackingRules();
+      });
+    }
 
     // 添加重定向规则
     document.getElementById('addRedirectRule').addEventListener('click', () => {
@@ -341,8 +400,8 @@
     currentConfig.global = {
       removeTargetSameOrigin: document.getElementById('removeTargetSameOrigin').checked,
       removeTargetRelative: document.getElementById('removeTargetRelative').checked,
-      removeTargetAfterUnwrap: document.getElementById('removeTargetAfterUnwrap').checked,
-      enableForDynamicContent: document.getElementById('enableForDynamicContent').checked
+      enableRedirect: document.getElementById('enableRedirect').checked,
+      enableTracking: document.getElementById('enableTracking').checked
     };
 
     // 收集规则表单值

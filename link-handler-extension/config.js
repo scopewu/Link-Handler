@@ -61,6 +61,24 @@ const DEFAULT_CONFIG = {
       param: 'u',
       enabled: true,
       description: '淘宝联盟链接'
+    },
+    {
+      domain: 'sspai.com',
+      param: 'target',
+      enabled: true,
+      description: '少数派链接跳转'
+    },
+    {
+      domain: 'out.reddit.com',
+      param: 'url',
+      enabled: true,
+      description: 'Reddit 出站链接'
+    },
+    {
+      domain: 'facebook.com',
+      param: 'u',
+      enabled: true,
+      description: 'Facebook 链接跳转'
     }
   ],
 
@@ -129,8 +147,8 @@ const DEFAULT_CONFIG = {
     enabled: true,                    // 全局启用/禁用
     removeTargetSameOrigin: true,    // 同域名移除 target
     removeTargetRelative: true,      // 相对地址移除 target
-    removeTargetAfterUnwrap: true,   // 解析重定向后移除 target
-    enableForDynamicContent: true,   // 监听动态内容
+    enableRedirect: true,            // 启用重定向解析
+    enableTracking: true,            // 启用跟踪清理
     processExistingLinks: true       // 处理已有链接
   }
 };

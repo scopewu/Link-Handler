@@ -87,13 +87,13 @@
     "message": "相對位址連結在同一分頁開啟",
     "description": "相對位址設定"
   },
-  "removeTargetAfterUnwrap": {
-    "message": "解析重定向連結後在同一分頁開啟",
-    "description": "解析後設定"
+  "enableRedirect": {
+    "message": "啟用重定向解析",
+    "description": "重定向全域開關"
   },
-  "enableForDynamicContent": {
-    "message": "處理動態載入的內容（SPA 頁面）",
-    "description": "動態內容設定"
+  "enableTracking": {
+    "message": "啟用追蹤清理",
+    "description": "追蹤清理全域開關"
   },
   "processExistingLinks": {
     "message": "頁面載入時處理現有連結",
@@ -233,13 +233,13 @@
     "message": "相對位址連結將在目前分頁開啟",
     "description": "相對位址設定描述"
   },
-  "removeTargetAfterUnwrapDesc": {
-    "message": "移除重定向包裝後，在目前分頁開啟",
-    "description": "解析後設定描述"
+  "enableRedirectDesc": {
+    "message": "自動解析中間跳轉頁面的真實連結",
+    "description": "重定向全域開關描述"
   },
-  "enableForDynamicContentDesc": {
-    "message": "支援單頁應用（SPA）頁面",
-    "description": "動態內容設定描述"
+  "enableTrackingDesc": {
+    "message": "移除連結上的追蹤屬性和統計參數",
+    "description": "追蹤清理全域開關描述"
   },
   "backupSettings": {
     "message": "備份與還原",
@@ -272,5 +272,27 @@
   "reset": {
     "message": "重設",
     "description": "重設按鈕"
+  },
+  "searchDomainPlaceholder": {
+    "message": "搜尋網域或描述...",
+    "description": "網域搜尋框提示"
+  },
+  "noSearchResults": {
+    "message": "沒有找到符合的規則",
+    "description": "搜尋無結果提示"
+  },
+  "searchResults": {
+    "message": "找到 $1$ / $2$ 條規則",
+    "description": "搜尋結果統計",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "3"
+      },
+      "2": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
   }
 }

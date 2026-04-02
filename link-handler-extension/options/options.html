@@ -86,22 +86,22 @@
                 <span class="setting-desc" data-i18n="removeTargetRelativeDesc">Relative URLs will open in the current tab</span>
               </span>
             </label>
-            
+
             <label class="setting-item">
-              <input type="checkbox" id="removeTargetAfterUnwrap" checked>
+              <input type="checkbox" id="enableRedirect" checked>
               <span class="checkmark"></span>
               <span class="setting-content">
-                <span class="setting-title" data-i18n="removeTargetAfterUnwrap">Open unwrapped redirect links in same tab</span>
-                <span class="setting-desc" data-i18n="removeTargetAfterUnwrapDesc">After removing redirect wrappers, open in current tab</span>
+                <span class="setting-title" data-i18n="enableRedirect">Enable redirect unwrapping</span>
+                <span class="setting-desc" data-i18n="enableRedirectDesc">Automatically unwrap redirect links from intermediate pages</span>
               </span>
             </label>
-            
+
             <label class="setting-item">
-              <input type="checkbox" id="enableForDynamicContent" checked>
+              <input type="checkbox" id="enableTracking" checked>
               <span class="checkmark"></span>
               <span class="setting-content">
-                <span class="setting-title" data-i18n="enableForDynamicContent">Process dynamically loaded content</span>
-                <span class="setting-desc" data-i18n="enableForDynamicContentDesc">Works with Single Page Applications (SPA)</span>
+                <span class="setting-title" data-i18n="enableTracking">Enable tracking cleanup</span>
+                <span class="setting-desc" data-i18n="enableTrackingDesc">Remove tracking attributes and parameters from links</span>
               </span>
             </label>
           </div>
@@ -112,7 +112,15 @@
             <h2 data-i18n="redirectRules">Redirect Link Rules</h2>
             <p data-i18n="redirectRulesDesc">Automatically unwrap redirect links from intermediate pages</p>
           </div>
-          
+
+          <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input type="text" id="redirectSearch" data-i18n-placeholder="searchDomainPlaceholder" placeholder="搜索域名...">
+          </div>
+
           <div id="redirectRules" class="rules-container"></div>
           
           <button class="btn btn-primary btn-add" id="addRedirectRule">
@@ -129,7 +137,15 @@
             <h2 data-i18n="trackingRules">Tracking Cleanup Rules</h2>
             <p data-i18n="trackingRulesDesc">Remove tracking attributes and parameters from links</p>
           </div>
-          
+
+          <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input type="text" id="trackingSearch" data-i18n-placeholder="searchDomainPlaceholder" placeholder="搜索域名...">
+          </div>
+
           <div id="trackingRules" class="rules-container"></div>
           
           <button class="btn btn-primary btn-add" id="addTrackingRule">

@@ -95,13 +95,13 @@
     "message": "相对地址链接在同一标签页打开",
     "description": "相对地址设置"
   },
-  "removeTargetAfterUnwrap": {
-    "message": "解析重定向链接后在同一标签页打开",
-    "description": "解析后设置"
+  "enableRedirect": {
+    "message": "启用重定向解析",
+    "description": "重定向全局开关"
   },
-  "enableForDynamicContent": {
-    "message": "处理动态加载的内容（SPA 页面）",
-    "description": "动态内容设置"
+  "enableTracking": {
+    "message": "启用跟踪清理",
+    "description": "跟踪清理全局开关"
   },
   "processExistingLinks": {
     "message": "页面加载时处理现有链接",
@@ -233,13 +233,13 @@
     "message": "相对地址链接将在当前标签页打开",
     "description": "相对地址设置描述"
   },
-  "removeTargetAfterUnwrapDesc": {
-    "message": "移除重定向包装后，在当前标签页打开",
-    "description": "解析后设置描述"
+  "enableRedirectDesc": {
+    "message": "自动解析中间跳转页面的真实链接",
+    "description": "重定向全局开关描述"
   },
-  "enableForDynamicContentDesc": {
-    "message": "支持单页应用（SPA）页面",
-    "description": "动态内容设置描述"
+  "enableTrackingDesc": {
+    "message": "移除链接上的跟踪属性和统计参数",
+    "description": "跟踪清理全局开关描述"
   },
   "backupSettings": {
     "message": "备份与恢复",
@@ -272,5 +272,27 @@
   "reset": {
     "message": "重置",
     "description": "重置按钮"
+  },
+  "searchDomainPlaceholder": {
+    "message": "搜索域名或描述...",
+    "description": "域名搜索框提示"
+  },
+  "noSearchResults": {
+    "message": "没有找到匹配的规则",
+    "description": "搜索无结果提示"
+  },
+  "searchResults": {
+    "message": "找到 $1$ / $2$ 条规则",
+    "description": "搜索结果统计",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "3"
+      },
+      "2": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
   }
 }

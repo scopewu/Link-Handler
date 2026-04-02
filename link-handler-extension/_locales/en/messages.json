@@ -87,13 +87,13 @@
     "message": "Open relative links in same tab",
     "description": "Relative URL setting"
   },
-  "removeTargetAfterUnwrap": {
-    "message": "Open unwrapped redirect links in same tab",
-    "description": "After unwrap setting"
+  "enableRedirect": {
+    "message": "Enable redirect unwrapping",
+    "description": "Redirect global toggle"
   },
-  "enableForDynamicContent": {
-    "message": "Process dynamically loaded content (SPA)",
-    "description": "Dynamic content setting"
+  "enableTracking": {
+    "message": "Enable tracking cleanup",
+    "description": "Tracking cleanup global toggle"
   },
   "processExistingLinks": {
     "message": "Process existing links on page load",
@@ -233,13 +233,13 @@
     "message": "Relative URLs will open in the current tab",
     "description": "Relative URL setting description"
   },
-  "removeTargetAfterUnwrapDesc": {
-    "message": "After removing redirect wrappers, open in current tab",
-    "description": "After unwrap setting description"
+  "enableRedirectDesc": {
+    "message": "Automatically unwrap redirect links from intermediate pages",
+    "description": "Redirect global toggle description"
   },
-  "enableForDynamicContentDesc": {
-    "message": "Works with Single Page Applications (SPA)",
-    "description": "Dynamic content setting description"
+  "enableTrackingDesc": {
+    "message": "Remove tracking attributes and parameters from links",
+    "description": "Tracking cleanup global toggle description"
   },
   "backupSettings": {
     "message": "Backup & Restore",
@@ -272,5 +272,27 @@
   "reset": {
     "message": "Reset",
     "description": "Reset button text"
+  },
+  "searchDomainPlaceholder": {
+    "message": "Search domain or description...",
+    "description": "Domain search input placeholder"
+  },
+  "noSearchResults": {
+    "message": "No matching rules found",
+    "description": "No search results message"
+  },
+  "searchResults": {
+    "message": "Found $1$ / $2$ rules",
+    "description": "Search results count",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "3"
+      },
+      "2": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
   }
 }

@@ -27,12 +27,10 @@
       processAllLinks();
     }
 
-    // 监听动态内容
-    if (config.global.enableForDynamicContent) {
-      observeDynamicContent();
-    }
+    // 监听动态内容（默认始终启用）
+    observeDynamicContent();
 
-    // 监听 SPA 路由变化
+    // 监听 SPA 路由变化（默认始终启用）
     listenToSPANavigation();
   }
 
@@ -47,9 +45,7 @@
           // 扩展被启用，重新初始化
           config.global.enabled = true;
           processAllLinks();
-          if (config.global.enableForDynamicContent) {
-            observeDynamicContent();
-          }
+          observeDynamicContent();
         }
       }
       if (message.action === 'reprocess') {
@@ -106,10 +102,12 @@
 
     try {
       // 阶段1: 处理重定向链接
-      const redirectRule = findRedirectRule(link.href);
-      if (redirectRule && redirectRule.enabled !== false) {
-        unwrapRedirectLink(link, redirectRule);
-        return; // 重定向链接处理后，不再进行其他处理
+      if (config.global.enableRedirect !== false) {
+        const redirectRule = findRedirectRule(link.href);
+        if (redirectRule && redirectRule.enabled !== false) {
+          unwrapRedirectLink(link, redirectRule);
+          return; // 重定向链接处理后，不再进行其他处理
+        }
       }
 
       // 阶段2: 同域名/相对地址，移除 target
@@ -118,14 +116,16 @@
       }
 
       // 阶段3: 清理跟踪属性
-      const trackingRule = findTrackingRule(link.href);
-      if (trackingRule && trackingRule.enabled !== false) {
-        cleanTrackingAttributes(link, trackingRule);
-        if (trackingRule.cleanUrlParams && trackingRule.cleanUrlParams.length > 0) {
-          cleanUrlParams(link, trackingRule.cleanUrlParams);
-        }
-        if (trackingRule.preventClickRewrite) {
-          preventClickRewrite(link);
+      if (config.global.enableTracking !== false) {
+        const trackingRule = findTrackingRule(link.href);
+        if (trackingRule && trackingRule.enabled !== false) {
+          cleanTrackingAttributes(link, trackingRule);
+          if (trackingRule.cleanUrlParams && trackingRule.cleanUrlParams.length > 0) {
+            cleanUrlParams(link, trackingRule.cleanUrlParams);
+          }
+          if (trackingRule.preventClickRewrite) {
+            preventClickRewrite(link);
+          }
         }
       }
     } catch (e) {
@@ -181,11 +181,6 @@
         if (isValidUrl(realUrl)) {
           const oldHref = link.href;
           link.href = realUrl;
-
-          // 移除 target 属性（在同一标签页打开）
-          // if (config.global.removeTargetAfterUnwrap) {
-          //   link.removeAttribute('target');
-          // }
         }
       }
     } catch (e) {
