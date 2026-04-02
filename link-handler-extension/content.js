@@ -247,6 +247,16 @@
   function cleanUrlParams(link, paramsToRemove) {
     try {
       const url = new URL(link.href);
+
+      // 通配符 * 表示直接移除所有参数，产出干净 URL
+      if (paramsToRemove.includes('*')) {
+        if (url.search) {
+          url.search = '';
+          link.href = url.toString();
+        }
+        return;
+      }
+
       let modified = false;
 
       paramsToRemove.forEach(param => {

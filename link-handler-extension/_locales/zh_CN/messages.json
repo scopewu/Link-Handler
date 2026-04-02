@@ -84,7 +84,7 @@
     "description": "阻止点击重写描述"
   },
   "cleanUrlParams": {
-    "message": "清理 URL 参数",
+    "message": "清理 URL 参数（输入 * 清除所有）",
     "description": "清理 URL 参数标签"
   },
   "removeTargetSameOrigin": {

@@ -90,7 +90,7 @@ const DEFAULT_CONFIG = {
       description: 'Bilibili 跟踪清理',
       removeAttributes: ['data-spmid', 'data-mod', 'data-idx', 'data-idxdata-idx', 'data-report-id'],
       preventClickRewrite: true,
-      cleanUrlParams: ['spm_id_from', 'from_source', 'from_spmid']
+      cleanUrlParams: ['*', 'spm_id_from', 'from_source', 'from_spmid']
     },
     {
       domain: 'weibo.com',

@@ -76,7 +76,7 @@
     "description": "Prevent click rewrite label"
   },
   "cleanUrlParams": {
-    "message": "Clean URL Parameters",
+    "message": "Clean URL Parameters (use * for all)",
     "description": "Clean URL parameters label"
   },
   "removeTargetSameOrigin": {

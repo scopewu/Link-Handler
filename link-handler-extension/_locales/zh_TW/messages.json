@@ -76,7 +76,7 @@
     "description": "阻止點擊重寫標籤"
   },
   "cleanUrlParams": {
-    "message": "清理 URL 參數",
+    "message": "清理 URL 參數（輸入 * 清除所有）",
     "description": "清理 URL 參數標籤"
   },
   "removeTargetSameOrigin": {
