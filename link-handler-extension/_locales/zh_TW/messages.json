@@ -31,6 +31,18 @@
     "message": "新增規則",
     "description": "新增規則按鈕"
   },
+  "cancel": {
+    "message": "取消",
+    "description": "取消按鈕"
+  },
+  "domainRequired": {
+    "message": "網域不能為空",
+    "description": "網域必填驗證訊息"
+  },
+  "paramRequired": {
+    "message": "參數名稱不能為空",
+    "description": "參數名稱必填驗證訊息"
+  },
   "deleteRule": {
     "message": "刪除",
     "description": "刪除規則按鈕"

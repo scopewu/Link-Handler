@@ -6,6 +6,7 @@
 
   let redirectSearchKeyword = '';
   let trackingSearchKeyword = '';
+  let currentModalType = null;
 
   // 初始化
   async function init() {
@@ -64,9 +65,9 @@
     div.innerHTML = `
       <div class="rule-header">
         <h3>${ruleTitle}</h3>
-        <div class="rule-toggle">
+        <div class="rule-switch">
           <label class="rule-enabled">
-            <input type="checkbox" ${rule.enabled !== false ? 'checked' : ''}>
+            <input type="checkbox" class="rule-toggle" ${rule.enabled !== false ? 'checked' : ''}>
             <span>${i18n.getMessage('enabled')}</span>
           </label>
           <button class="btn btn-danger delete-rule">${i18n.getMessage('deleteRule')}</button>
@@ -133,9 +134,9 @@
     div.innerHTML = `
       <div class="rule-header">
         <h3>${ruleTitle}</h3>
-        <div class="rule-toggle">
+        <div class="rule-switch">
           <label class="rule-enabled">
-            <input type="checkbox" ${rule.enabled !== false ? 'checked' : ''}>
+            <input type="checkbox" class="rule-toggle" ${rule.enabled !== false ? 'checked' : ''}>
             <span>${i18n.getMessage('enabled')}</span>
           </label>
           <button class="btn btn-danger delete-rule">${i18n.getMessage('deleteRule')}</button>
@@ -284,28 +285,20 @@
 
     // 添加重定向规则
     document.getElementById('addRedirectRule').addEventListener('click', () => {
-      collectCurrentValues();
-      currentConfig.redirectRules.push({
-        domain: '',
-        param: 'target',
-        enabled: true,
-        description: ''
-      });
-      renderRedirectRules();
+      openRuleModal('redirect');
     });
 
     // 添加跟踪规则
     document.getElementById('addTrackingRule').addEventListener('click', () => {
-      collectCurrentValues();
-      currentConfig.trackingRules.push({
-        domain: '',
-        enabled: true,
-        description: '',
-        removeAttributes: [],
-        cleanUrlParams: [],
-        preventClickRewrite: false
-      });
-      renderTrackingRules();
+      openRuleModal('tracking');
+    });
+
+    // 弹窗事件
+    document.getElementById('closeRuleModal').addEventListener('click', closeRuleModal);
+    document.getElementById('cancelRuleModal').addEventListener('click', closeRuleModal);
+    document.getElementById('confirmRuleModal').addEventListener('click', confirmRuleModal);
+    document.getElementById('ruleModal').addEventListener('click', (e) => {
+      if (e.target.id === 'ruleModal') closeRuleModal();
     });
 
     // 保存设置
@@ -472,6 +465,185 @@
 
     // 清空 input
     e.target.value = '';
+  }
+
+  // 打开规则弹窗
+  function openRuleModal(type) {
+    currentModalType = type;
+    const modal = document.getElementById('ruleModal');
+    const title = document.getElementById('ruleModalTitle');
+    const body = document.getElementById('ruleModalBody');
+
+    title.textContent = i18n.getMessage('addRule');
+
+    if (type === 'redirect') {
+      body.innerHTML = `
+        <div class="modal-form">
+          <div class="form-row">
+            <div class="form-group full-width checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="modalRuleEnabled" checked>
+                <span>${i18n.getMessage('enabled')}</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>${i18n.getMessage('domain')}</label>
+              <input type="text" id="modalRuleDomain" placeholder="${i18n.getMessage('domainPlaceholder')}">
+            </div>
+            <div class="form-group">
+              <label>${i18n.getMessage('param')}</label>
+              <input type="text" id="modalRuleParam" value="target" placeholder="${i18n.getMessage('paramPlaceholder')}">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>${i18n.getMessage('description')}</label>
+              <input type="text" id="modalRuleDesc" placeholder="${i18n.getMessage('descPlaceholder')}">
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      body.innerHTML = `
+        <div class="modal-form">
+          <div class="form-row">
+            <div class="form-group full-width checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="modalRuleEnabled" checked>
+                <span>${i18n.getMessage('enabled')}</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>${i18n.getMessage('domain')}</label>
+              <input type="text" id="modalRuleDomain" placeholder="${i18n.getMessage('domainPlaceholder')}">
+            </div>
+            <div class="form-group">
+              <label>${i18n.getMessage('description')}</label>
+              <input type="text" id="modalRuleDesc" placeholder="${i18n.getMessage('descPlaceholder')}">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>${i18n.getMessage('removeAttributes')}</label>
+              <div class="tags-input" data-field="modalRemoveAttributes">
+                <input type="text" placeholder="${i18n.getMessage('attrsPlaceholder')}">
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>${i18n.getMessage('cleanUrlParams')}</label>
+              <div class="tags-input" data-field="modalCleanUrlParams">
+                <input type="text" placeholder="${i18n.getMessage('attrsPlaceholder')}">
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full-width checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="modalRulePreventClick">
+                <span>${i18n.getMessage('preventClickRewriteDesc')}</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    modal.classList.add('show');
+    const firstInput = body.querySelector('input[type="text"]');
+    if (firstInput) firstInput.focus();
+  }
+
+  // 关闭规则弹窗
+  function closeRuleModal() {
+    document.getElementById('ruleModal').classList.remove('show');
+    currentModalType = null;
+  }
+
+  // 显示输入框错误状态
+  function showInputError(input) {
+    input.style.borderColor = 'var(--accent-coral)';
+    input.style.boxShadow = '0 0 0 3px rgba(255, 107, 107, 0.2)';
+    input.focus();
+    setTimeout(() => {
+      input.style.borderColor = '';
+      input.style.boxShadow = '';
+    }, 2000);
+  }
+
+  // 确认添加规则
+  function confirmRuleModal() {
+    const body = document.getElementById('ruleModalBody');
+    const enabled = body.querySelector('#modalRuleEnabled').checked;
+
+    if (currentModalType === 'redirect') {
+      const domainInput = body.querySelector('#modalRuleDomain');
+      const paramInput = body.querySelector('#modalRuleParam');
+      const descInput = body.querySelector('#modalRuleDesc');
+      const domain = domainInput.value.trim();
+      const param = paramInput.value.trim();
+      const description = descInput.value.trim();
+
+      if (!domain) {
+        showInputError(domainInput);
+        showToast(i18n.getMessage('domainRequired') || '请输入域名', 'error');
+        return;
+      }
+      if (!param) {
+        showInputError(paramInput);
+        showToast(i18n.getMessage('paramRequired') || '请输入参数名', 'error');
+        return;
+      }
+
+      collectCurrentValues();
+      currentConfig.redirectRules.push({
+        domain,
+        param: param || 'target',
+        enabled,
+        description
+      });
+      renderRedirectRules();
+    } else if (currentModalType === 'tracking') {
+      const domainInput = body.querySelector('#modalRuleDomain');
+      const descInput = body.querySelector('#modalRuleDesc');
+      const domain = domainInput.value.trim();
+      const description = descInput.value.trim();
+      const preventClick = body.querySelector('#modalRulePreventClick').checked;
+
+      if (!domain) {
+        showInputError(domainInput);
+        showToast(i18n.getMessage('domainRequired') || '请输入域名', 'error');
+        return;
+      }
+
+      const removeAttrs = [];
+      body.querySelectorAll('[data-field="modalRemoveAttributes"] .tag').forEach(tag => {
+        removeAttrs.push(tag.childNodes[0].textContent.trim());
+      });
+
+      const cleanParams = [];
+      body.querySelectorAll('[data-field="modalCleanUrlParams"] .tag').forEach(tag => {
+        cleanParams.push(tag.childNodes[0].textContent.trim());
+      });
+
+      collectCurrentValues();
+      currentConfig.trackingRules.push({
+        domain,
+        enabled,
+        description,
+        removeAttributes: removeAttrs,
+        cleanUrlParams: cleanParams,
+        preventClickRewrite: preventClick
+      });
+      renderTrackingRules();
+    }
+
+    closeRuleModal();
   }
 
   // 显示提示

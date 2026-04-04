@@ -31,6 +31,18 @@
     "message": "Add Rule",
     "description": "Add rule button"
   },
+  "cancel": {
+    "message": "Cancel",
+    "description": "Cancel button"
+  },
+  "domainRequired": {
+    "message": "Domain is required",
+    "description": "Domain required validation message"
+  },
+  "paramRequired": {
+    "message": "Parameter is required",
+    "description": "Parameter required validation message"
+  },
   "deleteRule": {
     "message": "Delete",
     "description": "Delete rule button"

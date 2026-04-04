@@ -35,6 +35,18 @@
     "message": "添加规则",
     "description": "添加规则按钮"
   },
+  "cancel": {
+    "message": "取消",
+    "description": "取消按钮"
+  },
+  "domainRequired": {
+    "message": "域名不能为空",
+    "description": "域名必填验证提示"
+  },
+  "paramRequired": {
+    "message": "参数名不能为空",
+    "description": "参数名必填验证提示"
+  },
   "deleteRule": {
     "message": "删除",
     "description": "删除规则按钮"

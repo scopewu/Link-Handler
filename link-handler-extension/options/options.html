@@ -99,9 +99,18 @@
         </div>
 
         <div class="tab-panel" id="tab-redirects">
-          <div class="panel-header">
-            <h2 data-i18n="redirectRules">Redirect Link Rules</h2>
-            <p data-i18n="redirectRulesDesc">Automatically unwrap redirect links from intermediate pages</p>
+          <div class="panel-header panel-header-with-action">
+            <div class="panel-header-text">
+              <h2 data-i18n="redirectRules">Redirect Link Rules</h2>
+              <p data-i18n="redirectRulesDesc">Automatically unwrap redirect links from intermediate pages</p>
+            </div>
+            <button class="btn btn-primary" id="addRedirectRule">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              <span data-i18n="addRule">Add Rule</span>
+            </button>
           </div>
 
           <div class="search-box">
@@ -113,20 +122,21 @@
           </div>
 
           <div id="redirectRules" class="rules-container"></div>
-          
-          <button class="btn btn-primary btn-add" id="addRedirectRule">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            <span data-i18n="addRule">Add Redirect Rule</span>
-          </button>
         </div>
 
         <div class="tab-panel" id="tab-tracking">
-          <div class="panel-header">
-            <h2 data-i18n="trackingRules">Tracking Cleanup Rules</h2>
-            <p data-i18n="trackingRulesDesc">Remove tracking attributes and parameters from links</p>
+          <div class="panel-header panel-header-with-action">
+            <div class="panel-header-text">
+              <h2 data-i18n="trackingRules">Tracking Cleanup Rules</h2>
+              <p data-i18n="trackingRulesDesc">Remove tracking attributes and parameters from links</p>
+            </div>
+            <button class="btn btn-primary" id="addTrackingRule">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              <span data-i18n="addRule">Add Rule</span>
+            </button>
           </div>
 
           <div class="search-box">
@@ -138,14 +148,6 @@
           </div>
 
           <div id="trackingRules" class="rules-container"></div>
-          
-          <button class="btn btn-primary btn-add" id="addTrackingRule">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            <span data-i18n="addRule">Add Tracking Rule</span>
-          </button>
         </div>
 
         <div class="tab-panel" id="tab-backup">
@@ -221,6 +223,26 @@
     </main>
 
     <div id="toast" class="toast"></div>
+
+    <!-- 添加规则弹窗 -->
+    <div class="modal-overlay" id="ruleModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 id="ruleModalTitle" data-i18n="addRule">Add Rule</h3>
+          <button class="modal-close" id="closeRuleModal" aria-label="Close">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body" id="ruleModalBody"></div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancelRuleModal" data-i18n="cancel">Cancel</button>
+          <button class="btn btn-primary" id="confirmRuleModal" data-i18n="addRule">Add Rule</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="../config.js"></script>
