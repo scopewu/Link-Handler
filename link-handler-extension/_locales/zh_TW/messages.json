@@ -31,6 +31,14 @@
     "message": "新增規則",
     "description": "新增規則按鈕"
   },
+  "editRule": {
+    "message": "編輯規則",
+    "description": "編輯規則按鈕"
+  },
+  "save": {
+    "message": "儲存",
+    "description": "儲存按鈕"
+  },
   "cancel": {
     "message": "取消",
     "description": "取消按鈕"

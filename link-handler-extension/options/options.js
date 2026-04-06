@@ -7,6 +7,7 @@
   let redirectSearchKeyword = '';
   let trackingSearchKeyword = '';
   let currentModalType = null;
+  let currentEditIndex = null; // 当前编辑的规则索引，null表示添加新模式
 
   // 初始化
   async function init() {
@@ -25,7 +26,7 @@
     document.getElementById('enableTracking').checked = global.enableTracking !== false;
   }
 
-  // 渲染重定向规则
+  // 渲染重定向规则 - 静态卡片展示
   function renderRedirectRules() {
     const container = document.getElementById('redirectRules');
     container.innerHTML = '';
@@ -46,15 +47,15 @@
     }
 
     filteredRules.forEach(({ rule, index }) => {
-      const ruleEl = createRedirectRuleElement(rule, index);
+      const ruleEl = createRedirectRuleCard(rule, index);
       container.appendChild(ruleEl);
     });
   }
 
-  // 创建重定向规则元素
-  function createRedirectRuleElement(rule, index) {
+  // 创建重定向规则卡片 - 静态展示
+  function createRedirectRuleCard(rule, index) {
     const div = document.createElement('div');
-    div.className = 'rule-item' + (rule.enabled === false ? ' disabled' : '');
+    div.className = 'rule-card' + (rule.enabled === false ? ' disabled' : '');
     div.dataset.index = index;
     div.dataset.type = 'redirect';
 
@@ -62,39 +63,49 @@
       ? `${i18n.getMessage('ruleNumber', (index + 1).toString())} - ${rule.description}`
       : i18n.getMessage('ruleNumber', (index + 1).toString());
 
+    // 构建详情行
+    const details = [];
+    if (rule.domain) {
+      details.push(`<span class="rule-detail"><strong>${i18n.getMessage('domain')}:</strong> ${escapeHtml(rule.domain)}</span>`);
+    }
+    if (rule.param) {
+      details.push(`<span class="rule-detail"><strong>${i18n.getMessage('param')}:</strong> ${escapeHtml(rule.param)}</span>`);
+    }
+
     div.innerHTML = `
-      <div class="rule-header">
-        <h3>${ruleTitle}</h3>
-        <div class="rule-switch">
-          <label class="rule-enabled">
+      <div class="rule-card-header">
+        <div class="rule-card-title">
+          <span class="rule-status ${rule.enabled !== false ? 'enabled' : 'disabled'}"></span>
+          <h3>${escapeHtml(ruleTitle)}</h3>
+        </div>
+        <div class="rule-card-actions">
+          <label class="rule-toggle-label">
             <input type="checkbox" class="rule-toggle" ${rule.enabled !== false ? 'checked' : ''}>
-            <span>${i18n.getMessage('enabled')}</span>
+            <span class="toggle-slider"></span>
           </label>
-          <button class="btn btn-danger delete-rule">${i18n.getMessage('deleteRule')}</button>
+          <button class="btn-icon edit-rule" title="${i18n.getMessage('editRule') || '编辑'}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button class="btn-icon delete-rule" title="${i18n.getMessage('deleteRule')}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>${i18n.getMessage('domain')}</label>
-          <input type="text" class="rule-domain" value="${rule.domain || ''}" placeholder="${i18n.getMessage('domainPlaceholder')}">
-        </div>
-        <div class="form-group">
-          <label>${i18n.getMessage('param')}</label>
-          <input type="text" class="rule-param" value="${rule.param || ''}" placeholder="${i18n.getMessage('paramPlaceholder')}">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group full-width">
-          <label>${i18n.getMessage('description')}</label>
-          <input type="text" class="rule-desc" value="${rule.description || ''}" placeholder="${i18n.getMessage('descPlaceholder')}">
-        </div>
+      <div class="rule-card-body">
+        ${details.length > 0 ? details.join('') : '<span class="rule-detail empty">暂无配置</span>'}
       </div>
     `;
 
     return div;
   }
 
-  // 渲染跟踪规则
+  // 渲染跟踪规则 - 静态卡片展示
   function renderTrackingRules() {
     const container = document.getElementById('trackingRules');
     container.innerHTML = '';
@@ -115,15 +126,15 @@
     }
 
     filteredRules.forEach(({ rule, index }) => {
-      const ruleEl = createTrackingRuleElement(rule, index);
+      const ruleEl = createTrackingRuleCard(rule, index);
       container.appendChild(ruleEl);
     });
   }
 
-  // 创建跟踪规则元素
-  function createTrackingRuleElement(rule, index) {
+  // 创建跟踪规则卡片 - 静态展示
+  function createTrackingRuleCard(rule, index) {
     const div = document.createElement('div');
-    div.className = 'rule-item' + (rule.enabled === false ? ' disabled' : '');
+    div.className = 'rule-card' + (rule.enabled === false ? ' disabled' : '');
     div.dataset.index = index;
     div.dataset.type = 'tracking';
 
@@ -131,56 +142,61 @@
       ? `${i18n.getMessage('ruleNumber', (index + 1).toString())} - ${rule.description}`
       : i18n.getMessage('ruleNumber', (index + 1).toString());
 
+    // 构建详情行
+    const details = [];
+    if (rule.domain) {
+      details.push(`<span class="rule-detail"><strong>${i18n.getMessage('domain')}:</strong> ${escapeHtml(rule.domain)}</span>`);
+    }
+    if (rule.removeAttributes && rule.removeAttributes.length > 0) {
+      details.push(`<span class="rule-detail"><strong>${i18n.getMessage('removeAttributes')}:</strong> ${rule.removeAttributes.join(', ')}</span>`);
+    }
+    if (rule.cleanUrlParams && rule.cleanUrlParams.length > 0) {
+      const paramsDisplay = rule.cleanUrlParams.includes('*') ? '*' : rule.cleanUrlParams.join(', ');
+      details.push(`<span class="rule-detail"><strong>${i18n.getMessage('cleanUrlParams').replace('（输入 * 清除所有）', '').replace(' (use * for all)', '')}:</strong> ${paramsDisplay}</span>`);
+    }
+    if (rule.preventClickRewrite) {
+      details.push(`<span class="rule-detail"><strong>${i18n.getMessage('preventClickRewrite')}:</strong> ✓</span>`);
+    }
+
     div.innerHTML = `
-      <div class="rule-header">
-        <h3>${ruleTitle}</h3>
-        <div class="rule-switch">
-          <label class="rule-enabled">
+      <div class="rule-card-header">
+        <div class="rule-card-title">
+          <span class="rule-status ${rule.enabled !== false ? 'enabled' : 'disabled'}"></span>
+          <h3>${escapeHtml(ruleTitle)}</h3>
+        </div>
+        <div class="rule-card-actions">
+          <label class="rule-toggle-label">
             <input type="checkbox" class="rule-toggle" ${rule.enabled !== false ? 'checked' : ''}>
-            <span>${i18n.getMessage('enabled')}</span>
+            <span class="toggle-slider"></span>
           </label>
-          <button class="btn btn-danger delete-rule">${i18n.getMessage('deleteRule')}</button>
+          <button class="btn-icon edit-rule" title="${i18n.getMessage('editRule') || '编辑'}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button class="btn-icon delete-rule" title="${i18n.getMessage('deleteRule')}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>${i18n.getMessage('domain')}</label>
-          <input type="text" class="rule-domain" value="${rule.domain || ''}" placeholder="${i18n.getMessage('domainPlaceholder')}">
-        </div>
-        <div class="form-group">
-          <label>${i18n.getMessage('description')}</label>
-          <input type="text" class="rule-desc" value="${rule.description || ''}" placeholder="${i18n.getMessage('descPlaceholder')}">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group full-width">
-          <label>${i18n.getMessage('removeAttributes')}</label>
-          <div class="tags-input" data-field="removeAttributes">
-            ${(rule.removeAttributes || []).map(attr => `<span class="tag">${attr}<span class="remove">×</span></span>`).join('')}
-            <input type="text" placeholder="${i18n.getMessage('attrsPlaceholder')}">
-          </div>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group full-width">
-          <label>${i18n.getMessage('cleanUrlParams')}</label>
-          <div class="tags-input" data-field="cleanUrlParams">
-            ${(rule.cleanUrlParams || []).map(param => `<span class="tag">${param}<span class="remove">×</span></span>`).join('')}
-            <input type="text" placeholder="${i18n.getMessage('attrsPlaceholder')}">
-          </div>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="checkbox-label" style="padding: 0;">
-            <input type="checkbox" class="rule-prevent-click" ${rule.preventClickRewrite ? 'checked' : ''}>
-            <span>${i18n.getMessage('preventClickRewriteDesc')}</span>
-          </label>
-        </div>
+      <div class="rule-card-body">
+        ${details.length > 0 ? details.join('') : '<span class="rule-detail empty">暂无配置</span>'}
       </div>
     `;
 
     return div;
+  }
+
+  // 转义 HTML 特殊字符
+  function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   // 过滤规则（根据域名或描述搜索）
@@ -199,45 +215,6 @@
       }
     });
     return result;
-  }
-
-  // 从 DOM 收集当前表单值到 currentConfig（重新渲染前调用，防止丢失未保存的编辑）
-  function collectCurrentValues() {
-    // 收集重定向规则
-    document.querySelectorAll('#redirectRules .rule-item').forEach((item, index) => {
-      if (currentConfig.redirectRules[index]) {
-        const domain = item.querySelector('.rule-domain');
-        const param = item.querySelector('.rule-param');
-        const desc = item.querySelector('.rule-desc');
-        if (domain) currentConfig.redirectRules[index].domain = domain.value.trim();
-        if (param) currentConfig.redirectRules[index].param = param.value.trim();
-        if (desc) currentConfig.redirectRules[index].description = desc.value.trim();
-      }
-    });
-
-    // 收集跟踪规则
-    document.querySelectorAll('#trackingRules .rule-item').forEach((item, index) => {
-      if (currentConfig.trackingRules[index]) {
-        const domain = item.querySelector('.rule-domain');
-        const desc = item.querySelector('.rule-desc');
-        const preventClick = item.querySelector('.rule-prevent-click');
-        if (domain) currentConfig.trackingRules[index].domain = domain.value.trim();
-        if (desc) currentConfig.trackingRules[index].description = desc.value.trim();
-        if (preventClick) currentConfig.trackingRules[index].preventClickRewrite = preventClick.checked;
-
-        const removeAttrs = [];
-        item.querySelectorAll('[data-field="removeAttributes"] .tag').forEach(tag => {
-          removeAttrs.push(tag.childNodes[0].textContent.trim());
-        });
-        currentConfig.trackingRules[index].removeAttributes = removeAttrs;
-
-        const cleanParams = [];
-        item.querySelectorAll('[data-field="cleanUrlParams"] .tag').forEach(tag => {
-          cleanParams.push(tag.childNodes[0].textContent.trim());
-        });
-        currentConfig.trackingRules[index].cleanUrlParams = cleanParams;
-      }
-    });
   }
 
   function initTabs() {
@@ -301,8 +278,10 @@
       if (e.target.id === 'ruleModal') closeRuleModal();
     });
 
-    // 保存设置
-    document.getElementById('saveSettings').addEventListener('click', saveSettings);
+    // 全局设置实时保存
+    document.getElementById('removeTargetSameOrigin').addEventListener('change', autoSaveGlobalSettings);
+    document.getElementById('enableRedirect').addEventListener('change', autoSaveGlobalSettings);
+    document.getElementById('enableTracking').addEventListener('change', autoSaveGlobalSettings);
 
     // 恢复默认
     document.getElementById('resetSettings').addEventListener('click', resetSettings);
@@ -316,7 +295,7 @@
     });
     document.getElementById('importFile').addEventListener('change', importSettings);
 
-    // 委托事件：删除规则、切换启用状态、标签输入
+    // 委托事件：删除规则、切换启用状态、编辑规则
     document.addEventListener('click', handleDelegatedClick);
     document.addEventListener('change', handleDelegatedChange);
     document.addEventListener('keydown', handleTagInput);
@@ -324,14 +303,14 @@
   }
 
   // 处理委托点击事件
-  function handleDelegatedClick(e) {
+  async function handleDelegatedClick(e) {
+    const ruleCard = e.target.closest('.rule-card');
+
     // 删除规则
     if (e.target.classList.contains('delete-rule') || e.target.closest('.delete-rule')) {
-      const ruleItem = e.target.closest('.rule-item');
-      const index = parseInt(ruleItem.dataset.index);
-      const type = ruleItem.dataset.type;
-
-      collectCurrentValues();
+      if (!ruleCard) return;
+      const index = parseInt(ruleCard.dataset.index);
+      const type = ruleCard.dataset.type;
 
       if (type === 'redirect') {
         currentConfig.redirectRules.splice(index, 1);
@@ -340,16 +319,37 @@
         currentConfig.trackingRules.splice(index, 1);
         renderTrackingRules();
       }
+
+      // 自动保存
+      const success = await saveConfig(currentConfig);
+      if (success) {
+        showToast(i18n.getMessage('savedSuccess'), 'success');
+      } else {
+        showToast(i18n.getMessage('savedError'), 'error');
+      }
+    }
+
+    // 编辑规则
+    if (e.target.classList.contains('edit-rule') || e.target.closest('.edit-rule')) {
+      if (!ruleCard) return;
+      const index = parseInt(ruleCard.dataset.index);
+      const type = ruleCard.dataset.type;
+
+      if (type === 'redirect') {
+        openRuleModal('redirect', index);
+      } else if (type === 'tracking') {
+        openRuleModal('tracking', index);
+      }
     }
   }
 
   // 处理委托变更事件
-  function handleDelegatedChange(e) {
-    const ruleItem = e.target.closest('.rule-item');
-    if (!ruleItem) return;
+  async function handleDelegatedChange(e) {
+    const ruleCard = e.target.closest('.rule-card');
+    if (!ruleCard) return;
 
-    const index = parseInt(ruleItem.dataset.index);
-    const type = ruleItem.dataset.type;
+    const index = parseInt(ruleCard.dataset.index);
+    const type = ruleCard.dataset.type;
 
     // 切换启用状态
     if (e.target.classList.contains('rule-toggle')) {
@@ -358,7 +358,15 @@
       } else if (type === 'tracking') {
         currentConfig.trackingRules[index].enabled = e.target.checked;
       }
-      ruleItem.classList.toggle('disabled', !e.target.checked);
+      ruleCard.classList.toggle('disabled', !e.target.checked);
+
+      // 自动保存
+      const success = await saveConfig(currentConfig);
+      if (success) {
+        showToast(i18n.getMessage('savedSuccess'), 'success');
+      } else {
+        showToast(i18n.getMessage('savedError'), 'error');
+      }
     }
   }
 
@@ -386,19 +394,14 @@
     e.target.closest('.tag').remove();
   }
 
-  // 保存设置
-  async function saveSettings() {
-    // 收集全局设置
+  // 自动保存全局设置
+  async function autoSaveGlobalSettings() {
     currentConfig.global = {
       removeTargetSameOrigin: document.getElementById('removeTargetSameOrigin').checked,
       enableRedirect: document.getElementById('enableRedirect').checked,
       enableTracking: document.getElementById('enableTracking').checked
     };
 
-    // 收集规则表单值
-    collectCurrentValues();
-
-    // 保存
     const success = await saveConfig(currentConfig);
     if (success) {
       showToast(i18n.getMessage('savedSuccess'), 'success');
@@ -468,13 +471,27 @@
   }
 
   // 打开规则弹窗
-  function openRuleModal(type) {
+  // type: 'redirect' | 'tracking'
+  // editIndex: 编辑时的规则索引，不传或为null表示添加新规则
+  function openRuleModal(type, editIndex = null) {
     currentModalType = type;
+    currentEditIndex = editIndex;
     const modal = document.getElementById('ruleModal');
     const title = document.getElementById('ruleModalTitle');
     const body = document.getElementById('ruleModalBody');
+    const confirmBtn = document.getElementById('confirmRuleModal');
 
-    title.textContent = i18n.getMessage('addRule');
+    const isEdit = editIndex !== null;
+    const rule = isEdit
+      ? (type === 'redirect' ? currentConfig.redirectRules[editIndex] : currentConfig.trackingRules[editIndex])
+      : null;
+
+    title.textContent = isEdit
+      ? (i18n.getMessage('editRule') || '编辑规则')
+      : i18n.getMessage('addRule');
+    confirmBtn.textContent = isEdit
+      ? (i18n.getMessage('save') || '保存')
+      : i18n.getMessage('addRule');
 
     if (type === 'redirect') {
       body.innerHTML = `
@@ -482,7 +499,7 @@
           <div class="form-row">
             <div class="form-group full-width checkbox-group">
               <label class="checkbox-label">
-                <input type="checkbox" id="modalRuleEnabled" checked>
+                <input type="checkbox" id="modalRuleEnabled" ${!isEdit || (rule && rule.enabled !== false) ? 'checked' : ''}>
                 <span>${i18n.getMessage('enabled')}</span>
               </label>
             </div>
@@ -490,28 +507,31 @@
           <div class="form-row">
             <div class="form-group">
               <label>${i18n.getMessage('domain')}</label>
-              <input type="text" id="modalRuleDomain" placeholder="${i18n.getMessage('domainPlaceholder')}">
+              <input type="text" id="modalRuleDomain" value="${isEdit && rule ? escapeHtml(rule.domain) : ''}" placeholder="${i18n.getMessage('domainPlaceholder')}">
             </div>
             <div class="form-group">
               <label>${i18n.getMessage('param')}</label>
-              <input type="text" id="modalRuleParam" value="target" placeholder="${i18n.getMessage('paramPlaceholder')}">
+              <input type="text" id="modalRuleParam" value="${isEdit && rule ? escapeHtml(rule.param) : 'target'}" placeholder="${i18n.getMessage('paramPlaceholder')}">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group full-width">
               <label>${i18n.getMessage('description')}</label>
-              <input type="text" id="modalRuleDesc" placeholder="${i18n.getMessage('descPlaceholder')}">
+              <input type="text" id="modalRuleDesc" value="${isEdit && rule ? escapeHtml(rule.description) : ''}" placeholder="${i18n.getMessage('descPlaceholder')}">
             </div>
           </div>
         </div>
       `;
     } else {
+      const removeAttrs = isEdit && rule && rule.removeAttributes ? rule.removeAttributes : [];
+      const cleanParams = isEdit && rule && rule.cleanUrlParams ? rule.cleanUrlParams : [];
+
       body.innerHTML = `
         <div class="modal-form">
           <div class="form-row">
             <div class="form-group full-width checkbox-group">
               <label class="checkbox-label">
-                <input type="checkbox" id="modalRuleEnabled" checked>
+                <input type="checkbox" id="modalRuleEnabled" ${!isEdit || (rule && rule.enabled !== false) ? 'checked' : ''}>
                 <span>${i18n.getMessage('enabled')}</span>
               </label>
             </div>
@@ -519,17 +539,18 @@
           <div class="form-row">
             <div class="form-group">
               <label>${i18n.getMessage('domain')}</label>
-              <input type="text" id="modalRuleDomain" placeholder="${i18n.getMessage('domainPlaceholder')}">
+              <input type="text" id="modalRuleDomain" value="${isEdit && rule ? escapeHtml(rule.domain) : ''}" placeholder="${i18n.getMessage('domainPlaceholder')}">
             </div>
             <div class="form-group">
               <label>${i18n.getMessage('description')}</label>
-              <input type="text" id="modalRuleDesc" placeholder="${i18n.getMessage('descPlaceholder')}">
+              <input type="text" id="modalRuleDesc" value="${isEdit && rule ? escapeHtml(rule.description) : ''}" placeholder="${i18n.getMessage('descPlaceholder')}">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group full-width">
               <label>${i18n.getMessage('removeAttributes')}</label>
               <div class="tags-input" data-field="modalRemoveAttributes">
+                ${removeAttrs.map(attr => `<span class="tag">${escapeHtml(attr)}<span class="remove">×</span></span>`).join('')}
                 <input type="text" placeholder="${i18n.getMessage('attrsPlaceholder')}">
               </div>
             </div>
@@ -538,6 +559,7 @@
             <div class="form-group full-width">
               <label>${i18n.getMessage('cleanUrlParams')}</label>
               <div class="tags-input" data-field="modalCleanUrlParams">
+                ${cleanParams.map(param => `<span class="tag">${escapeHtml(param)}<span class="remove">×</span></span>`).join('')}
                 <input type="text" placeholder="${i18n.getMessage('attrsPlaceholder')}">
               </div>
             </div>
@@ -545,7 +567,7 @@
           <div class="form-row">
             <div class="form-group full-width checkbox-group">
               <label class="checkbox-label">
-                <input type="checkbox" id="modalRulePreventClick">
+                <input type="checkbox" id="modalRulePreventClick" ${isEdit && rule && rule.preventClickRewrite ? 'checked' : ''}>
                 <span>${i18n.getMessage('preventClickRewriteDesc')}</span>
               </label>
             </div>
@@ -563,6 +585,7 @@
   function closeRuleModal() {
     document.getElementById('ruleModal').classList.remove('show');
     currentModalType = null;
+    currentEditIndex = null;
   }
 
   // 显示输入框错误状态
@@ -576,10 +599,11 @@
     }, 2000);
   }
 
-  // 确认添加规则
-  function confirmRuleModal() {
+  // 确认添加/编辑规则
+  async function confirmRuleModal() {
     const body = document.getElementById('ruleModalBody');
     const enabled = body.querySelector('#modalRuleEnabled').checked;
+    const isEdit = currentEditIndex !== null;
 
     if (currentModalType === 'redirect') {
       const domainInput = body.querySelector('#modalRuleDomain');
@@ -600,13 +624,18 @@
         return;
       }
 
-      collectCurrentValues();
-      currentConfig.redirectRules.push({
+      const ruleData = {
         domain,
         param: param || 'target',
         enabled,
         description
-      });
+      };
+
+      if (isEdit) {
+        currentConfig.redirectRules[currentEditIndex] = ruleData;
+      } else {
+        currentConfig.redirectRules.push(ruleData);
+      }
       renderRedirectRules();
     } else if (currentModalType === 'tracking') {
       const domainInput = body.querySelector('#modalRuleDomain');
@@ -631,16 +660,29 @@
         cleanParams.push(tag.childNodes[0].textContent.trim());
       });
 
-      collectCurrentValues();
-      currentConfig.trackingRules.push({
+      const ruleData = {
         domain,
         enabled,
         description,
         removeAttributes: removeAttrs,
         cleanUrlParams: cleanParams,
         preventClickRewrite: preventClick
-      });
+      };
+
+      if (isEdit) {
+        currentConfig.trackingRules[currentEditIndex] = ruleData;
+      } else {
+        currentConfig.trackingRules.push(ruleData);
+      }
       renderTrackingRules();
+    }
+
+    // 直接保存配置
+    const success = await saveConfig(currentConfig);
+    if (success) {
+      showToast(i18n.getMessage('savedSuccess'), 'success');
+    } else {
+      showToast(i18n.getMessage('savedError'), 'error');
     }
 
     closeRuleModal();

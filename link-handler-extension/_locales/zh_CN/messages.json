@@ -35,6 +35,14 @@
     "message": "添加规则",
     "description": "添加规则按钮"
   },
+  "editRule": {
+    "message": "编辑规则",
+    "description": "编辑规则按钮"
+  },
+  "save": {
+    "message": "保存",
+    "description": "保存按钮"
+  },
   "cancel": {
     "message": "取消",
     "description": "取消按钮"
