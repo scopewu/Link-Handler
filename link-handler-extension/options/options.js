@@ -298,8 +298,23 @@
     // 委托事件：删除规则、切换启用状态、编辑规则
     document.addEventListener('click', handleDelegatedClick);
     document.addEventListener('change', handleDelegatedChange);
-    document.addEventListener('keydown', handleTagInput);
     document.addEventListener('click', handleTagRemove);
+  }
+
+  // 绑定弹窗内的标签输入事件
+  function bindTagInputEvents(container) {
+    const tagInputs = container.querySelectorAll('.tags-input input');
+    tagInputs.forEach(input => {
+      input.addEventListener('keydown', handleTagInput);
+    });
+  }
+
+  // 解绑弹窗内的标签输入事件
+  function unbindTagInputEvents(container) {
+    const tagInputs = container.querySelectorAll('.tags-input input');
+    tagInputs.forEach(input => {
+      input.removeEventListener('keydown', handleTagInput);
+    });
   }
 
   // 处理委托点击事件
@@ -373,7 +388,6 @@
   // 处理标签输入
   function handleTagInput(e) {
     if (e.key !== 'Enter' && e.key !== ',') return;
-    if (!e.target.closest('.tags-input')) return;
 
     e.preventDefault();
     const input = e.target;
@@ -383,7 +397,7 @@
     const tagsInput = input.closest('.tags-input');
     const tag = document.createElement('span');
     tag.className = 'tag';
-    tag.innerHTML = `${value}<span class="remove">×</span>`;
+    tag.innerHTML = `${escapeHtml(value)}<span class="remove">×</span>`;
     tagsInput.insertBefore(tag, input);
     input.value = '';
   }
@@ -577,12 +591,22 @@
     }
 
     modal.classList.add('show');
+
+    // 绑定标签输入事件（仅在跟踪规则类型且有标签输入框时）
+    if (type === 'tracking') {
+      bindTagInputEvents(body);
+    }
+
     const firstInput = body.querySelector('input[type="text"]');
     if (firstInput) firstInput.focus();
   }
 
   // 关闭规则弹窗
   function closeRuleModal() {
+    const modalBody = document.getElementById('ruleModalBody');
+    // 解绑标签输入事件
+    unbindTagInputEvents(modalBody);
+
     document.getElementById('ruleModal').classList.remove('show');
     currentModalType = null;
     currentEditIndex = null;

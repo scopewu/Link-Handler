@@ -335,12 +335,20 @@
     console.log('[Link Handler] Observing dynamic content');
   }
 
+  // 保存原始 history 方法，供其他扩展访问
+  const originalPushState = history.pushState;
+  const originalReplaceState = history.replaceState;
+
+  // 将原始方法挂载到 window，便于其他扩展获取
+  if (!window.__linkHandlerOriginalMethods__) {
+    window.__linkHandlerOriginalMethods__ = {
+      pushState: originalPushState,
+      replaceState: originalReplaceState
+    };
+  }
+
   // 监听 SPA 路由变化
   function listenToSPANavigation() {
-    // 监听 history 变化
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
-
     history.pushState = function(...args) {
       originalPushState.apply(this, args);
       onNavigation();
