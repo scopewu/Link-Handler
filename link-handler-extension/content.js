@@ -201,7 +201,8 @@
 
   // 判断是否为相对地址
   function isRelativeUrl(href) {
-    return href && !href.match(/^(?!(?:[a-z][a-z0-9+\-.]*:)?\/\/).+$/);
+    // 检查是否为相对 URL（不以协议或 // 开头）
+    return href && !/^([a-zA-Z][a-zA-Z0-9+\-.]*:|\/\/)/.test(href);
   }
 
   // 判断是否为同域名

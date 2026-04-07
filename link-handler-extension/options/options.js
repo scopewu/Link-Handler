@@ -451,7 +451,7 @@
 
         // 验证配置结构
         if (!imported.redirectRules || !imported.trackingRules || !imported.global) {
-          throw new Error('无效的配置文件');
+          throw new Error(i18n.getMessage('importError'));
         }
 
         currentConfig = imported;
