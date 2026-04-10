@@ -12,6 +12,14 @@
   let pendingLinks = [];
   let processTimer = null;
 
+  // 统计计数器
+  let stats = {
+    totalProcessed: 0,
+    redirectUnwrapped: 0,
+    targetRemoved: 0,
+    trackingCleaned: 0
+  };
+
   // 初始化
   async function init() {
     config = await getConfig();
@@ -57,6 +65,11 @@
           batchProcessLinks([]);
         }
       }
+      if (message.action === 'getStats') {
+        // 返回统计信息
+        sendResponse(stats);
+        return true; // 保持消息通道开启
+      }
     });
   }
 
@@ -99,6 +112,7 @@
 
     // 标记为已处理
     link.setAttribute(PROCESSED_MARK, 'true');
+    stats.totalProcessed++;
 
     try {
       // 阶段1: 处理重定向链接
@@ -106,6 +120,7 @@
         const redirectRule = findRedirectRule(link.href);
         if (redirectRule && redirectRule.enabled !== false) {
           unwrapRedirectLink(link, redirectRule);
+          stats.redirectUnwrapped++;
           return; // 重定向链接处理后，不再进行其他处理
         }
       }
@@ -113,6 +128,7 @@
       // 阶段2: 同域名/相对地址，移除 target
       if (shouldRemoveTarget(link)) {
         removeTargetAttribute(link);
+        stats.targetRemoved++;
       }
 
       // 阶段3: 清理跟踪属性
@@ -126,6 +142,7 @@
           if (trackingRule.preventClickRewrite) {
             preventClickRewrite(link);
           }
+          stats.trackingCleaned++;
         }
       }
     } catch (e) {
@@ -188,7 +205,6 @@
     }
   }
 
-  // 判断是否应该移除 target
   function shouldRemoveTarget(link) {
     if (!link.hasAttribute('target')) return false;
     if (link.getAttribute('target') !== '_blank') return false;
@@ -199,13 +215,11 @@
     return isSameOrigin(link) || isRelativeUrl(href);
   }
 
-  // 判断是否为相对地址
   function isRelativeUrl(href) {
     // 检查是否为相对 URL（不以协议或 // 开头）
     return href && !/^([a-zA-Z][a-zA-Z0-9+\-.]*:|\/\/)/.test(href);
   }
 
-  // 判断是否为同域名
   function isSameOrigin(link) {
     try {
       const linkUrl = new URL(link.href);
@@ -215,7 +229,6 @@
     }
   }
 
-  // 移除 target 属性
   function removeTargetAttribute(link) {
     link.removeAttribute('target');
   }

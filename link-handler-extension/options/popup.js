@@ -15,11 +15,31 @@
     // 更新统计
     document.getElementById('redirectCount').textContent = config.redirectRules.filter(r => r.enabled !== false).length;
     document.getElementById('trackingCount').textContent = config.trackingRules.filter(r => r.enabled !== false).length;
-    document.getElementById('totalProcessed').textContent = '~';
 
-    // 绑定事件
+    await updateProcessedStats();
+
     document.getElementById('processNow').addEventListener('click', processCurrentPage);
     document.getElementById('enableExtension').addEventListener('change', toggleExtension);
+  }
+
+  // 更新已处理链接统计
+  async function updateProcessedStats() {
+    const totalProcessedDom = document.getElementById('totalProcessed');
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab) {
+        const response = await chrome.tabs.sendMessage(tab.id, { action: 'getStats' });
+        if (response && response.totalProcessed > 0) {
+          totalProcessedDom.textContent = response.totalProcessed;
+        } else {
+          totalProcessedDom.textContent = '0';
+        }
+      } else {
+        totalProcessedDom.textContent = '-';
+      }
+    } catch (e) {
+      totalProcessedDom.textContent = '-';
+    }
   }
 
   // 更新开关图标视觉状态
@@ -36,6 +56,11 @@
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (tab) {
         await chrome.tabs.sendMessage(tab.id, { action: 'reprocess' });
+
+        // 等待处理后更新统计
+        setTimeout(async () => {
+          await updateProcessedStats();
+        }, 100);
 
         // 视觉反馈
         const btn = document.getElementById('processNow');
@@ -61,7 +86,6 @@
   async function toggleExtension(e) {
     const enabled = e.target.checked;
 
-    // 更新图标视觉状态
     updateToggleIcon(enabled);
 
     // 保存到配置
