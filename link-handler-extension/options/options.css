@@ -930,6 +930,93 @@ body {
   background: var(--text-secondary);
 }
 
+/* Whitelist */
+.whitelist-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  align-items: stretch;
+}
+
+.whitelist-form .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.whitelist-form .form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-tertiary);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  transition: all var(--transition-fast);
+}
+
+.whitelist-form .form-group input:focus {
+  outline: none;
+  border-color: var(--primary-400);
+  background: var(--bg-secondary);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.whitelist-form .btn {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  font-size: 0.85rem;
+}
+
+.whitelist-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 375px) {
+  .whitelist-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .whitelist-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.whitelist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.whitelist-item:hover {
+  border-color: var(--primary-200);
+  box-shadow: var(--shadow-md);
+}
+
+.whitelist-domain {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  word-break: break-all;
+  min-width: 0;
+}
+
+.whitelist-item .btn-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .app-container {

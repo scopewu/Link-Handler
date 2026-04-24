@@ -9,12 +9,107 @@
   let currentModalType = null;
   let currentEditIndex = null; // 当前编辑的规则索引，null表示添加新模式
 
+  function renderWhitelist() {
+    const container = document.getElementById('whitelistContainer');
+    container.innerHTML = '';
+
+    const whitelist = currentConfig.whitelist || [];
+
+    if (whitelist.length === 0) {
+      container.innerHTML = `<div class="empty-state">${i18n.getMessage('noWhitelistDomains')}</div>`;
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    // 倒序遍历，最新添加的显示在最前面
+    for (let i = whitelist.length - 1; i >= 0; i--) {
+      const item = document.createElement('div');
+      item.className = 'whitelist-item';
+      item.dataset.index = i;
+      item.innerHTML = `
+        <span class="whitelist-domain">${escapeHtml(whitelist[i])}</span>
+        <button class="btn-icon delete-whitelist" title="${i18n.getMessage('deleteRule')}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>
+      `;
+      fragment.appendChild(item);
+    }
+    container.appendChild(fragment);
+  }
+
+  async function addWhitelistDomain() {
+    const input = document.getElementById('whitelistDomainInput');
+    let domain = input.value.trim().toLowerCase();
+
+    if (!domain) {
+      showInputError(input);
+      showToast(i18n.getMessage('domainRequired'), 'error');
+      return;
+    }
+
+    if (domain.includes('://')) {
+      try {
+        const url = new URL(domain);
+        domain = url.hostname;
+      } catch {
+        // 解析失败，保持原值交给后续验证
+      }
+    }
+
+    if (!/^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)*[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(domain)) {
+      showInputError(input);
+      showToast(i18n.getMessage('domainInvalid'), 'error');
+      return;
+    }
+
+    if (domain.startsWith('www.')) {
+      domain = domain.slice(4);
+    }
+
+    if (!currentConfig.whitelist) {
+      currentConfig.whitelist = [];
+    }
+
+    if (currentConfig.whitelist.includes(domain)) {
+      showToast(i18n.getMessage('domainExists'), 'error');
+      return;
+    }
+
+    currentConfig.whitelist.push(domain);
+    input.value = '';
+    renderWhitelist();
+
+    const success = await saveConfig(currentConfig);
+    if (success) {
+      showToast(i18n.getMessage('savedSuccess'), 'success');
+    } else {
+      showToast(i18n.getMessage('savedError'), 'error');
+    }
+  }
+
+  async function deleteWhitelistDomain(index) {
+    if (!currentConfig.whitelist) return;
+    currentConfig.whitelist.splice(index, 1);
+    renderWhitelist();
+
+    const success = await saveConfig(currentConfig);
+    if (success) {
+      showToast(i18n.getMessage('savedSuccess'), 'success');
+    } else {
+      showToast(i18n.getMessage('savedError'), 'error');
+    }
+  }
+
   // 初始化
   async function init() {
     currentConfig = await getConfig();
     renderGlobalSettings();
     renderRedirectRules();
     renderTrackingRules();
+    renderWhitelist();
     bindEvents();
   }
 
@@ -83,7 +178,7 @@
             <input type="checkbox" class="rule-toggle" ${rule.enabled !== false ? 'checked' : ''}>
             <span class="toggle-slider"></span>
           </label>
-          <button class="btn-icon edit-rule" title="${i18n.getMessage('editRule') || '编辑'}">
+          <button class="btn-icon edit-rule" title="${i18n.getMessage('editRule')}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -169,7 +264,7 @@
             <input type="checkbox" class="rule-toggle" ${rule.enabled !== false ? 'checked' : ''}>
             <span class="toggle-slider"></span>
           </label>
-          <button class="btn-icon edit-rule" title="${i18n.getMessage('editRule') || '编辑'}">
+          <button class="btn-icon edit-rule" title="${i18n.getMessage('editRule')}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -270,6 +365,17 @@
       openRuleModal('tracking');
     });
 
+    // 白名单事件
+    const whitelistInput = document.getElementById('whitelistDomainInput');
+    whitelistInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addWhitelistDomain();
+      }
+    });
+    const addWhitelistBtn = document.getElementById('addWhitelistDomain');
+    addWhitelistBtn?.addEventListener('click', addWhitelistDomain);
+
     // 弹窗事件
     document.getElementById('closeRuleModal').addEventListener('click', closeRuleModal);
     document.getElementById('cancelRuleModal').addEventListener('click', closeRuleModal);
@@ -356,6 +462,15 @@
         openRuleModal('tracking', index);
       }
     }
+
+    // 删除白名单域名
+    if (e.target.classList.contains('delete-whitelist') || e.target.closest('.delete-whitelist')) {
+      const whitelistItem = e.target.closest('.whitelist-item');
+      if (whitelistItem) {
+        const index = parseInt(whitelistItem.dataset.index);
+        deleteWhitelistDomain(index);
+      }
+    }
   }
 
   // 处理委托变更事件
@@ -433,6 +548,7 @@
     renderGlobalSettings();
     renderRedirectRules();
     renderTrackingRules();
+    renderWhitelist();
     showToast(i18n.getMessage('resetSettings'), 'success');
   }
 
@@ -473,6 +589,7 @@
         renderGlobalSettings();
         renderRedirectRules();
         renderTrackingRules();
+        renderWhitelist();
         showToast(i18n.getMessage('importSettings'), 'success');
       } catch (err) {
         showToast(i18n.getMessage('importError') + ': ' + err.message, 'error');
@@ -501,10 +618,10 @@
       : null;
 
     title.textContent = isEdit
-      ? (i18n.getMessage('editRule') || '编辑规则')
+      ? i18n.getMessage('editRule')
       : i18n.getMessage('addRule');
     confirmBtn.textContent = isEdit
-      ? (i18n.getMessage('save') || '保存')
+      ? i18n.getMessage('save')
       : i18n.getMessage('addRule');
 
     if (type === 'redirect') {
@@ -639,12 +756,12 @@
 
       if (!domain) {
         showInputError(domainInput);
-        showToast(i18n.getMessage('domainRequired') || '请输入域名', 'error');
+        showToast(i18n.getMessage('domainRequired'), 'error');
         return;
       }
       if (!param) {
         showInputError(paramInput);
-        showToast(i18n.getMessage('paramRequired') || '请输入参数名', 'error');
+        showToast(i18n.getMessage('paramRequired'), 'error');
         return;
       }
 
@@ -670,7 +787,7 @@
 
       if (!domain) {
         showInputError(domainInput);
-        showToast(i18n.getMessage('domainRequired') || '请输入域名', 'error');
+        showToast(i18n.getMessage('domainRequired'), 'error');
         return;
       }
 

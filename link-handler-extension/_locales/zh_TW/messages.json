@@ -237,6 +237,10 @@
     "message": "追蹤清理",
     "description": "追蹤標籤"
   },
+  "tabWhitelist": {
+    "message": "白名單",
+    "description": "白名單標籤"
+  },
   "tabBackup": {
     "message": "備份",
     "description": "備份標籤"
@@ -306,5 +310,29 @@
         "example": "10"
       }
     }
+  },
+  "whitelistSettings": {
+    "message": "白名單",
+    "description": "白名單標題"
+  },
+  "whitelistSettingsDesc": {
+    "message": "白名單中的網站將不會被處理",
+    "description": "白名單描述"
+  },
+  "addDomain": {
+    "message": "新增網域",
+    "description": "新增網域按鈕"
+  },
+  "noWhitelistDomains": {
+    "message": "暫無白名單網域",
+    "description": "空白白名單提示"
+  },
+  "domainInvalid": {
+    "message": "網域格式不正確",
+    "description": "網域格式驗證提示"
+  },
+  "domainExists": {
+    "message": "網域已存在",
+    "description": "網域已存在提示"
   }
 }

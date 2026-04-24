@@ -306,5 +306,33 @@
         "example": "10"
       }
     }
+  },
+  "tabWhitelist": {
+    "message": "白名单",
+    "description": "白名单标签"
+  },
+  "whitelistSettings": {
+    "message": "白名单",
+    "description": "白名单标题"
+  },
+  "whitelistSettingsDesc": {
+    "message": "白名单中的网站将不会被处理",
+    "description": "白名单描述"
+  },
+  "addDomain": {
+    "message": "添加域名",
+    "description": "添加域名按钮"
+  },
+  "noWhitelistDomains": {
+    "message": "暂无白名单域名",
+    "description": "空白白名单提示"
+  },
+  "domainInvalid": {
+    "message": "域名格式不正确",
+    "description": "域名格式验证提示"
+  },
+  "domainExists": {
+    "message": "域名已存在",
+    "description": "域名已存在提示"
   }
 }

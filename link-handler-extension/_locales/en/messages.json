@@ -306,5 +306,33 @@
         "example": "10"
       }
     }
+  },
+  "tabWhitelist": {
+    "message": "Whitelist",
+    "description": "Whitelist tab label"
+  },
+  "whitelistSettings": {
+    "message": "Whitelist",
+    "description": "Whitelist section title"
+  },
+  "whitelistSettingsDesc": {
+    "message": "Websites on the whitelist will not be processed",
+    "description": "Whitelist section description"
+  },
+  "addDomain": {
+    "message": "Add Domain",
+    "description": "Add domain button"
+  },
+  "noWhitelistDomains": {
+    "message": "No whitelist domains yet",
+    "description": "Empty whitelist message"
+  },
+  "domainInvalid": {
+    "message": "Invalid domain format",
+    "description": "Invalid domain validation message"
+  },
+  "domainExists": {
+    "message": "Domain already exists",
+    "description": "Domain already exists message"
   }
 }

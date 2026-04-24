@@ -142,6 +142,9 @@ const DEFAULT_CONFIG = {
     }
   ],
 
+  // 白名单（域名后缀匹配，满足白名单的网站不处理链接）
+  whitelist: ['localhost', '::1', '127.0.0.1', 'deepseek.com'],
+
   // 全局设置
   global: {
     enabled: true,                    // 全局启用/禁用
@@ -182,6 +185,10 @@ function mergeConfig(defaults, custom) {
     result.trackingRules = [...custom.trackingRules];
   }
 
+  if (custom.whitelist) {
+    result.whitelist = [...custom.whitelist];
+  }
+
   if (custom.global) {
     result.global = { ...result.global, ...custom.global };
   }
@@ -197,6 +204,7 @@ async function saveConfig(config) {
       const dataToSave = {
         redirectRules: config.redirectRules,
         trackingRules: config.trackingRules,
+        whitelist: config.whitelist || DEFAULT_CONFIG.whitelist,
         global: config.global
       };
       await chrome.storage.sync.set({ linkHandlerConfig: dataToSave });

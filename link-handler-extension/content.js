@@ -20,6 +20,14 @@
     trackingCleaned: 0
   };
 
+  // 检查域名是否在白名单中（域名后缀匹配）
+  function isWhitelisted(hostname) {
+    if (!config.whitelist || config.whitelist.length === 0) return false;
+    return config.whitelist.some(domain => {
+      return hostname === domain || hostname.endsWith('.' + domain);
+    });
+  }
+
   // 初始化
   async function init() {
     config = await getConfig();
@@ -27,6 +35,12 @@
     // 检查全局启用状态
     if (config.global.enabled === false) {
       console.log('[Link Handler] Extension is disabled');
+      return;
+    }
+
+    // 检查当前页面是否在白名单中
+    if (isWhitelisted(location.hostname)) {
+      console.log('[Link Handler] Current site is whitelisted, skipping processing');
       return;
     }
 
@@ -75,6 +89,7 @@
 
   // 处理所有链接
   function processAllLinks() {
+    if (isWhitelisted(location.hostname)) return;
     const links = document.querySelectorAll('a[href]:not([' + PROCESSED_MARK + '])');
     batchProcessLinks(links);
   }
