@@ -701,13 +701,13 @@ body {
   font-weight: 500;
 }
 
-.tag .remove {
+.tag .tag-remove {
   cursor: pointer;
   opacity: 0.6;
   transition: opacity 0.2s;
 }
 
-.tag .remove:hover {
+.tag .tag-remove:hover {
   opacity: 1;
 }
 

@@ -147,7 +147,6 @@ const DEFAULT_CONFIG = {
 
   // 全局设置
   global: {
-    enabled: true,                    // 全局启用/禁用
     removeTargetSameOrigin: true,    // 同域名/相对地址移除 target
     enableRedirect: true,            // 启用重定向解析
     enableTracking: true,            // 启用跟踪清理
@@ -171,7 +170,7 @@ async function getConfig() {
   return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 }
 
-// 合并配置（深度合并）
+// 合并配置（规则数组整体替换，global 浅合并）
 function mergeConfig(defaults, custom) {
   const result = JSON.parse(JSON.stringify(defaults));
 

@@ -149,10 +149,6 @@
     "message": "Remove tracking attributes and parameters from links (e.g., Bilibili, Weibo)",
     "description": "Tracking rules description"
   },
-  "quickToggle": {
-    "message": "Enable Link Processing",
-    "description": "Quick toggle label"
-  },
   "openSettings": {
     "message": "Open Settings",
     "description": "Open settings button"
@@ -209,9 +205,9 @@
     "message": "Smart link processing for better browsing",
     "description": "Header subtitle"
   },
-  "toggleHint": {
-    "message": "Click the extension icon to quickly toggle",
-    "description": "Toggle hint text"
+  "popupFooterHint": {
+    "message": "Link Handler",
+    "description": "Popup footer text"
   },
   "preventClickRewriteDesc": {
     "message": "Force direct navigation, bypass click tracking",
@@ -220,10 +216,6 @@
   "globalSettingsDesc": {
     "message": "Configure how links are processed across all websites",
     "description": "Global settings description"
-  },
-  "quickToggleDesc": {
-    "message": "Processing active links on all pages",
-    "description": "Quick toggle description"
   },
   "tabGeneral": {
     "message": "General",
@@ -334,5 +326,19 @@
   "domainExists": {
     "message": "Domain already exists",
     "description": "Domain already exists message"
+  },
+  "whitelistSiteDesc": {
+    "message": "Skip link processing",
+    "description": "Whitelist toggle description in popup"
+  },
+  "whitelistInheritedDesc": {
+    "message": "Inherited from $1$",
+    "description": "Whitelist inherited from parent domain",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "example.com"
+      }
+    }
   }
 }

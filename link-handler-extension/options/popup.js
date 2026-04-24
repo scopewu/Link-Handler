@@ -6,20 +6,15 @@
     // 获取配置
     const config = await getConfig();
 
-    // 恢复开关状态
-    document.getElementById('enableExtension').checked = config.global.enabled !== false;
-
-    // 更新开关图标状态
-    updateToggleIcon(config.global.enabled !== false);
-
     // 更新统计
     document.getElementById('redirectCount').textContent = config.redirectRules.filter(r => r.enabled !== false).length;
     document.getElementById('trackingCount').textContent = config.trackingRules.filter(r => r.enabled !== false).length;
 
     await updateProcessedStats();
 
+    await initWhitelistToggle(config);
+
     document.getElementById('processNow').addEventListener('click', processCurrentPage);
-    document.getElementById('enableExtension').addEventListener('change', toggleExtension);
   }
 
   // 更新已处理链接统计
@@ -39,14 +34,6 @@
       }
     } catch (e) {
       totalProcessedDom.textContent = '-';
-    }
-  }
-
-  // 更新开关图标视觉状态
-  function updateToggleIcon(enabled) {
-    const iconWrapper = document.querySelector('.toggle-icon-wrapper');
-    if (iconWrapper) {
-      iconWrapper.className = 'toggle-icon-wrapper' + (enabled ? ' enabled' : '');
     }
   }
 
@@ -82,31 +69,103 @@
     }
   }
 
-  // 切换扩展启用状态
-  async function toggleExtension(e) {
-    const enabled = e.target.checked;
-
-    updateToggleIcon(enabled);
-
-    // 保存到配置
+  async function initWhitelistToggle(config) {
     try {
-      const config = await getConfig();
-      config.global.enabled = enabled;
-      await saveConfig(config);
-      console.log('[Link Handler] Extension enabled:', enabled);
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab || !tab.url) return;
 
-      // 通知当前标签页
-      try {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (tab) {
-          chrome.tabs.sendMessage(tab.id, { action: 'configUpdated', enabled: enabled });
-        }
-      } catch {}
+      const url = new URL(tab.url);
+      const hostname = url.hostname;
+      if (!hostname) return;
+
+      const card = document.getElementById('whitelistCard');
+      const hostnameEl = document.getElementById('currentSiteHostname');
+      const toggle = document.getElementById('whitelistToggle');
+      const descEl = document.getElementById('whitelistToggleDesc');
+
+      hostnameEl.textContent = hostname;
+      card.style.display = '';
+
+      const matchedDomain = findWhitelistMatch(hostname, config.whitelist);
+      const whitelisted = matchedDomain !== null;
+      toggle.checked = whitelisted;
+      updateWhitelistIcon(whitelisted);
+
+      if (whitelisted && matchedDomain !== hostname) {
+        // 继承自父域名，禁用开关并显示来源
+        toggle.disabled = true;
+        descEl.textContent = i18n.getMessage('whitelistInheritedDesc', [matchedDomain]);
+      } else {
+        toggle.disabled = false;
+        descEl.textContent = i18n.getMessage('whitelistSiteDesc');
+        toggle.addEventListener('change', (e) => handleWhitelistToggle(e, hostname, tab.id));
+      }
     } catch (e) {
-      console.error('[Link Handler] Failed to save toggle state:', e);
+      console.error('[Link Handler] Failed to init whitelist toggle:', e);
     }
   }
 
-  // 初始化
+  // 检查域名是否在白名单中（与 content.js 保持一致）
+  function isHostnameWhitelisted(hostname, whitelist) {
+    if (!whitelist || whitelist.length === 0) return false;
+    return whitelist.some(domain => {
+      return hostname === domain || hostname.endsWith('.' + domain);
+    });
+  }
+
+  // 查找匹配的白名单域名（精确匹配优先，返回匹配的域名或 null）
+  function findWhitelistMatch(hostname, whitelist) {
+    if (!whitelist || whitelist.length === 0) return null;
+    let suffixMatch = null;
+    for (const domain of whitelist) {
+      if (hostname === domain) return domain;
+      if (hostname.endsWith('.' + domain)) {
+        suffixMatch = domain;
+      }
+    }
+    return suffixMatch;
+  }
+
+  // 更新白名单图标视觉状态
+  function updateWhitelistIcon(whitelisted) {
+    const iconWrapper = document.getElementById('whitelistIconWrapper');
+    if (iconWrapper) {
+      iconWrapper.className = 'toggle-icon-wrapper' + (whitelisted ? ' enabled' : '');
+    }
+  }
+
+  // 处理白名单开关切换
+  async function handleWhitelistToggle(e, hostname, tabId) {
+    const addToWhitelist = e.target.checked;
+    try {
+      const config = await getConfig();
+      if (!Array.isArray(config.whitelist)) config.whitelist = [];
+
+      let cleanHostname = hostname;
+      if (cleanHostname.startsWith('www.')) cleanHostname = cleanHostname.slice(4);
+
+      if (addToWhitelist) {
+        if (!config.whitelist.includes(cleanHostname)) {
+          config.whitelist.push(cleanHostname);
+        }
+      } else {
+        config.whitelist = config.whitelist.filter(d => d !== cleanHostname);
+      }
+
+      await saveConfig(config);
+      updateWhitelistIcon(addToWhitelist);
+
+      try {
+        await chrome.tabs.sendMessage(tabId, { action: 'reloadPage' });
+      } catch {
+        // 内容脚本未运行（如 chrome:// 页面），静默忽略
+      }
+    } catch (err) {
+      console.error('[Link Handler] Failed to toggle whitelist:', err);
+      e.target.checked = !addToWhitelist;
+      updateWhitelistIcon(!addToWhitelist);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', init);
 })();

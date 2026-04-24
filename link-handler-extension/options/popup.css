@@ -305,6 +305,11 @@ input:focus + .slider {
   box-shadow: 0 0 0 3px var(--primary-100);
 }
 
+input:disabled + .slider {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Actions */
 .actions {
   padding: 0 16px 16px;

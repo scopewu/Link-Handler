@@ -157,10 +157,6 @@
     "message": "移除链接上的跟踪属性和统计参数（如 Bilibili、微博）",
     "description": "跟踪规则描述"
   },
-  "quickToggle": {
-    "message": "启用链接处理",
-    "description": "快速切换标签"
-  },
   "openSettings": {
     "message": "打开设置",
     "description": "打开设置按钮"
@@ -217,13 +213,9 @@
     "message": "智能处理网页链接，提升浏览体验",
     "description": "副标题"
   },
-  "toggleHint": {
-    "message": "点击扩展图标可快速切换启用状态",
-    "description": "切换提示文字"
-  },
-  "quickToggleDesc": {
-    "message": "正在处理所有页面上的活跃链接",
-    "description": "快速切换描述"
+  "popupFooterHint": {
+    "message": "Link Handler",
+    "description": "弹出窗口底部文字"
   },
   "tabGeneral": {
     "message": "通用",
@@ -334,5 +326,19 @@
   "domainExists": {
     "message": "域名已存在",
     "description": "域名已存在提示"
+  },
+  "whitelistSiteDesc": {
+    "message": "跳过此网站的链接处理",
+    "description": "弹出窗口白名单开关描述"
+  },
+  "whitelistInheritedDesc": {
+    "message": "已由 $1$ 继承",
+    "description": "白名单由父域名继承",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "example.com"
+      }
+    }
   }
 }

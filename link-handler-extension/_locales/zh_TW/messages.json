@@ -149,10 +149,6 @@
     "message": "移除連結上的追蹤屬性和統計參數（如 Bilibili、微博）",
     "description": "追蹤規則描述"
   },
-  "quickToggle": {
-    "message": "啟用連結處理",
-    "description": "快速切換標籤"
-  },
   "openSettings": {
     "message": "⚙️ 開啟設定頁面",
     "description": "開啟設定按鈕"
@@ -209,9 +205,9 @@
     "message": "智慧處理網頁連結，提升瀏覽體驗",
     "description": "副標題"
   },
-  "toggleHint": {
-    "message": "點擊擴充功能圖示可快速切換啟用狀態",
-    "description": "切換提示文字"
+  "popupFooterHint": {
+    "message": "Link Handler",
+    "description": "彈出視窗底部文字"
   },
   "preventClickRewriteDesc": {
     "message": "強制直接跳轉，阻止點擊統計",
@@ -220,10 +216,6 @@
   "globalSettingsDesc": {
     "message": "設定連結處理的全域行為",
     "description": "全域設定描述"
-  },
-  "quickToggleDesc": {
-    "message": "正在處理所有頁面上的活躍連結",
-    "description": "快速切換描述"
   },
   "tabGeneral": {
     "message": "一般",
@@ -334,5 +326,19 @@
   "domainExists": {
     "message": "網域已存在",
     "description": "網域已存在提示"
+  },
+  "whitelistSiteDesc": {
+    "message": "跳過此網站的連結處理",
+    "description": "彈出視窗白名單開關描述"
+  },
+  "whitelistInheritedDesc": {
+    "message": "已由 $1$ 繼承",
+    "description": "白名單由父網域繼承",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "example.com"
+      }
+    }
   }
 }

@@ -8,6 +8,7 @@
   let trackingSearchKeyword = '';
   let currentModalType = null;
   let currentEditIndex = null; // 当前编辑的规则索引，null表示添加新模式
+  let toastTimer = null;
 
   function renderWhitelist() {
     const container = document.getElementById('whitelistContainer');
@@ -59,7 +60,9 @@
       }
     }
 
-    if (!/^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)*[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(domain)) {
+    const isIp = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(domain) || /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/.test(domain);
+    const isDomain = /^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)*[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(domain);
+    if (!isIp && !isDomain) {
       showInputError(input);
       showToast(i18n.getMessage('domainInvalid'), 'error');
       return;
@@ -512,14 +515,14 @@
     const tagsInput = input.closest('.tags-input');
     const tag = document.createElement('span');
     tag.className = 'tag';
-    tag.innerHTML = `${escapeHtml(value)}<span class="remove">×</span>`;
+    tag.innerHTML = `<span class="tag-text">${escapeHtml(value)}</span><span class="tag-remove">×</span>`;
     tagsInput.insertBefore(tag, input);
     input.value = '';
   }
 
   // 处理标签删除
   function handleTagRemove(e) {
-    if (!e.target.classList.contains('remove')) return;
+    if (!e.target.classList.contains('tag-remove')) return;
     e.target.closest('.tag').remove();
   }
 
@@ -575,7 +578,7 @@
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const imported = JSON.parse(event.target.result);
 
@@ -585,7 +588,7 @@
         }
 
         currentConfig = imported;
-        saveConfig(currentConfig);
+        await saveConfig(currentConfig);
         renderGlobalSettings();
         renderRedirectRules();
         renderTrackingRules();
@@ -681,7 +684,7 @@
             <div class="form-group full-width">
               <label>${i18n.getMessage('removeAttributes')}</label>
               <div class="tags-input" data-field="modalRemoveAttributes">
-                ${removeAttrs.map(attr => `<span class="tag">${escapeHtml(attr)}<span class="remove">×</span></span>`).join('')}
+                ${removeAttrs.map(attr => `<span class="tag"><span class="tag-text">${escapeHtml(attr)}</span><span class="tag-remove">×</span></span>`).join('')}
                 <input type="text" placeholder="${i18n.getMessage('attrsPlaceholder')}">
               </div>
             </div>
@@ -690,7 +693,7 @@
             <div class="form-group full-width">
               <label>${i18n.getMessage('cleanUrlParams')}</label>
               <div class="tags-input" data-field="modalCleanUrlParams">
-                ${cleanParams.map(param => `<span class="tag">${escapeHtml(param)}<span class="remove">×</span></span>`).join('')}
+                ${cleanParams.map(param => `<span class="tag"><span class="tag-text">${escapeHtml(param)}</span><span class="tag-remove">×</span></span>`).join('')}
                 <input type="text" placeholder="${i18n.getMessage('attrsPlaceholder')}">
               </div>
             </div>
@@ -793,12 +796,14 @@
 
       const removeAttrs = [];
       body.querySelectorAll('[data-field="modalRemoveAttributes"] .tag').forEach(tag => {
-        removeAttrs.push(tag.childNodes[0].textContent.trim());
+        const textSpan = tag.querySelector('.tag-text');
+        removeAttrs.push(textSpan ? textSpan.textContent.trim() : tag.childNodes[0].textContent.trim());
       });
 
       const cleanParams = [];
       body.querySelectorAll('[data-field="modalCleanUrlParams"] .tag').forEach(tag => {
-        cleanParams.push(tag.childNodes[0].textContent.trim());
+        const textSpan = tag.querySelector('.tag-text');
+        cleanParams.push(textSpan ? textSpan.textContent.trim() : tag.childNodes[0].textContent.trim());
       });
 
       const ruleData = {
@@ -835,7 +840,8 @@
     toast.textContent = message;
     toast.className = 'toast show ' + type;
 
-    setTimeout(() => {
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
       toast.classList.remove('show');
     }, 3000);
   }

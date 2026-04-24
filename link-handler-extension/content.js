@@ -32,12 +32,6 @@
   async function init() {
     config = await getConfig();
 
-    // 检查全局启用状态
-    if (config.global.enabled === false) {
-      console.log('[Link Handler] Extension is disabled');
-      return;
-    }
-
     // 检查当前页面是否在白名单中
     if (isWhitelisted(location.hostname)) {
       console.log('[Link Handler] Current site is whitelisted, skipping processing');
@@ -59,30 +53,22 @@
   // 监听来自 popup 的配置更新
   if (typeof chrome !== 'undefined' && chrome.runtime) {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      if (message.action === 'configUpdated') {
-        if (message.enabled === false) {
-          // 扩展被禁用，不做任何处理
-          config.global.enabled = false;
-        } else {
-          // 扩展被启用，重新初始化
-          config.global.enabled = true;
-          processAllLinks();
-          observeDynamicContent();
-        }
-      }
       if (message.action === 'reprocess') {
-        // 重新处理所有链接
-        if (config.global.enabled !== false) {
-          document.querySelectorAll('a:not([' + PROCESSED_MARK + '])').forEach(link => {
-            pendingLinks.push(link);
+        // 重新处理所有链接（跳过白名单网站）
+        if (!isWhitelisted(location.hostname)) {
+          document.querySelectorAll('[' + PROCESSED_MARK + ']').forEach(link => {
+            link.removeAttribute(PROCESSED_MARK);
           });
-          batchProcessLinks([]);
+          processAllLinks();
         }
       }
       if (message.action === 'getStats') {
         // 返回统计信息
         sendResponse(stats);
         return true; // 保持消息通道开启
+      }
+      if (message.action === 'reloadPage') {
+        location.reload();
       }
     });
   }
@@ -95,19 +81,22 @@
   }
 
   // 批量处理链接（性能优化）
-  function batchProcessLinks(links) {
-    if (links.length === 0) return;
+  const scheduleProcess = typeof requestIdleCallback !== 'undefined'
+    ? requestIdleCallback
+    : (fn) => setTimeout(fn, 1);
+  const cancelSchedule = typeof cancelIdleCallback !== 'undefined'
+    ? cancelIdleCallback
+    : clearTimeout;
 
-    pendingLinks.push(...links);
+  function batchProcessLinks(links) {
+    if (links.length > 0) {
+      pendingLinks.push(...links);
+    }
+    if (pendingLinks.length === 0) return;
 
     if (processTimer) {
-      clearTimeout(processTimer);
+      cancelSchedule(processTimer);
     }
-
-    // 使用 requestIdleCallback 或 setTimeout 批量处理
-    const scheduleProcess = typeof requestIdleCallback !== 'undefined'
-      ? requestIdleCallback
-      : (fn) => setTimeout(fn, 1);
 
     processTimer = scheduleProcess(() => {
       const batch = pendingLinks.splice(0, 100); // 每批处理100个
@@ -331,6 +320,7 @@
 
   // 监听动态内容变化
   function observeDynamicContent() {
+    if (!document.body) return;
     const observer = new MutationObserver((mutations) => {
       const newLinks = [];
 
@@ -377,6 +367,9 @@
 
   // 监听 SPA 路由变化
   function listenToSPANavigation() {
+    if (window.__linkHandlerPatched__) return;
+    window.__linkHandlerPatched__ = true;
+
     history.pushState = function(...args) {
       originalPushState.apply(this, args);
       onNavigation();
