@@ -33,12 +33,6 @@ const DEFAULT_CONFIG = {
       description: 'CSDN 链接跳转'
     },
     {
-      domain: 'link.segmentfault.com',
-      param: 'enc',
-      enabled: true,
-      description: 'SegmentFault 链接跳转'
-    },
-    {
       domain: 'jianshu.com',
       param: 'to',
       enabled: true,

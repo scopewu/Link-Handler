@@ -1,5 +1,44 @@
 # Changelog
 
+## Version 1.4.0
+
+### ✨ New Features / 新功能
+
+- **Domain Whitelist** / **域名白名单**  
+  Added per-site whitelist to skip link processing. Supports suffix matching (e.g., `deepseek.com` covers `chat.deepseek.com`). Manage whitelist in the options page or toggle current site directly from the popup.  
+  新增按域名白名单跳过链接处理功能。支持后缀匹配（如 `deepseek.com` 自动覆盖 `chat.deepseek.com`）。可在选项页面管理，也可直接在弹出窗口切换当前网站。
+
+- **Inherited Whitelist Indicator** / **白名单继承提示**  
+  When a subdomain is whitelisted via a parent domain, the popup toggle is disabled and shows the source domain to prevent confusing UI state.  
+  当子域名通过父域名继承白名单状态时，弹出窗口开关自动置灰并显示来源域名，避免无法关闭的困惑。
+
+### 🔧 Improvements / 改进
+
+- **Removed Global Toggle** / **移除全局开关**  
+  Replaced the coarse global on/off switch with fine-grained per-site whitelist control.  
+  移除了粗放的全局启用/禁用开关，改为按网站细粒度控制。
+
+### 🐛 Bug Fixes / 问题修复
+
+- **Fixed Batch Processing Deadlock** / **修复批处理死锁**  
+  Fixed a critical bug where `batchProcessLinks` would drop remaining links forever when called with an empty array, causing only the first 100 links to be processed.  
+  修复 `batchProcessLinks` 传入空数组时直接返回、导致剩余链接永远不被处理的关键 Bug（仅前 100 条生效）。
+
+- **Fixed Reprocess Action** / **修复重新处理逻辑**  
+  `reprocess` now correctly clears processed marks and re-scans all links instead of only touching unprocessed ones.  
+  `reprocess` 现在会先清除已处理标记再全量重新扫描，而不是只碰未处理的链接。
+
+- **Fixed SPA History Patch Leak** / **修复 SPA 历史方法重复包装**  
+  Added guard to prevent `history.pushState/replaceState` from being patched multiple times on extension reload.  
+  增加防护，防止扩展重载时对 `history.pushState/replaceState` 重复包装。
+
+### 🧹 Cleanup / 清理
+
+- Removed defunct SegmentFault (`link.segmentfault.com`) redirect rule.  
+  移除失效的 SegmentFault 重定向规则。
+
+---
+
 ## Version 1.3.0
 
 ### ✨ New Features / 新功能
