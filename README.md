@@ -15,6 +15,10 @@
   <a href="#supported-sites">Supported Sites</a>
 </p>
 
+<p align="center">
+  <a href="README.zh_CN.md">简体中文</a>
+</p>
+
 ---
 
 ## Features
@@ -42,6 +46,9 @@ Automatically extract real URLs from redirect services:
 | Bilibili | `link.bilibili.com/?url=xxx` → direct link |
 | 京东联盟 | `link.jd.com/?to=xxx` → direct link |
 | 淘宝联盟 | `s.click.taobao.com` → direct link |
+| 少数派 (SSPai) | `sspai.com/?target=xxx` → direct link |
+| Reddit | `out.reddit.com/?url=xxx` → direct link |
+| Facebook | `facebook.com/?u=xxx` → direct link |
 
 ### 🧹 Tracking Removal
 
@@ -53,6 +60,25 @@ Clean tracking data from major platforms:
 - **掘金 (Juejin)**: `utm_*` parameters
 - **CSDN**: `data-report-*`, `spm`
 - **百度 (Baidu)**: `data-click`, tracking params
+
+### 🛡️ Domain Whitelist
+
+Skip link processing on specific domains via a per-site whitelist:
+
+- **Suffix matching**: `deepseek.com` automatically covers `chat.deepseek.com`
+- **Popup toggle**: Quickly whitelist the current site directly from the toolbar popup
+- **Inherited indicator**: Subdomains whitelisted via a parent domain show the source domain in the popup
+
+### 📊 Processing Statistics
+
+The popup displays real-time statistics:
+
+| Metric | Description |
+|--------|-------------|
+| Total Processed | All links processed on the current page |
+| Redirect Unwrapped | Links bypassed through redirect services |
+| Target Removed | Same-origin `target="_blank"` removed |
+| Tracking Cleaned | Links with tracking data cleaned |
 
 ## Installation
 
@@ -78,8 +104,8 @@ Once installed, the extension works automatically on all websites. No configurat
 ### Quick Access
 
 Click the extension icon in your toolbar to:
-- View active rules count
-- Toggle processing on/off
+- View real-time processing statistics
+- Toggle whitelist for the current site
 - Process current page manually
 - Open settings
 
@@ -90,6 +116,7 @@ Access full settings via the options page to:
 - **Global Settings**: Configure default behaviors
 - **Redirect Rules**: Add custom redirect unwrapping rules
 - **Tracking Rules**: Configure per-domain tracking cleanup
+- **Whitelist**: Manage domains to skip processing
 - **Import/Export**: Backup and share configurations
 
 ## Supported Sites
@@ -99,11 +126,13 @@ Access full settings via the options page to:
 - ✅ 知乎 (zhihu.com)
 - ✅ 微博 (weibo.cn, t.cn)
 - ✅ CSDN (csdn.net)
-- ✅ SegmentFault (segmentfault.com)
 - ✅ 简书 (jianshu.com)
 - ✅ Bilibili (bilibili.com)
 - ✅ 京东联盟 (jd.com)
 - ✅ 淘宝联盟 (taobao.com)
+- ✅ 少数派 (sspai.com)
+- ✅ Reddit (reddit.com)
+- ✅ Facebook (facebook.com)
 
 ### Tracking Cleanup
 - ✅ Bilibili
@@ -140,6 +169,8 @@ Access full settings via the options page to:
 }
 ```
 
+Use `"cleanUrlParams": ["*"]` to remove **all** URL parameters.
+
 ## Privacy
 
 - **No data collection**: All processing happens locally in your browser
@@ -163,7 +194,7 @@ Browser automatically selects language based on system preferences.
 - **Manifest V3**: Modern extension API
 - **Content Scripts**: Injected into all pages
 - **MutationObserver**: Handles dynamically loaded content
-- **SPA Support**: Works with React, Vue, Angular apps
+- **SPA Support**: Works with React, Vue, Angular apps via `history.pushState`/`replaceState` patching
 
 ### Performance
 - Batch processing with `requestIdleCallback`
@@ -193,16 +224,6 @@ link-handler-extension/
 └── icons/                     # Extension icons
     └── icon*.png
 ```
-
-## Changelog
-
-### v1.0.0
-- Initial release
-- Redirect link unwrapping
-- Tracking parameter cleanup
-- Same-origin target removal
-- Custom rule support
-- Multi-language support (EN/ZH/ZH-TW)
 
 ## License
 
