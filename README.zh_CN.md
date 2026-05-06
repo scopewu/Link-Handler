@@ -23,7 +23,7 @@
 
 ## 功能特性
 
-### 🎯 智能链接处理
+### 智能链接处理
 
 | 功能 | 说明 |
 |------|------|
@@ -32,7 +32,7 @@
 | **重定向解包** | 绕过中间跳转页面，直达目标链接 |
 | **跟踪清理** | 移除跟踪参数和属性 |
 
-### 🔄 重定向解包
+### 重定向解包
 
 自动从跳转服务中提取真实 URL：
 
@@ -50,7 +50,7 @@
 | Reddit | `out.reddit.com/?url=xxx` → 直达链接 |
 | Facebook | `facebook.com/?u=xxx` → 直达链接 |
 
-### 🧹 跟踪清理
+### 跟踪清理
 
 清理主流平台的跟踪数据：
 
@@ -61,7 +61,7 @@
 - **CSDN**：`data-report-*`、`spm`
 - **百度**：`data-click`、跟踪参数
 
-### 🛡️ 域名白名单
+### 域名白名单
 
 按域名跳过链接处理：
 
@@ -69,7 +69,7 @@
 - **弹出窗口切换**：直接在工具栏弹出窗口中快速添加/移除当前网站
 - **继承提示**：子域名通过父域名继承白名单状态时，弹出窗口会显示来源域名
 
-### 📊 处理统计
+### 处理统计
 
 弹出窗口实时显示统计信息：
 
@@ -122,26 +122,26 @@
 ## 支持站点
 
 ### 重定向服务
-- ✅ 掘金 (juejin.cn)
-- ✅ 知乎 (zhihu.com)
-- ✅ 微博 (weibo.cn, t.cn)
-- ✅ CSDN (csdn.net)
-- ✅ 简书 (jianshu.com)
-- ✅ Bilibili (bilibili.com)
-- ✅ 京东联盟 (jd.com)
-- ✅ 淘宝联盟 (taobao.com)
-- ✅ 少数派 (sspai.com)
-- ✅ Reddit (reddit.com)
-- ✅ Facebook (facebook.com)
+- 掘金 (juejin.cn)
+- 知乎 (zhihu.com)
+- 微博 (weibo.cn, t.cn)
+- CSDN (csdn.net)
+- 简书 (jianshu.com)
+- Bilibili (bilibili.com)
+- 京东联盟 (jd.com)
+- 淘宝联盟 (taobao.com)
+- 少数派 (sspai.com)
+- Reddit (reddit.com)
+- Facebook (facebook.com)
 
 ### 跟踪清理
-- ✅ Bilibili
-- ✅ 微博
-- ✅ 知乎
-- ✅ 掘金
-- ✅ 简书
-- ✅ CSDN
-- ✅ 百度搜索
+- Bilibili
+- 微博
+- 知乎
+- 掘金
+- 简书
+- CSDN
+- 百度搜索
 
 ## 自定义规则
 
@@ -183,9 +183,9 @@
 
 | 语言 | 代码 | 状态 |
 |------|------|--------|
-| 简体中文 | zh_CN | ✅ 已完成 |
-| 繁體中文 | zh_TW | ✅ 已完成 |
-| English | en | ✅ 已完成 |
+| 简体中文 | zh_CN | 已完成 |
+| 繁體中文 | zh_TW | 已完成 |
+| English | en | 已完成 |
 
 浏览器根据系统偏好自动选择语言。
 
@@ -232,9 +232,3 @@ MIT License
 ## 贡献
 
 欢迎提交 Issue 和 Pull Request！
-
----
-
-<p align="center">
-  Made with 💙 for a cleaner web experience
-</p>

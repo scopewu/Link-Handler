@@ -23,7 +23,7 @@
 
 ## Features
 
-### 🎯 Smart Link Processing
+### Smart Link Processing
 
 | Feature | Description |
 |---------|-------------|
@@ -32,7 +32,7 @@
 | **Redirect Unwrap** | Bypass intermediate redirect pages |
 | **Tracking Cleanup** | Remove tracking parameters & attributes |
 
-### 🔄 Redirect Unwrapping
+### Redirect Unwrapping
 
 Automatically extract real URLs from redirect services:
 
@@ -50,7 +50,7 @@ Automatically extract real URLs from redirect services:
 | Reddit | `out.reddit.com/?url=xxx` → direct link |
 | Facebook | `facebook.com/?u=xxx` → direct link |
 
-### 🧹 Tracking Removal
+### Tracking Removal
 
 Clean tracking data from major platforms:
 
@@ -61,7 +61,7 @@ Clean tracking data from major platforms:
 - **CSDN**: `data-report-*`, `spm`
 - **百度 (Baidu)**: `data-click`, tracking params
 
-### 🛡️ Domain Whitelist
+### Domain Whitelist
 
 Skip link processing on specific domains via a per-site whitelist:
 
@@ -69,7 +69,7 @@ Skip link processing on specific domains via a per-site whitelist:
 - **Popup toggle**: Quickly whitelist the current site directly from the toolbar popup
 - **Inherited indicator**: Subdomains whitelisted via a parent domain show the source domain in the popup
 
-### 📊 Processing Statistics
+### Processing Statistics
 
 The popup displays real-time statistics:
 
@@ -122,26 +122,26 @@ Access full settings via the options page to:
 ## Supported Sites
 
 ### Redirect Services
-- ✅ 掘金 (juejin.cn)
-- ✅ 知乎 (zhihu.com)
-- ✅ 微博 (weibo.cn, t.cn)
-- ✅ CSDN (csdn.net)
-- ✅ 简书 (jianshu.com)
-- ✅ Bilibili (bilibili.com)
-- ✅ 京东联盟 (jd.com)
-- ✅ 淘宝联盟 (taobao.com)
-- ✅ 少数派 (sspai.com)
-- ✅ Reddit (reddit.com)
-- ✅ Facebook (facebook.com)
+- 掘金 (juejin.cn)
+- 知乎 (zhihu.com)
+- 微博 (weibo.cn, t.cn)
+- CSDN (csdn.net)
+- 简书 (jianshu.com)
+- Bilibili (bilibili.com)
+- 京东联盟 (jd.com)
+- 淘宝联盟 (taobao.com)
+- 少数派 (sspai.com)
+- Reddit (reddit.com)
+- Facebook (facebook.com)
 
 ### Tracking Cleanup
-- ✅ Bilibili
-- ✅ 微博 (Weibo)
-- ✅ 知乎 (Zhihu)
-- ✅ 掘金 (Juejin)
-- ✅ 简书 (Jianshu)
-- ✅ CSDN
-- ✅ 百度搜索
+- Bilibili
+- 微博 (Weibo)
+- 知乎 (Zhihu)
+- 掘金 (Juejin)
+- 简书 (Jianshu)
+- CSDN
+- 百度搜索
 
 ## Custom Rules
 
@@ -183,9 +183,9 @@ Supported languages:
 
 | Language | Code | Status |
 |----------|------|--------|
-| 简体中文 | zh_CN | ✅ Complete |
-| 繁體中文 | zh_TW | ✅ Complete |
-| English | en | ✅ Complete |
+| 简体中文 | zh_CN | Complete |
+| 繁體中文 | zh_TW | Complete |
+| English | en | Complete |
 
 Browser automatically selects language based on system preferences.
 
@@ -232,9 +232,3 @@ MIT License
 ## Contributing
 
 Issues and pull requests are welcome!
-
----
-
-<p align="center">
-  Made with 💙 for a cleaner web experience
-</p>
