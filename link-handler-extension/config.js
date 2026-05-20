@@ -82,9 +82,9 @@ const DEFAULT_CONFIG = {
       domain: 'bilibili.com',
       enabled: true,
       description: 'Bilibili 跟踪清理',
-      removeAttributes: ['data-spmid', 'data-mod', 'data-idx', 'data-idxdata-idx', 'data-report-id'],
+      removeAttributes: ['data-spmid', 'data-mod', 'data-idx', 'data-report-id'],
       preventClickRewrite: true,
-      cleanUrlParams: ['*', 'spm_id_from', 'from_source', 'from_spmid']
+      cleanUrlParams: ['*']
     },
     {
       domain: 'weibo.com',
@@ -132,7 +132,7 @@ const DEFAULT_CONFIG = {
       description: '百度搜索跟踪清理',
       removeAttributes: ['data-click'],
       preventClickRewrite: true,
-      cleanUrlParams: ['wd', 'rsv_bp', 'rsv_idx', 'ie']
+      cleanUrlParams: ['rsv_bp', 'rsv_idx', 'ie']
     }
   ],
 

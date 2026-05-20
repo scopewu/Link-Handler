@@ -407,7 +407,8 @@ body {
 }
 
 /* Rule Card - Static Display */
-.rule-card {
+.rule-card,
+.rule-item {
   background: var(--bg-secondary);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-lg);
@@ -415,16 +416,19 @@ body {
   transition: all var(--transition-fast);
 }
 
-.rule-card:hover {
+.rule-card:hover,
+.rule-item:hover {
   border-color: var(--primary-200);
   box-shadow: var(--shadow-md);
 }
 
-.rule-card.disabled {
+.rule-card.disabled,
+.rule-item.disabled {
   opacity: 0.6;
 }
 
-.rule-card.disabled .rule-card-title h3 {
+.rule-card.disabled .rule-card-title h3,
+.rule-item.disabled .rule-card-title h3 {
   color: var(--text-tertiary);
 }
 
@@ -578,24 +582,7 @@ body {
   padding-left: 0;
 }
 
-/* Legacy rule-item styles (kept for compatibility) */
-.rule-item {
-  background: var(--bg-secondary);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  transition: all var(--transition-fast);
-}
-
-.rule-item:hover {
-  border-color: var(--primary-200);
-  box-shadow: var(--shadow-md);
-}
-
-.rule-item.disabled {
-  opacity: 0.6;
-}
-
+/* Legacy rule-header styles (kept for compatibility) */
 .rule-header {
   display: flex;
   justify-content: space-between;

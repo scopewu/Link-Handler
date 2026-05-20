@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "__MSG_extName__",
   "description": "__MSG_extDescription__",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "default_locale": "en",
   "browser_specific_settings": {
     "gecko": {
@@ -24,7 +24,7 @@
       "matches": ["<all_urls>"],
       "js": ["config.js", "content.js"],
       "run_at": "document_end",
-      "all_frames": true
+      "all_frames": false
     }
   ],
   "options_page": "options/options.html",
@@ -41,5 +41,8 @@
     "48": "icons/icon48.png",
     "96": "icons/icon96.png",
     "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
   }
 }

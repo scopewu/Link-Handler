@@ -169,6 +169,10 @@
     "message": "暫無規則，點擊新增",
     "description": "空白規則訊息"
   },
+  "noConfig": {
+    "message": "暫無設定",
+    "description": "規則詳情為空提示"
+  },
   "domainPlaceholder": {
     "message": "如：link.example.com",
     "description": "網域輸入提示"

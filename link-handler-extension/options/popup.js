@@ -45,9 +45,7 @@
         await chrome.tabs.sendMessage(tab.id, { action: 'reprocess' });
 
         // 等待处理后更新统计
-        setTimeout(async () => {
-          await updateProcessedStats();
-        }, 100);
+        setTimeout(() => updateProcessedStats(), 100);
 
         // 视觉反馈
         const btn = document.getElementById('processNow');
@@ -103,14 +101,6 @@
     } catch (e) {
       console.error('[Link Handler] Failed to init whitelist toggle:', e);
     }
-  }
-
-  // 检查域名是否在白名单中（与 content.js 保持一致）
-  function isHostnameWhitelisted(hostname, whitelist) {
-    if (!whitelist || whitelist.length === 0) return false;
-    return whitelist.some(domain => {
-      return hostname === domain || hostname.endsWith('.' + domain);
-    });
   }
 
   // 查找匹配的白名单域名（精确匹配优先，返回匹配的域名或 null）

@@ -9,6 +9,28 @@
   let currentModalType = null;
   let currentEditIndex = null; // 当前编辑的规则索引，null表示添加新模式
   let toastTimer = null;
+  let saveDebounceTimer = null;
+
+  // 常量
+  const TIMING = {
+    STATS_UPDATE_DELAY: 100,
+    FEEDBACK_DURATION: 1500,
+    INPUT_ERROR_DURATION: 2000,
+    SAVE_DEBOUNCE: 500
+  };
+
+  // 防抖保存
+  function debouncedSave(config) {
+    clearTimeout(saveDebounceTimer);
+    saveDebounceTimer = setTimeout(async () => {
+      const success = await saveConfig(config);
+      if (success) {
+        showToast(i18n.getMessage('savedSuccess'), 'success');
+      } else {
+        showToast(i18n.getMessage('savedError'), 'error');
+      }
+    }, TIMING.SAVE_DEBOUNCE);
+  }
 
   function renderWhitelist() {
     const container = document.getElementById('whitelistContainer');
@@ -60,7 +82,10 @@
       }
     }
 
-    const isIp = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(domain) || /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/.test(domain);
+    const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(domain) && domain.split('.').every(octet => {
+      const n = parseInt(octet, 10);
+      return n >= 0 && n <= 255;
+    }) || /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/.test(domain);
     const isDomain = /^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)*[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(domain);
     if (!isIp && !isDomain) {
       showInputError(input);
@@ -85,12 +110,7 @@
     input.value = '';
     renderWhitelist();
 
-    const success = await saveConfig(currentConfig);
-    if (success) {
-      showToast(i18n.getMessage('savedSuccess'), 'success');
-    } else {
-      showToast(i18n.getMessage('savedError'), 'error');
-    }
+    debouncedSave(currentConfig);
   }
 
   async function deleteWhitelistDomain(index) {
@@ -98,12 +118,7 @@
     currentConfig.whitelist.splice(index, 1);
     renderWhitelist();
 
-    const success = await saveConfig(currentConfig);
-    if (success) {
-      showToast(i18n.getMessage('savedSuccess'), 'success');
-    } else {
-      showToast(i18n.getMessage('savedError'), 'error');
-    }
+    debouncedSave(currentConfig);
   }
 
   // 初始化
@@ -196,7 +211,7 @@
         </div>
       </div>
       <div class="rule-card-body">
-        ${details.length > 0 ? details.join('') : '<span class="rule-detail empty">暂无配置</span>'}
+        ${details.length > 0 ? details.join('') : `<span class="rule-detail empty">${i18n.getMessage('noConfig')}</span>`}
       </div>
     `;
 
@@ -246,11 +261,12 @@
       details.push(`<span class="rule-detail"><strong>${i18n.getMessage('domain')}:</strong> ${escapeHtml(rule.domain)}</span>`);
     }
     if (rule.removeAttributes && rule.removeAttributes.length > 0) {
-      details.push(`<span class="rule-detail"><strong>${i18n.getMessage('removeAttributes')}:</strong> ${rule.removeAttributes.join(', ')}</span>`);
+      details.push(`<span class="rule-detail"><strong>${i18n.getMessage('removeAttributes')}:</strong> ${escapeHtml(rule.removeAttributes.join(', '))}</span>`);
     }
     if (rule.cleanUrlParams && rule.cleanUrlParams.length > 0) {
-      const paramsDisplay = rule.cleanUrlParams.includes('*') ? '*' : rule.cleanUrlParams.join(', ');
-      details.push(`<span class="rule-detail"><strong>${i18n.getMessage('cleanUrlParams').replace('（输入 * 清除所有）', '').replace(' (use * for all)', '')}:</strong> ${paramsDisplay}</span>`);
+      const paramsDisplay = rule.cleanUrlParams.includes('*') ? '*' : escapeHtml(rule.cleanUrlParams.join(', '));
+      const paramsLabel = i18n.getMessage('cleanUrlParams').split('（')[0].split(' (')[0];
+      details.push(`<span class="rule-detail"><strong>${escapeHtml(paramsLabel)}:</strong> ${paramsDisplay}</span>`);
     }
     if (rule.preventClickRewrite) {
       details.push(`<span class="rule-detail"><strong>${i18n.getMessage('preventClickRewrite')}:</strong> ✓</span>`);
@@ -282,7 +298,7 @@
         </div>
       </div>
       <div class="rule-card-body">
-        ${details.length > 0 ? details.join('') : '<span class="rule-detail empty">暂无配置</span>'}
+        ${details.length > 0 ? details.join('') : `<span class="rule-detail empty">${i18n.getMessage('noConfig')}</span>`}
       </div>
     `;
 
@@ -295,6 +311,30 @@
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  // 验证配置结构
+  function validateConfigStructure(config) {
+    if (!config || typeof config !== 'object') return false;
+    if (!Array.isArray(config.redirectRules)) return false;
+    if (!Array.isArray(config.trackingRules)) return false;
+    if (!config.global || typeof config.global !== 'object') return false;
+
+    // 验证重定向规则
+    for (const rule of config.redirectRules) {
+      if (!rule.domain || typeof rule.domain !== 'string') return false;
+      if (!rule.param || typeof rule.param !== 'string') return false;
+    }
+
+    // 验证跟踪规则
+    for (const rule of config.trackingRules) {
+      if (!rule.domain || typeof rule.domain !== 'string') return false;
+    }
+
+    // 验证白名单
+    if (config.whitelist && !Array.isArray(config.whitelist)) return false;
+
+    return true;
   }
 
   // 过滤规则（根据域名或描述搜索）
@@ -445,12 +485,7 @@
       }
 
       // 自动保存
-      const success = await saveConfig(currentConfig);
-      if (success) {
-        showToast(i18n.getMessage('savedSuccess'), 'success');
-      } else {
-        showToast(i18n.getMessage('savedError'), 'error');
-      }
+      debouncedSave(currentConfig);
     }
 
     // 编辑规则
@@ -494,12 +529,7 @@
       ruleCard.classList.toggle('disabled', !e.target.checked);
 
       // 自动保存
-      const success = await saveConfig(currentConfig);
-      if (success) {
-        showToast(i18n.getMessage('savedSuccess'), 'success');
-      } else {
-        showToast(i18n.getMessage('savedError'), 'error');
-      }
+      debouncedSave(currentConfig);
     }
   }
 
@@ -534,12 +564,7 @@
       enableTracking: document.getElementById('enableTracking').checked
     };
 
-    const success = await saveConfig(currentConfig);
-    if (success) {
-      showToast(i18n.getMessage('savedSuccess'), 'success');
-    } else {
-      showToast(i18n.getMessage('savedError'), 'error');
-    }
+    debouncedSave(currentConfig);
   }
 
   // 恢复默认设置
@@ -583,7 +608,7 @@
         const imported = JSON.parse(event.target.result);
 
         // 验证配置结构
-        if (!imported.redirectRules || !imported.trackingRules || !imported.global) {
+        if (!validateConfigStructure(imported)) {
           throw new Error(i18n.getMessage('importError'));
         }
 
@@ -740,7 +765,7 @@
     setTimeout(() => {
       input.style.borderColor = '';
       input.style.boxShadow = '';
-    }, 2000);
+    }, TIMING.INPUT_ERROR_DURATION);
   }
 
   // 确认添加/编辑规则
@@ -841,9 +866,10 @@
     toast.className = 'toast show ' + type;
 
     if (toastTimer) clearTimeout(toastTimer);
+    const duration = type === 'error' ? 5000 : 3000;
     toastTimer = setTimeout(() => {
       toast.classList.remove('show');
-    }, 3000);
+    }, duration);
   }
 
   // 启动

@@ -177,6 +177,10 @@
     "message": "暂无规则，点击添加",
     "description": "空白规则提示"
   },
+  "noConfig": {
+    "message": "暂无配置",
+    "description": "规则详情为空提示"
+  },
   "domainPlaceholder": {
     "message": "如：link.example.com",
     "description": "域名输入提示"

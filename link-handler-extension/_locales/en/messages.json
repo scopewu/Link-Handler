@@ -169,6 +169,10 @@
     "message": "No rules yet. Click to add.",
     "description": "Empty rules message"
   },
+  "noConfig": {
+    "message": "No configuration",
+    "description": "Empty rule detail message"
+  },
   "domainPlaceholder": {
     "message": "e.g., link.example.com",
     "description": "Domain input placeholder"
