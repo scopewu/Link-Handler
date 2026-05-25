@@ -43,12 +43,7 @@
 
   // 初始化
   async function init() {
-    try {
-      config = await getConfig();
-    } catch (e) {
-      console.error('[Link Handler] Failed to load config:', e);
-      return;
-    }
+    config = await getConfig();
 
     buildRuleMaps();
 
@@ -95,14 +90,10 @@
       if (message.action === 'reprocess') {
         // 重新加载配置后处理所有链接（跳过白名单网站）
         (async () => {
-          try {
-            config = await getConfig();
-            buildRuleMaps();
-            if (!isWhitelisted(location.hostname)) {
-              clearProcessedMarksAndReprocess();
-            }
-          } catch (e) {
-            console.error('[Link Handler] Failed to reload config:', e);
+          config = await getConfig();
+          buildRuleMaps();
+          if (!isWhitelisted(location.hostname)) {
+            clearProcessedMarksAndReprocess();
           }
         })();
       }
@@ -192,48 +183,40 @@
     link.dataset[LAST_HREF_DATA] = link.getAttribute('href') || '';
     stats.totalProcessed++;
 
-    try {
-      // 阶段1: 处理重定向链接
-      let wasRedirect = false;
-      if (config.global.enableRedirect !== false) {
-        const redirectRule = findRedirectRule(link.href);
-        if (redirectRule && redirectRule.enabled !== false) {
-          unwrapRedirectLink(link, redirectRule);
-          stats.redirectUnwrapped++;
-          wasRedirect = true;
-          // ❌ 原代码在这里 return，导致解包后的链接无法继续后续处理
-          // 修复：继续执行阶段2和阶段3
+    // 阶段1: 处理重定向链接
+    let wasRedirect = false;
+    if (config.global.enableRedirect !== false) {
+      const redirectRule = findRedirectRule(link.href);
+      if (redirectRule && redirectRule.enabled !== false) {
+        unwrapRedirectLink(link, redirectRule);
+        stats.redirectUnwrapped++;
+        wasRedirect = true;
+      }
+    }
+
+    // 阶段2: 同域名/相对地址，移除 target
+    if (shouldRemoveTarget(link)) {
+      removeTargetAttribute(link);
+      stats.targetRemoved++;
+    }
+
+    // 阶段3: 清理跟踪属性
+    if (config.global.enableTracking !== false) {
+      const trackingRule = findTrackingRule(link.href);
+      if (trackingRule && trackingRule.enabled !== false) {
+        cleanTrackingAttributes(link, trackingRule);
+        if (trackingRule.cleanUrlParams && trackingRule.cleanUrlParams.length > 0) {
+          cleanUrlParams(link, trackingRule.cleanUrlParams);
+        }
+        if (trackingRule.preventClickRewrite) {
+          preventClickRewrite(link);
+        }
+        const actuallyCleaned = (trackingRule.removeAttributes && trackingRule.removeAttributes.length > 0) ||
+                                (trackingRule.cleanUrlParams && trackingRule.cleanUrlParams.length > 0);
+        if (actuallyCleaned || !wasRedirect) {
+          stats.trackingCleaned++;
         }
       }
-
-      // 阶段2: 同域名/相对地址，移除 target
-      if (shouldRemoveTarget(link)) {
-        removeTargetAttribute(link);
-        stats.targetRemoved++;
-      }
-
-      // 阶段3: 清理跟踪属性
-      if (config.global.enableTracking !== false) {
-        const trackingRule = findTrackingRule(link.href);
-        if (trackingRule && trackingRule.enabled !== false) {
-          cleanTrackingAttributes(link, trackingRule);
-          if (trackingRule.cleanUrlParams && trackingRule.cleanUrlParams.length > 0) {
-            cleanUrlParams(link, trackingRule.cleanUrlParams);
-          }
-          if (trackingRule.preventClickRewrite) {
-            preventClickRewrite(link);
-          }
-          // 如果之前是重定向链接且没有触发其他统计，仍然计入 trackingCleaned
-          // 但如果 only preventClickRewrite 没有实际清理属性/参数，不重复统计
-          const actuallyCleaned = (trackingRule.removeAttributes && trackingRule.removeAttributes.length > 0) ||
-                                  (trackingRule.cleanUrlParams && trackingRule.cleanUrlParams.length > 0);
-          if (actuallyCleaned || !wasRedirect) {
-            stats.trackingCleaned++;
-          }
-        }
-      }
-    } catch (e) {
-      console.error('[Link Handler] Error processing link:', e, link);
     }
   }
 
