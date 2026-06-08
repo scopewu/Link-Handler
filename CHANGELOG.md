@@ -1,5 +1,27 @@
 # Changelog
 
+## Version 1.4.2
+
+### 🐛 Bug Fixes / 问题修复
+
+- **Fixed SPA Link Processing Failures** / **修复 SPA 链接处理失败**  
+  Fixed a bug where link processing would fail on SPA navigation due to `requestIdleCallback` being called with incorrect arguments.  
+  修复了由于 `requestIdleCallback` 参数错误导致 SPA 导航时链接处理失败的问题。
+
+### 🔧 Improvements / 改进
+
+- **Hardened Link Processing & XSS Prevention** / **强化链接处理与 XSS 防护**  
+  Strengthened URL validation and sanitization to prevent potential XSS vectors in redirect unwrapping.  
+  加强 URL 验证与清理，防止重定向解包中的潜在 XSS 攻击向量。
+
+### 📝 Documentation / 文档
+
+- **Cleaned Up README** / **清理 README**  
+  Removed emoji and decorative elements for a more professional appearance. Added Chinese README (`README.zh_CN.md`).  
+  移除表情符号和装饰元素，更加专业；新增中文 README (`README.zh_CN.md`)。
+
+---
+
 ## Version 1.4.0
 
 ### ✨ New Features / 新功能
