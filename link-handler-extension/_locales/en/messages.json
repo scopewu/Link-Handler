@@ -43,6 +43,10 @@
     "message": "Cancel",
     "description": "Cancel button"
   },
+  "close": {
+    "message": "Close",
+    "description": "Close button"
+  },
   "domainRequired": {
     "message": "Domain is required",
     "description": "Domain required validation message"
@@ -99,6 +103,10 @@
     "message": "Clean URL Parameters (use * for all)",
     "description": "Clean URL parameters label"
   },
+  "cleanUrlParamsShort": {
+    "message": "URL Params",
+    "description": "Short label for clean URL parameters in rule cards"
+  },
   "removeTargetSameOrigin": {
     "message": "Open same-site links in same tab",
     "description": "Same site setting"
@@ -110,10 +118,6 @@
   "enableTracking": {
     "message": "Enable tracking cleanup",
     "description": "Tracking cleanup global toggle"
-  },
-  "processExistingLinks": {
-    "message": "Process existing links on page load",
-    "description": "Process existing links setting"
   },
   "savedSuccess": {
     "message": "Settings saved successfully",
@@ -214,7 +218,7 @@
     "description": "Popup footer text"
   },
   "preventClickRewriteDesc": {
-    "message": "Force direct navigation, bypass click tracking",
+    "message": "Force direct navigation, bypass click tracking (may affect some site features)",
     "description": "Prevent click rewrite description"
   },
   "globalSettingsDesc": {
@@ -290,14 +294,14 @@
     "description": "No search results message"
   },
   "searchResults": {
-    "message": "Found $1$ / $2$ rules",
+    "message": "Found $found$ / $total$ rules",
     "description": "Search results count",
     "placeholders": {
-      "1": {
+      "found": {
         "content": "$1",
         "example": "3"
       },
-      "2": {
+      "total": {
         "content": "$2",
         "example": "10"
       }
@@ -336,7 +340,7 @@
     "description": "Whitelist toggle description in popup"
   },
   "whitelistInheritedDesc": {
-    "message": "Inherited from $1$",
+    "message": "Inherited from $1$ — link processing skipped on this site",
     "description": "Whitelist inherited from parent domain",
     "placeholders": {
       "1": {

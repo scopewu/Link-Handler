@@ -10,6 +10,7 @@
   let currentEditIndex = null; // 当前编辑的规则索引，null表示添加新模式
   let toastTimer = null;
   let saveDebounceTimer = null;
+  let modalLastFocusedElement = null;
 
   // 常量
   const TIMING = {
@@ -20,16 +21,68 @@
   };
 
   // 防抖保存
-  function debouncedSave(config) {
+  function debouncedSave(config, options = {}) {
     clearTimeout(saveDebounceTimer);
     saveDebounceTimer = setTimeout(async () => {
       const success = await saveConfig(config);
       if (success) {
         showToast(i18n.getMessage('savedSuccess'), 'success');
+        if (options.notify !== false) {
+          notifyContentScripts({ action: 'reprocess' });
+        }
       } else {
         showToast(i18n.getMessage('savedError'), 'error');
       }
     }, TIMING.SAVE_DEBOUNCE);
+  }
+
+  // 通知所有内容脚本重新处理
+  function notifyContentScripts(message) {
+    if (typeof chrome === 'undefined' || !chrome.tabs || !chrome.tabs.query) return;
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach(tab => {
+        if (!tab.id || !tab.url) return;
+        // 跳过 chrome://、edge://、about: 等不可注入页面
+        if (/^(chrome|edge|brave|opera|vivaldi|about):/i.test(tab.url)) return;
+        try {
+          chrome.tabs.sendMessage(tab.id, message).catch(() => {
+            // 内容脚本未运行时静默忽略
+          });
+        } catch {
+          // 某些标签页不支持消息，忽略
+        }
+      });
+    });
+  }
+
+  // 规范化域名输入：去除协议、小写、去除 www.
+  function normalizeDomainInput(raw) {
+    let domain = raw.trim().toLowerCase();
+    if (!domain) return domain;
+    if (domain.includes('://')) {
+      try {
+        const url = new URL(domain);
+        domain = url.hostname;
+      } catch {
+        // 解析失败，保持原值交给后续验证
+      }
+    }
+    if (domain.startsWith('www.')) {
+      domain = domain.slice(4);
+    }
+    return domain;
+  }
+
+  // 校验域名或 IP 格式
+  function isValidDomain(domain) {
+    if (!domain) return false;
+    const isIpV4 = /^(\d{1,3}\.){3}\d{1,3}$/.test(domain) && domain.split('.').every(octet => {
+      const n = parseInt(octet, 10);
+      return n >= 0 && n <= 255;
+    });
+    const isIpV6 = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/.test(domain);
+    const isDomain = /^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)*[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(domain);
+    return isIpV4 || isIpV6 || isDomain;
   }
 
   function renderWhitelist() {
@@ -65,7 +118,7 @@
 
   async function addWhitelistDomain() {
     const input = document.getElementById('whitelistDomainInput');
-    let domain = input.value.trim().toLowerCase();
+    const domain = normalizeDomainInput(input.value);
 
     if (!domain) {
       showInputError(input);
@@ -73,28 +126,10 @@
       return;
     }
 
-    if (domain.includes('://')) {
-      try {
-        const url = new URL(domain);
-        domain = url.hostname;
-      } catch {
-        // 解析失败，保持原值交给后续验证
-      }
-    }
-
-    const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(domain) && domain.split('.').every(octet => {
-      const n = parseInt(octet, 10);
-      return n >= 0 && n <= 255;
-    }) || /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/.test(domain);
-    const isDomain = /^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)*[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(domain);
-    if (!isIp && !isDomain) {
+    if (!isValidDomain(domain)) {
       showInputError(input);
       showToast(i18n.getMessage('domainInvalid'), 'error');
       return;
-    }
-
-    if (domain.startsWith('www.')) {
-      domain = domain.slice(4);
     }
 
     if (!currentConfig.whitelist) {
@@ -159,7 +194,8 @@
       container.appendChild(statsEl);
     }
 
-    filteredRules.forEach(({ rule, index }) => {
+    // 倒序渲染：最新添加的规则显示在最前面；index 仍指向原数组位置，保证编辑/删除定位正确
+    [...filteredRules].reverse().forEach(({ rule, index }) => {
       const ruleEl = createRedirectRuleCard(rule, index);
       container.appendChild(ruleEl);
     });
@@ -238,7 +274,8 @@
       container.appendChild(statsEl);
     }
 
-    filteredRules.forEach(({ rule, index }) => {
+    // 倒序渲染：最新添加的规则显示在最前面；index 仍指向原数组位置，保证编辑/删除定位正确
+    [...filteredRules].reverse().forEach(({ rule, index }) => {
       const ruleEl = createTrackingRuleCard(rule, index);
       container.appendChild(ruleEl);
     });
@@ -265,7 +302,7 @@
     }
     if (rule.cleanUrlParams && rule.cleanUrlParams.length > 0) {
       const paramsDisplay = rule.cleanUrlParams.includes('*') ? '*' : escapeHtml(rule.cleanUrlParams.join(', '));
-      const paramsLabel = i18n.getMessage('cleanUrlParams').split('（')[0].split(' (')[0];
+      const paramsLabel = i18n.getMessage('cleanUrlParamsShort');
       details.push(`<span class="rule-detail"><strong>${escapeHtml(paramsLabel)}:</strong> ${paramsDisplay}</span>`);
     }
     if (rule.preventClickRewrite) {
@@ -322,19 +359,44 @@
 
     // 验证重定向规则
     for (const rule of config.redirectRules) {
-      if (!rule.domain || typeof rule.domain !== 'string') return false;
-      if (!rule.param || typeof rule.param !== 'string') return false;
+      if (!rule || typeof rule !== 'object') return false;
+      if (!rule.domain || typeof rule.domain !== 'string' || !rule.domain.trim()) return false;
+      if (!rule.param || typeof rule.param !== 'string' || !rule.param.trim()) return false;
+      if (rule.enabled !== undefined && typeof rule.enabled !== 'boolean') return false;
+      if (rule.description !== undefined && typeof rule.description !== 'string') return false;
     }
 
     // 验证跟踪规则
     for (const rule of config.trackingRules) {
-      if (!rule.domain || typeof rule.domain !== 'string') return false;
+      if (!rule || typeof rule !== 'object') return false;
+      if (!rule.domain || typeof rule.domain !== 'string' || !rule.domain.trim()) return false;
+      if (rule.enabled !== undefined && typeof rule.enabled !== 'boolean') return false;
+      if (rule.description !== undefined && typeof rule.description !== 'string') return false;
+      if (rule.preventClickRewrite !== undefined && typeof rule.preventClickRewrite !== 'boolean') return false;
+      if (rule.removeAttributes !== undefined && !isStringArray(rule.removeAttributes)) return false;
+      if (rule.cleanUrlParams !== undefined && !isStringArray(rule.cleanUrlParams)) return false;
     }
 
     // 验证白名单
     if (config.whitelist && !Array.isArray(config.whitelist)) return false;
+    if (config.whitelist) {
+      for (const item of config.whitelist) {
+        if (typeof item !== 'string' || !item.trim()) return false;
+      }
+    }
+
+    // 验证全局设置
+    for (const key of ['removeTargetSameOrigin', 'enableRedirect', 'enableTracking']) {
+      if (config.global[key] !== undefined && typeof config.global[key] !== 'boolean') return false;
+    }
 
     return true;
+  }
+
+  // 判断是否为字符串数组
+  function isStringArray(value) {
+    if (!Array.isArray(value)) return false;
+    return value.every(item => typeof item === 'string');
   }
 
   // 过滤规则（根据域名或描述搜索）
@@ -423,9 +485,11 @@
     document.getElementById('closeRuleModal').addEventListener('click', closeRuleModal);
     document.getElementById('cancelRuleModal').addEventListener('click', closeRuleModal);
     document.getElementById('confirmRuleModal').addEventListener('click', confirmRuleModal);
-    document.getElementById('ruleModal').addEventListener('click', (e) => {
+    const ruleModal = document.getElementById('ruleModal');
+    ruleModal.addEventListener('click', (e) => {
       if (e.target.id === 'ruleModal') closeRuleModal();
     });
+    ruleModal.addEventListener('keydown', handleModalKeydown);
 
     // 全局设置实时保存
     document.getElementById('removeTargetSameOrigin').addEventListener('change', autoSaveGlobalSettings);
@@ -577,6 +641,7 @@
     renderRedirectRules();
     renderTrackingRules();
     renderWhitelist();
+    notifyContentScripts({ action: 'reprocess' });
     showToast(i18n.getMessage('resetSettings'), 'success');
   }
 
@@ -618,6 +683,7 @@
         renderRedirectRules();
         renderTrackingRules();
         renderWhitelist();
+        notifyContentScripts({ action: 'reprocess' });
         showToast(i18n.getMessage('importSettings'), 'success');
       } catch (err) {
         showToast(i18n.getMessage('importError') + ': ' + err.message, 'error');
@@ -635,6 +701,7 @@
   function openRuleModal(type, editIndex = null) {
     currentModalType = type;
     currentEditIndex = editIndex;
+    modalLastFocusedElement = document.activeElement;
     const modal = document.getElementById('ruleModal');
     const title = document.getElementById('ruleModalTitle');
     const body = document.getElementById('ruleModalBody');
@@ -746,6 +813,42 @@
     if (firstInput) firstInput.focus();
   }
 
+  // Modal 内可聚焦元素选择器
+  const MODAL_FOCUSABLES = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+  // 处理弹窗键盘事件（ESC 关闭、Tab 焦点循环）
+  function handleModalKeydown(e) {
+    const modal = document.getElementById('ruleModal');
+    if (!modal.classList.contains('show')) return;
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeRuleModal();
+      return;
+    }
+
+    if (e.key !== 'Tab') return;
+
+    const focusableElements = Array.from(modal.querySelectorAll(MODAL_FOCUSABLES)).filter(el => {
+      if (el.disabled) return false;
+      // 不使用 offsetParent：position:fixed 元素即使可见其 offsetParent 也为 null
+      const style = window.getComputedStyle(el);
+      return style.display !== 'none' && style.visibility !== 'hidden';
+    });
+    if (focusableElements.length === 0) return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    if (e.shiftKey && document.activeElement === firstElement) {
+      e.preventDefault();
+      lastElement.focus();
+    } else if (!e.shiftKey && document.activeElement === lastElement) {
+      e.preventDefault();
+      firstElement.focus();
+    }
+  }
+
   // 关闭规则弹窗
   function closeRuleModal() {
     const modalBody = document.getElementById('ruleModalBody');
@@ -755,6 +858,11 @@
     document.getElementById('ruleModal').classList.remove('show');
     currentModalType = null;
     currentEditIndex = null;
+
+    // 恢复打开弹窗前的焦点
+    if (modalLastFocusedElement && modalLastFocusedElement.focus) {
+      modalLastFocusedElement.focus();
+    }
   }
 
   // 显示输入框错误状态
@@ -778,13 +886,18 @@
       const domainInput = body.querySelector('#modalRuleDomain');
       const paramInput = body.querySelector('#modalRuleParam');
       const descInput = body.querySelector('#modalRuleDesc');
-      const domain = domainInput.value.trim();
+      const domain = normalizeDomainInput(domainInput.value);
       const param = paramInput.value.trim();
       const description = descInput.value.trim();
 
       if (!domain) {
         showInputError(domainInput);
         showToast(i18n.getMessage('domainRequired'), 'error');
+        return;
+      }
+      if (!isValidDomain(domain)) {
+        showInputError(domainInput);
+        showToast(i18n.getMessage('domainInvalid'), 'error');
         return;
       }
       if (!param) {
@@ -809,13 +922,18 @@
     } else if (currentModalType === 'tracking') {
       const domainInput = body.querySelector('#modalRuleDomain');
       const descInput = body.querySelector('#modalRuleDesc');
-      const domain = domainInput.value.trim();
+      const domain = normalizeDomainInput(domainInput.value);
       const description = descInput.value.trim();
       const preventClick = body.querySelector('#modalRulePreventClick').checked;
 
       if (!domain) {
         showInputError(domainInput);
         showToast(i18n.getMessage('domainRequired'), 'error');
+        return;
+      }
+      if (!isValidDomain(domain)) {
+        showInputError(domainInput);
+        showToast(i18n.getMessage('domainInvalid'), 'error');
         return;
       }
 
@@ -852,6 +970,7 @@
     const success = await saveConfig(currentConfig);
     if (success) {
       showToast(i18n.getMessage('savedSuccess'), 'success');
+      notifyContentScripts({ action: 'reprocess' });
     } else {
       showToast(i18n.getMessage('savedError'), 'error');
     }

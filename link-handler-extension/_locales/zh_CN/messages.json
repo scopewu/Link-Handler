@@ -47,6 +47,10 @@
     "message": "取消",
     "description": "取消按钮"
   },
+  "close": {
+    "message": "关闭",
+    "description": "关闭按钮"
+  },
   "domainRequired": {
     "message": "域名不能为空",
     "description": "域名必填验证提示"
@@ -100,12 +104,16 @@
     "description": "阻止点击重写标签"
   },
   "preventClickRewriteDesc": {
-    "message": "强制直接跳转，阻止点击统计",
+    "message": "强制直接跳转，绕过点击统计（可能影响部分网站功能）",
     "description": "阻止点击重写描述"
   },
   "cleanUrlParams": {
     "message": "清理 URL 参数（输入 * 清除所有）",
     "description": "清理 URL 参数标签"
+  },
+  "cleanUrlParamsShort": {
+    "message": "URL 参数",
+    "description": "规则卡片中清理 URL 参数的简短标签"
   },
   "removeTargetSameOrigin": {
     "message": "同一网站内链接在同一标签页打开",
@@ -118,10 +126,6 @@
   "enableTracking": {
     "message": "启用跟踪清理",
     "description": "跟踪清理全局开关"
-  },
-  "processExistingLinks": {
-    "message": "页面加载时处理现有链接",
-    "description": "处理现有链接设置"
   },
   "savedSuccess": {
     "message": "设置已保存",
@@ -290,14 +294,14 @@
     "description": "搜索无结果提示"
   },
   "searchResults": {
-    "message": "找到 $1$ / $2$ 条规则",
+    "message": "找到 $found$ / $total$ 条规则",
     "description": "搜索结果统计",
     "placeholders": {
-      "1": {
+      "found": {
         "content": "$1",
         "example": "3"
       },
-      "2": {
+      "total": {
         "content": "$2",
         "example": "10"
       }
@@ -336,7 +340,7 @@
     "description": "弹出窗口白名单开关描述"
   },
   "whitelistInheritedDesc": {
-    "message": "已由 $1$ 继承",
+    "message": "已由 $1$ 继承，跳过此网站的链接处理",
     "description": "白名单由父域名继承",
     "placeholders": {
       "1": {

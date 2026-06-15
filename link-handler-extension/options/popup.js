@@ -44,8 +44,9 @@
       if (tab) {
         await chrome.tabs.sendMessage(tab.id, { action: 'reprocess' });
 
-        // 等待处理后更新统计
-        setTimeout(() => updateProcessedStats(), 100);
+        // 分阶段多次刷新统计，覆盖不同处理时长的页面
+        const updateDelays = [100, 300, 600, 1200];
+        updateDelays.forEach(delay => setTimeout(() => updateProcessedStats(), delay));
 
         // 视觉反馈
         const btn = document.getElementById('processNow');
@@ -101,19 +102,6 @@
     } catch (e) {
       console.error('[Link Handler] Failed to init whitelist toggle:', e);
     }
-  }
-
-  // 查找匹配的白名单域名（精确匹配优先，返回匹配的域名或 null）
-  function findWhitelistMatch(hostname, whitelist) {
-    if (!whitelist || whitelist.length === 0) return null;
-    let suffixMatch = null;
-    for (const domain of whitelist) {
-      if (hostname === domain) return domain;
-      if (hostname.endsWith('.' + domain)) {
-        suffixMatch = domain;
-      }
-    }
-    return suffixMatch;
   }
 
   // 更新白名单图标视觉状态

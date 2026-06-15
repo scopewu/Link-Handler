@@ -68,6 +68,22 @@ const i18n = {
     return 'en';
   },
 
+  // 根据当前脚本路径计算翻译文件基础路径
+  getLocalesBasePath: function() {
+    try {
+      const currentScript = document.currentScript;
+      if (currentScript && currentScript.src) {
+        const scriptUrl = new URL(currentScript.src);
+        // i18n.js 位于 options/ 或 popup/ 目录下，_locales 在父目录
+        const scriptDir = scriptUrl.pathname.replace(/\/[^/]+$/, '/');
+        return scriptDir + '../_locales/';
+      }
+    } catch {
+      // 解析失败时回退到默认相对路径
+    }
+    return '../_locales/';
+  },
+
   // 加载翻译文件
   loadTranslations: async function(locale) {
     // 如果在扩展环境中，优先使用 chrome.i18n
@@ -77,13 +93,14 @@ const i18n = {
     }
 
     // 非扩展环境：手动加载翻译文件
+    const basePath = this.getLocalesBasePath();
     try {
-      const response = await fetch(`../_locales/${locale}/messages.json`);
+      const response = await fetch(`${basePath}${locale}/messages.json`);
       if (response.ok) {
         this.translations = await response.json();
       } else {
         // 如果加载失败，尝试加载英文
-        const enResponse = await fetch(`../_locales/en/messages.json`);
+        const enResponse = await fetch(`${basePath}en/messages.json`);
         if (enResponse.ok) {
           this.translations = await enResponse.json();
         }
@@ -104,19 +121,36 @@ const i18n = {
 
     // 使用本地缓存的翻译
     const messageObj = this.translations[key];
-    if (messageObj && messageObj.message) {
-      let message = messageObj.message;
-      // 处理占位符
-      if (substitutions && Array.isArray(substitutions)) {
-        substitutions.forEach((sub, index) => {
-          message = message.replace(new RegExp(`\\$${index + 1}\\$`, 'g'), sub);
-        });
+    if (!messageObj || !messageObj.message) return key;
+
+    let message = messageObj.message;
+
+    // 归一化替换参数：字符串视为单元素数组
+    let subs = substitutions;
+    if (subs != null && !Array.isArray(subs)) subs = [subs];
+
+    // 解析命名占位符：$name$ → 通过 placeholders 映射取位置参数
+    const placeholders = messageObj.placeholders || {};
+    Object.keys(placeholders).forEach(name => {
+      const content = (placeholders[name] && placeholders[name].content) || '';
+      const positionalMatch = String(content).match(/^\$(\d+)$/);
+      let value = content;
+      if (positionalMatch) {
+        const idx = parseInt(positionalMatch[1], 10) - 1;
+        value = (subs && subs[idx] != null) ? subs[idx] : '';
       }
-      return message;
+      // 占位符名大小写不敏感（与 Chrome i18n 行为一致）
+      message = message.replace(new RegExp('\\$' + name + '\\$', 'gi'), value);
+    });
+
+    // 处理剩余的 $N$ 形式（消息未声明 placeholders 时）
+    if (subs && Array.isArray(subs)) {
+      subs.forEach((sub, index) => {
+        message = message.replace(new RegExp('\\$' + (index + 1) + '\\$', 'g'), sub);
+      });
     }
 
-    // 降级处理：返回 key
-    return key;
+    return message;
   },
 
   // 填充页面所有带 data-i18n 属性的元素

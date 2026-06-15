@@ -84,7 +84,7 @@ const DEFAULT_CONFIG = {
       description: 'Bilibili 跟踪清理',
       removeAttributes: ['data-spmid', 'data-mod', 'data-idx', 'data-report-id'],
       preventClickRewrite: true,
-      cleanUrlParams: ['*']
+      cleanUrlParams: []
     },
     {
       domain: 'weibo.com',
@@ -143,8 +143,7 @@ const DEFAULT_CONFIG = {
   global: {
     removeTargetSameOrigin: true,    // 同域名/相对地址移除 target
     enableRedirect: true,            // 启用重定向解析
-    enableTracking: true,            // 启用跟踪清理
-    processExistingLinks: true       // 处理已有链接
+    enableTracking: true             // 启用跟踪清理
   }
 };
 
@@ -164,18 +163,53 @@ async function getConfig() {
   return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 }
 
-// 合并配置（规则数组整体替换，global 浅合并）
+// 检查 hostname 是否匹配白名单（精确匹配优先，后缀匹配次之）
+// 返回匹配到的白名单域名，未匹配返回 null。供 content.js 与 popup.js 复用。
+function findWhitelistMatch(hostname, whitelist) {
+  if (!whitelist || whitelist.length === 0) return null;
+  const normalized = String(hostname).replace(/^\[/, '').replace(/\]$/, '');
+  let suffixMatch = null;
+  for (const domain of whitelist) {
+    const normalizedDomain = String(domain).replace(/^\[/, '').replace(/\]$/, '');
+    if (normalized === normalizedDomain) return normalizedDomain;
+    if (normalized.endsWith('.' + normalizedDomain)) {
+      suffixMatch = normalizedDomain;
+    }
+  }
+  return suffixMatch;
+}
+
+// 按域名合并规则：默认规则为底，自定义覆盖同域名，新增规则追加在末尾
+// 这样扩展升级时新增的默认规则可自动透传给老用户，同时保留用户改动
+function mergeRulesByDomain(defaultRules, customRules) {
+  const merged = [];
+  const customByDomain = new Map();
+  customRules.forEach(rule => {
+    if (rule && rule.domain) customByDomain.set(rule.domain, rule);
+  });
+  defaultRules.forEach(defaultRule => {
+    const customRule = customByDomain.get(defaultRule.domain);
+    if (customRule) {
+      merged.push(Object.assign({}, defaultRule, customRule));
+      customByDomain.delete(defaultRule.domain);
+    } else {
+      merged.push(JSON.parse(JSON.stringify(defaultRule)));
+    }
+  });
+  customByDomain.forEach(rule => merged.push(rule));
+  return merged;
+}
+
+// 合并配置（规则按域名增量合并，global 浅合并，白名单整体替换）
 function mergeConfig(defaults, custom) {
   const result = JSON.parse(JSON.stringify(defaults));
 
   if (custom.redirectRules) {
-    // 合并重定向规则，以自定义规则为准
-    result.redirectRules = [...custom.redirectRules];
+    result.redirectRules = mergeRulesByDomain(defaults.redirectRules, custom.redirectRules);
   }
 
   if (custom.trackingRules) {
-    // 合并跟踪规则
-    result.trackingRules = [...custom.trackingRules];
+    result.trackingRules = mergeRulesByDomain(defaults.trackingRules, custom.trackingRules);
   }
 
   if (custom.whitelist) {
@@ -189,6 +223,9 @@ function mergeConfig(defaults, custom) {
   return result;
 }
 
+// chrome.storage.sync 单项配额上限（QUOTA_BYTES_PER_ITEM = 8192，留少量余量）
+const SYNC_QUOTA_BYTES_PER_ITEM = 8000;
+
 // 保存配置
 async function saveConfig(config) {
   try {
@@ -197,9 +234,15 @@ async function saveConfig(config) {
       const dataToSave = {
         redirectRules: config.redirectRules,
         trackingRules: config.trackingRules,
-        whitelist: config.whitelist || DEFAULT_CONFIG.whitelist,
+        whitelist: Array.isArray(config.whitelist) ? config.whitelist : DEFAULT_CONFIG.whitelist,
         global: config.global
       };
+      const payload = JSON.stringify({ linkHandlerConfig: dataToSave });
+      // 预检配额：超出时给出明确提示而非让 set 静默失败
+      if (payload.length > SYNC_QUOTA_BYTES_PER_ITEM) {
+        console.error('[Link Handler] Config exceeds sync quota:', payload.length, 'bytes (limit', SYNC_QUOTA_BYTES_PER_ITEM + ')');
+        return false;
+      }
       await chrome.storage.sync.set({ linkHandlerConfig: dataToSave });
       // 验证写入是否成功
       const verify = await chrome.storage.sync.get('linkHandlerConfig');
@@ -217,5 +260,5 @@ async function saveConfig(config) {
 
 // 导出配置（用于 content script）
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { DEFAULT_CONFIG, getConfig, saveConfig, mergeConfig };
+  module.exports = { DEFAULT_CONFIG, getConfig, saveConfig, mergeConfig, findWhitelistMatch };
 }

@@ -43,6 +43,10 @@
     "message": "取消",
     "description": "取消按鈕"
   },
+  "close": {
+    "message": "關閉",
+    "description": "關閉按鈕"
+  },
   "domainRequired": {
     "message": "網域不能為空",
     "description": "網域必填驗證訊息"
@@ -99,6 +103,10 @@
     "message": "清理 URL 參數（輸入 * 清除所有）",
     "description": "清理 URL 參數標籤"
   },
+  "cleanUrlParamsShort": {
+    "message": "URL 參數",
+    "description": "規則卡片中清理 URL 參數的簡短標籤"
+  },
   "removeTargetSameOrigin": {
     "message": "同一網站內連結在同一分頁開啟",
     "description": "同網站設定"
@@ -110,10 +118,6 @@
   "enableTracking": {
     "message": "啟用追蹤清理",
     "description": "追蹤清理全域開關"
-  },
-  "processExistingLinks": {
-    "message": "頁面載入時處理現有連結",
-    "description": "處理現有連結設定"
   },
   "savedSuccess": {
     "message": "設定已儲存",
@@ -214,7 +218,7 @@
     "description": "彈出視窗底部文字"
   },
   "preventClickRewriteDesc": {
-    "message": "強制直接跳轉，阻止點擊統計",
+    "message": "強制直接跳轉，繞過點擊統計（可能影響部分網站功能）",
     "description": "阻止點擊重寫描述"
   },
   "globalSettingsDesc": {
@@ -294,14 +298,14 @@
     "description": "搜尋無結果提示"
   },
   "searchResults": {
-    "message": "找到 $1$ / $2$ 條規則",
+    "message": "找到 $found$ / $total$ 條規則",
     "description": "搜尋結果統計",
     "placeholders": {
-      "1": {
+      "found": {
         "content": "$1",
         "example": "3"
       },
-      "2": {
+      "total": {
         "content": "$2",
         "example": "10"
       }
@@ -336,7 +340,7 @@
     "description": "彈出視窗白名單開關描述"
   },
   "whitelistInheritedDesc": {
-    "message": "已由 $1$ 繼承",
+    "message": "已由 $1$ 繼承，跳過此網站的連結處理",
     "description": "白名單由父網域繼承",
     "placeholders": {
       "1": {
