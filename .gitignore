@@ -1,5 +1,6 @@
 .agent/
 .sisyphus/
+.omo
 
 .idea/
 .vscode/
