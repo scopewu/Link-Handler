@@ -35,6 +35,7 @@ const DEFAULT_CONFIG = {
     {
       domain: 'jianshu.com',
       param: 'to',
+      pathPattern: '/go',
       enabled: true,
       description: '简书外链跳转'
     },
@@ -59,6 +60,7 @@ const DEFAULT_CONFIG = {
     {
       domain: 'sspai.com',
       param: 'target',
+      pathPattern: '/link',
       enabled: true,
       description: '少数派链接跳转'
     },
@@ -71,6 +73,7 @@ const DEFAULT_CONFIG = {
     {
       domain: 'facebook.com',
       param: 'u',
+      pathPattern: '/l.php',
       enabled: true,
       description: 'Facebook 链接跳转'
     }
@@ -84,7 +87,13 @@ const DEFAULT_CONFIG = {
       description: 'Bilibili 跟踪清理',
       removeAttributes: ['data-spmid', 'data-mod', 'data-idx', 'data-report-id'],
       preventClickRewrite: true,
-      cleanUrlParams: ['*']
+      // 黑名单制：只删跟踪参数，保留 p（分P）、t（时间戳）等功能参数
+      cleanUrlParams: [
+        'spm_id_from', 'from_spmid', 'vd_source', 'from', 'seid',
+        'share_source', 'share_medium', 'share_plat', 'share_session_id',
+        'share_tag', 'timestamp', 'unique_k', 'up_id',
+        '-Arouter', 'is_story_h5', 'broadcast_type', 'trackid'
+      ]
     },
     {
       domain: 'weibo.com',
@@ -143,10 +152,116 @@ const DEFAULT_CONFIG = {
   global: {
     removeTargetSameOrigin: true,    // 同域名/相对地址移除 target
     enableRedirect: true,            // 启用重定向解析
-    enableTracking: true,            // 启用跟踪清理
-    processExistingLinks: true       // 处理已有链接
+    enableTracking: true             // 启用跟踪清理
   }
 };
+
+// 存储格式版本：v2 起只保存用户配置与内置配置的差异（diff），
+// 这样扩展升级后新增/修正的内置规则可以自动生效
+const STORAGE_VERSION = 2;
+
+function deepCopy(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+// 规范化对象（键名排序），用于深比较规则是否被用户修改过（与键顺序无关）
+function canonicalize(value) {
+  if (Array.isArray(value)) {
+    return value.map(canonicalize);
+  }
+  if (value && typeof value === 'object') {
+    const sorted = {};
+    Object.keys(value).sort().forEach(key => {
+      sorted[key] = canonicalize(value[key]);
+    });
+    return sorted;
+  }
+  return value;
+}
+
+function rulesEqual(a, b) {
+  return JSON.stringify(canonicalize(a)) === JSON.stringify(canonicalize(b));
+}
+
+// 拆分一组规则：与内置规则比对，分出「自定义规则 / 内置规则覆盖 / 被删除的内置规则」
+function diffRules(defaultRules, fullRules, customs, overrides, removed) {
+  const seen = new Set();
+  fullRules.forEach(rule => {
+    if (!rule || !rule.domain) return;
+    seen.add(rule.domain);
+    const builtin = defaultRules.find(r => r.domain === rule.domain);
+    if (builtin) {
+      if (!rulesEqual(builtin, rule)) {
+        overrides[rule.domain] = deepCopy(rule);
+      }
+    } else {
+      customs.push(deepCopy(rule));
+    }
+  });
+  defaultRules.forEach(rule => {
+    if (!seen.has(rule.domain)) removed.push(rule.domain);
+  });
+}
+
+// 将完整配置拆解为 diff（v2 存储格式）
+function decomposeConfig(fullConfig) {
+  const diff = {
+    version: STORAGE_VERSION,
+    customRedirectRules: [],
+    customTrackingRules: [],
+    redirectRuleOverrides: {},
+    trackingRuleOverrides: {},
+    removedBuiltinRedirectRules: [],
+    removedBuiltinTrackingRules: [],
+    whitelistAdded: [],
+    whitelistRemoved: [],
+    global: fullConfig.global ? { ...fullConfig.global } : {}
+  };
+
+  diffRules(
+    DEFAULT_CONFIG.redirectRules, fullConfig.redirectRules || [],
+    diff.customRedirectRules, diff.redirectRuleOverrides, diff.removedBuiltinRedirectRules
+  );
+  diffRules(
+    DEFAULT_CONFIG.trackingRules, fullConfig.trackingRules || [],
+    diff.customTrackingRules, diff.trackingRuleOverrides, diff.removedBuiltinTrackingRules
+  );
+
+  const fullWhitelist = fullConfig.whitelist || [];
+  diff.whitelistAdded = fullWhitelist.filter(d => !DEFAULT_CONFIG.whitelist.includes(d));
+  diff.whitelistRemoved = DEFAULT_CONFIG.whitelist.filter(d => !fullWhitelist.includes(d));
+
+  return diff;
+}
+
+// 将 diff 应用回内置默认配置，得到完整配置
+function applyConfigDiff(defaults, diff) {
+  const removedRedirect = new Set(diff.removedBuiltinRedirectRules || []);
+  const redirectOverrides = diff.redirectRuleOverrides || {};
+  const redirectRules = defaults.redirectRules
+    .filter(r => !removedRedirect.has(r.domain))
+    .map(r => redirectOverrides[r.domain] ? deepCopy(redirectOverrides[r.domain]) : deepCopy(r))
+    .concat(deepCopy(diff.customRedirectRules || []));
+
+  const removedTracking = new Set(diff.removedBuiltinTrackingRules || []);
+  const trackingOverrides = diff.trackingRuleOverrides || {};
+  const trackingRules = defaults.trackingRules
+    .filter(r => !removedTracking.has(r.domain))
+    .map(r => trackingOverrides[r.domain] ? deepCopy(trackingOverrides[r.domain]) : deepCopy(r))
+    .concat(deepCopy(diff.customTrackingRules || []));
+
+  const removedWhitelist = new Set(diff.whitelistRemoved || []);
+  const whitelist = defaults.whitelist
+    .filter(d => !removedWhitelist.has(d))
+    .concat((diff.whitelistAdded || []).filter(d => !defaults.whitelist.includes(d)));
+
+  return {
+    redirectRules,
+    trackingRules,
+    whitelist,
+    global: { ...defaults.global, ...(diff.global || {}) }
+  };
+}
 
 // 获取合并后的配置
 async function getConfig() {
@@ -161,45 +276,23 @@ async function getConfig() {
     console.log('[Link Handler] Using default config');
   }
   // 返回深拷贝，避免修改污染全局 DEFAULT_CONFIG
-  return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  return deepCopy(DEFAULT_CONFIG);
 }
 
-// 合并配置（规则数组整体替换，global 浅合并）
+// 合并配置（仅支持 v2 diff；无法识别的数据直接回落默认配置）
 function mergeConfig(defaults, custom) {
-  const result = JSON.parse(JSON.stringify(defaults));
-
-  if (custom.redirectRules) {
-    // 合并重定向规则，以自定义规则为准
-    result.redirectRules = [...custom.redirectRules];
+  if (custom && custom.version === STORAGE_VERSION) {
+    return applyConfigDiff(defaults, custom);
   }
 
-  if (custom.trackingRules) {
-    // 合并跟踪规则
-    result.trackingRules = [...custom.trackingRules];
-  }
-
-  if (custom.whitelist) {
-    result.whitelist = [...custom.whitelist];
-  }
-
-  if (custom.global) {
-    result.global = { ...result.global, ...custom.global };
-  }
-
-  return result;
+  return deepCopy(defaults);
 }
 
-// 保存配置
+// 保存配置（只保存与内置配置的差异）
 async function saveConfig(config) {
   try {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-      // 只保存用户自定义部分，不保存完整合并后的配置
-      const dataToSave = {
-        redirectRules: config.redirectRules,
-        trackingRules: config.trackingRules,
-        whitelist: config.whitelist || DEFAULT_CONFIG.whitelist,
-        global: config.global
-      };
+      const dataToSave = decomposeConfig(config);
       await chrome.storage.sync.set({ linkHandlerConfig: dataToSave });
       // 验证写入是否成功
       const verify = await chrome.storage.sync.get('linkHandlerConfig');
@@ -217,5 +310,5 @@ async function saveConfig(config) {
 
 // 导出配置（用于 content script）
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { DEFAULT_CONFIG, getConfig, saveConfig, mergeConfig };
+  module.exports = { DEFAULT_CONFIG, getConfig, saveConfig, mergeConfig, decomposeConfig, applyConfigDiff };
 }

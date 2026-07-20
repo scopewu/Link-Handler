@@ -119,10 +119,6 @@
     "message": "启用跟踪清理",
     "description": "跟踪清理全局开关"
   },
-  "processExistingLinks": {
-    "message": "页面加载时处理现有链接",
-    "description": "处理现有链接设置"
-  },
   "savedSuccess": {
     "message": "设置已保存",
     "description": "保存成功提示"

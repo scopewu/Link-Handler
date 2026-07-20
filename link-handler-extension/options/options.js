@@ -666,17 +666,17 @@
           <div class="form-row">
             <div class="form-group">
               <label>${i18n.getMessage('domain')}</label>
-              <input type="text" id="modalRuleDomain" value="${isEdit && rule ? escapeHtml(rule.domain) : ''}" placeholder="${i18n.getMessage('domainPlaceholder')}">
+              <input type="text" id="modalRuleDomain" placeholder="${i18n.getMessage('domainPlaceholder')}">
             </div>
             <div class="form-group">
               <label>${i18n.getMessage('param')}</label>
-              <input type="text" id="modalRuleParam" value="${isEdit && rule ? escapeHtml(rule.param) : 'target'}" placeholder="${i18n.getMessage('paramPlaceholder')}">
+              <input type="text" id="modalRuleParam" placeholder="${i18n.getMessage('paramPlaceholder')}">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group full-width">
               <label>${i18n.getMessage('description')}</label>
-              <input type="text" id="modalRuleDesc" value="${isEdit && rule ? escapeHtml(rule.description) : ''}" placeholder="${i18n.getMessage('descPlaceholder')}">
+              <input type="text" id="modalRuleDesc" placeholder="${i18n.getMessage('descPlaceholder')}">
             </div>
           </div>
         </div>
@@ -698,11 +698,11 @@
           <div class="form-row">
             <div class="form-group">
               <label>${i18n.getMessage('domain')}</label>
-              <input type="text" id="modalRuleDomain" value="${isEdit && rule ? escapeHtml(rule.domain) : ''}" placeholder="${i18n.getMessage('domainPlaceholder')}">
+              <input type="text" id="modalRuleDomain" placeholder="${i18n.getMessage('domainPlaceholder')}">
             </div>
             <div class="form-group">
               <label>${i18n.getMessage('description')}</label>
-              <input type="text" id="modalRuleDesc" value="${isEdit && rule ? escapeHtml(rule.description) : ''}" placeholder="${i18n.getMessage('descPlaceholder')}">
+              <input type="text" id="modalRuleDesc" placeholder="${i18n.getMessage('descPlaceholder')}">
             </div>
           </div>
           <div class="form-row">
@@ -734,6 +734,14 @@
         </div>
       `;
     }
+
+    // 通过 DOM 属性填充编辑值，避免把规则字段拼进 HTML 属性（引号可导致属性注入）
+    const domainInput = body.querySelector('#modalRuleDomain');
+    if (domainInput) domainInput.value = isEdit && rule ? (rule.domain || '') : '';
+    const paramInput = body.querySelector('#modalRuleParam');
+    if (paramInput) paramInput.value = isEdit && rule ? (rule.param || '') : 'target';
+    const descInput = body.querySelector('#modalRuleDesc');
+    if (descInput) descInput.value = isEdit && rule ? (rule.description || '') : '';
 
     modal.classList.add('show');
 
@@ -768,6 +776,22 @@
     }, TIMING.INPUT_ERROR_DURATION);
   }
 
+  // 收集标签容器中的所有值，包括输入框里尚未按回车提交的残留文本
+  function collectTagValues(body, field) {
+    const values = [];
+    body.querySelectorAll('[data-field="' + field + '"] .tag').forEach(tag => {
+      const textSpan = tag.querySelector('.tag-text');
+      const value = textSpan ? textSpan.textContent.trim() : tag.childNodes[0].textContent.trim();
+      if (value) values.push(value);
+    });
+    const container = body.querySelector('[data-field="' + field + '"]');
+    const pendingInput = container ? container.querySelector('input') : null;
+    if (pendingInput && pendingInput.value.trim()) {
+      values.push(pendingInput.value.trim());
+    }
+    return values;
+  }
+
   // 确认添加/编辑规则
   async function confirmRuleModal() {
     const body = document.getElementById('ruleModalBody');
@@ -793,7 +817,9 @@
         return;
       }
 
+      // 以旧规则为基础展开，保留 UI 未覆盖的字段（如 pathPattern）
       const ruleData = {
+        ...(isEdit ? currentConfig.redirectRules[currentEditIndex] : {}),
         domain,
         param: param || 'target',
         enabled,
@@ -819,19 +845,12 @@
         return;
       }
 
-      const removeAttrs = [];
-      body.querySelectorAll('[data-field="modalRemoveAttributes"] .tag').forEach(tag => {
-        const textSpan = tag.querySelector('.tag-text');
-        removeAttrs.push(textSpan ? textSpan.textContent.trim() : tag.childNodes[0].textContent.trim());
-      });
+      const removeAttrs = collectTagValues(body, 'modalRemoveAttributes');
+      const cleanParams = collectTagValues(body, 'modalCleanUrlParams');
 
-      const cleanParams = [];
-      body.querySelectorAll('[data-field="modalCleanUrlParams"] .tag').forEach(tag => {
-        const textSpan = tag.querySelector('.tag-text');
-        cleanParams.push(textSpan ? textSpan.textContent.trim() : tag.childNodes[0].textContent.trim());
-      });
-
+      // 以旧规则为基础展开，保留 UI 未覆盖的字段
       const ruleData = {
+        ...(isEdit ? currentConfig.trackingRules[currentEditIndex] : {}),
         domain,
         enabled,
         description,

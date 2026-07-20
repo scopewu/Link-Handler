@@ -111,10 +111,6 @@
     "message": "Enable tracking cleanup",
     "description": "Tracking cleanup global toggle"
   },
-  "processExistingLinks": {
-    "message": "Process existing links on page load",
-    "description": "Process existing links setting"
-  },
   "savedSuccess": {
     "message": "Settings saved successfully",
     "description": "Save success message"

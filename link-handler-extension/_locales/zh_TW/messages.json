@@ -111,10 +111,6 @@
     "message": "啟用追蹤清理",
     "description": "追蹤清理全域開關"
   },
-  "processExistingLinks": {
-    "message": "頁面載入時處理現有連結",
-    "description": "處理現有連結設定"
-  },
   "savedSuccess": {
     "message": "設定已儲存",
     "description": "儲存成功訊息"

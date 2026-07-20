@@ -44,8 +44,9 @@
       if (tab) {
         await chrome.tabs.sendMessage(tab.id, { action: 'reprocess' });
 
-        // 等待处理后更新统计
-        setTimeout(() => updateProcessedStats(), 100);
+        // 批处理走 requestIdleCallback，分两次刷新统计以拿到较新的结果
+        setTimeout(() => updateProcessedStats(), 500);
+        setTimeout(() => updateProcessedStats(), 1500);
 
         // 视觉反馈
         const btn = document.getElementById('processNow');

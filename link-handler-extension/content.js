@@ -54,9 +54,7 @@
     }
 
     // 处理已有链接
-    if (config.global.processExistingLinks) {
-      processAllLinks();
-    }
+    processAllLinks();
 
     // 监听动态内容（默认始终启用）
     observeDynamicContent();
@@ -108,6 +106,20 @@
     });
   }
 
+  // 监听配置变化（设置页保存后，已打开的页面实时生效）
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName !== 'sync' || !changes.linkHandlerConfig) return;
+      (async () => {
+        config = await getConfig();
+        buildRuleMaps();
+        if (!isWhitelisted(location.hostname)) {
+          clearProcessedMarksAndReprocess();
+        }
+      })();
+    });
+  }
+
   // 处理所有链接
   function processAllLinks() {
     if (isWhitelisted(location.hostname)) return;
@@ -149,10 +161,12 @@
 
   function batchProcessLinks(links) {
     if (links.length > 0) {
-      if (pendingLinks.length + links.length > MAX_PENDING) {
-        pendingLinks = pendingLinks.slice(-(MAX_PENDING - links.length));
+      // 用 concat 而非 spread push，避免超大数组触发参数数量上限
+      pendingLinks = pendingLinks.concat(links);
+      if (pendingLinks.length > MAX_PENDING) {
+        // 超出容量时丢弃最旧的，保留最新的 MAX_PENDING 条
+        pendingLinks = pendingLinks.slice(-MAX_PENDING);
       }
-      pendingLinks.push(...links);
     }
     if (pendingLinks.length === 0 || isProcessing) return;
 
@@ -224,20 +238,23 @@
     try {
       const url = new URL(href);
       const directMatch = redirectRuleMap.get(url.hostname);
-      if (directMatch && url.searchParams.has(directMatch.param)) {
-        const val = url.searchParams.get(directMatch.param);
-        if (val && val.trim().length > 0) return directMatch;
-      }
+      if (directMatch && matchRedirectRule(url, directMatch)) return directMatch;
       for (const [domain, rule] of redirectRuleMap) {
-        if (url.hostname.endsWith('.' + domain) && url.searchParams.has(rule.param)) {
-          const val = url.searchParams.get(rule.param);
-          if (val && val.trim().length > 0) return rule;
-        }
+        if (url.hostname.endsWith('.' + domain) && matchRedirectRule(url, rule)) return rule;
       }
       return null;
     } catch {
       return null;
     }
+  }
+
+  // 判断 URL 是否命中重定向规则：目标参数存在且非空，
+  // 若规则声明了 pathPattern，则路径必须以该前缀开头（避免误伤站内正常链接）
+  function matchRedirectRule(url, rule) {
+    if (rule.pathPattern && !url.pathname.startsWith(rule.pathPattern)) return false;
+    if (!url.searchParams.has(rule.param)) return false;
+    const val = url.searchParams.get(rule.param);
+    return !!(val && val.trim().length > 0);
   }
 
   function findTrackingRule(href) {
@@ -279,7 +296,8 @@
         // 验证 URL 安全性
         if (isValidUrl(realUrl)) {
           link.href = realUrl;
-          link.dataset[LAST_HREF_DATA] = realUrl;
+          // 记录规范化后的属性值，与 MutationObserver 中的比较保持一致
+          link.dataset[LAST_HREF_DATA] = link.getAttribute('href') || realUrl;
         }
       }
     } catch (e) {
@@ -353,32 +371,42 @@
       });
 
       if (modified) {
-        const newUrl = url.toString();
-        link.href = newUrl;
-        link.dataset[LAST_HREF_DATA] = newUrl;
+        link.href = url.toString();
+        // 记录规范化后的属性值，与 MutationObserver 中的比较保持一致
+        link.dataset[LAST_HREF_DATA] = link.getAttribute('href') || '';
       }
     } catch (e) {
       console.error('[Link Handler] Failed to clean URL params:', e);
     }
   }
 
-  // 阻止点击重写：不替换节点，改用捕获阶段事件拦截
-  // 避免 cloneNode 破坏 SPA 框架（Vue/React）的虚拟 DOM 映射
-  function preventClickRewrite(link) {
-    if (link.hasAttribute(PREVENTED_MARK)) return;
-    link.setAttribute(PREVENTED_MARK, 'true');
+  // 阻止点击重写：在 document 捕获阶段统一委托拦截
+  // 捕获阶段先于目标元素上的任何监听器执行，能可靠打断网站的点击跟踪/链接重写；
+  // 相比在每个链接上单独注册监听，也更省内存
+  let clickRewriteGuardInstalled = false;
 
-    link.addEventListener('click', (e) => {
+  function installClickRewriteGuard() {
+    if (clickRewriteGuardInstalled) return;
+    clickRewriteGuardInstalled = true;
+
+    document.addEventListener('click', (e) => {
       // 只拦截主按钮点击，保留 Ctrl/Command/Shift/Alt + 点击的默认行为
       if (e.button !== 0) return;
 
-      // 阻止同一元素上后续所有 click 监听器（捕获阶段先执行）
-      // 这会打断网站的点击跟踪/链接重写逻辑
-      e.stopImmediatePropagation();
+      const link = e.target && e.target.closest ? e.target.closest('a[' + PREVENTED_MARK + ']') : null;
+      if (!link) return;
 
+      // 阻止事件继续传播，网站的 click 监听器不会触发
       // 不调用 preventDefault()，让浏览器继续执行默认导航
       // 这样普通点击正常跳转，Ctrl+Click 仍会在新标签页打开
+      e.stopImmediatePropagation();
     }, true);
+  }
+
+  function preventClickRewrite(link) {
+    if (link.hasAttribute(PREVENTED_MARK)) return;
+    link.setAttribute(PREVENTED_MARK, 'true');
+    installClickRewriteGuard();
   }
 
   // 验证 URL 安全性
@@ -461,63 +489,45 @@
     console.log('[Link Handler] Observing dynamic content (including href changes)');
   }
 
-  // 保存原始 history 方法，供其他扩展访问
-  const originalPushState = history.pushState;
-  const originalReplaceState = history.replaceState;
+  // SPA 导航消息来源标识（与 spa-hook.js 约定一致）
+  const SPA_MESSAGE_SOURCE = 'link-handler-spa';
 
-  if (!window.__linkHandler_original_history__) {
-    window.__linkHandler_original_history__ = {
-      pushState: originalPushState,
-      replaceState: originalReplaceState
-    };
+  function onNavigation() {
+    if (isWhitelisted(location.hostname)) return;
+
+    // 更新 lastUrl
+    lastUrl = location.href;
+
+    // 防抖：快速连续导航只执行最后一次
+    if (navigationDebounceTimer) {
+      clearTimeout(navigationDebounceTimer);
+    }
+
+    // 首次在 100ms 后执行（尽快响应）
+    navigationDebounceTimer = setTimeout(() => {
+      clearProcessedMarksAndReprocess();
+
+      // 额外再执行两次，捕获异步加载的内容
+      setTimeout(() => processAllLinks(), 300);
+      setTimeout(() => processAllLinks(), 800);
+    }, 100);
   }
 
   function listenToSPANavigation() {
-    if (window.__linkHandler_spa_patched__) return;
-    window.__linkHandler_spa_patched__ = true;
-
-    history.pushState = function(...args) {
-      originalPushState.apply(this, args);
-      onNavigation();
-    };
-
-    history.replaceState = function(...args) {
-      originalReplaceState.apply(this, args);
-      onNavigation();
-    };
+    if (window.__linkHandler_spa_listening__) return;
+    window.__linkHandler_spa_listening__ = true;
 
     window.addEventListener('popstate', onNavigation);
     window.addEventListener('hashchange', onNavigation);
 
-    // 后备：轮询检测 URL 变化（捕获直接修改 location.href 的框架）
-    // setInterval(() => {
-    //   const currentUrl = location.href;
-    //   if (currentUrl !== lastUrl) {
-    //     lastUrl = currentUrl;
-    //     onNavigation();
-    //   }
-    // }, 1000);
-
-    function onNavigation() {
-      if (isWhitelisted(location.hostname)) return;
-
-      // 更新 lastUrl
-      lastUrl = location.href;
-
-      // 防抖：快速连续导航只执行最后一次
-      if (navigationDebounceTimer) {
-        clearTimeout(navigationDebounceTimer);
-      }
-
-      // 首次在 100ms 后执行（尽快响应）
-      navigationDebounceTimer = setTimeout(() => {
-        clearProcessedMarksAndReprocess();
-
-        // 额外再执行两次，捕获异步加载的内容
-        setTimeout(() => processAllLinks(), 300);
-        setTimeout(() => processAllLinks(), 800);
-      }, 100);
-    }
+    // 接收 MAIN world 中 spa-hook.js 转发的 pushState/replaceState 导航事件
+    // （content script 运行在隔离世界，无法直接 patch 页面主世界的 history）
+    window.addEventListener('message', (event) => {
+      if (event.source !== window) return;
+      const data = event.data;
+      if (!data || data.source !== SPA_MESSAGE_SOURCE || data.type !== 'navigation') return;
+      onNavigation();
+    });
   }
 
   // DOM 加载完成后初始化
