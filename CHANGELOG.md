@@ -1,5 +1,41 @@
 # Changelog
 
+## Version 1.5.0
+
+### New Features
+
+- **MAIN-World SPA Navigation Hook**
+  Added `spa-hook.js` injected into the page's `MAIN` world to intercept `history.pushState`/`replaceState` and `popstate`, then notify the content script via `postMessage`. Fixes cases where isolated-world history patching missed real SPA navigations.
+
+- **Live Config Updates**
+  The content script now listens to `chrome.storage.onChanged` and applies configuration changes in real time without requiring a page reload.
+
+- **Rule Path Scoping**
+  Redirect rules now support an optional `pathPattern` so the same domain can have different handlers for different redirect endpoints (e.g., Facebook `/flx/warn/...`, SSPAI `/go/...`, Jianshu `/p/...`).
+
+### Improvements
+
+- **Diff-Based Config Storage (v2)**
+  User settings are stored as a diff against the default config (custom rules, builtin overrides, and removed builtins). This lets builtin rule updates reach existing users on upgrade instead of being frozen at install time.
+
+- **Safer Bilibili Parameter Cleaning**
+  Replaced the `*` wildcard in the Bilibili tracking-param rule with an explicit blacklist, preserving functional parameters such as video timestamp (`t`) and page (`p`).
+
+- **Robust Click Delegation**
+  The delegated click-rewrite guard now runs at the document capture phase to reliably intercept middle-click and modified-click behavior.
+
+- **Modal Form Hardening**
+  Unknown rule fields are preserved when editing; unsubmitted tag input is collected on save; modal forms are guarded against attribute injection.
+
+- **Optimized MutationObserver Reprocessing**
+  The normalized `href` is stored in a `data-` attribute to avoid reprocessing links whose effective URL has not changed.
+
+### Cleanup
+
+- Removed the unused `processExistingLinks` setting and leftover polling code.
+
+---
+
 ## Version 1.4.2
 
 ### Bug Fixes
