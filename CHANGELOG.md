@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 1.5.1
+
+### New Features
+
+- **Block Bilibili Address-Bar Tracking Parameters**
+  The MAIN-world SPA hook now intercepts `history.pushState`/`replaceState` on `bilibili.com` and strips tracking parameters (including `vd_source`) before they are written to the browser history. Also cleans the current URL on page load.
+
+---
+
 ## Version 1.5.0
 
 ### New Features

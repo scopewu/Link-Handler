@@ -1,5 +1,14 @@
 # 更新日志
 
+## Version 1.5.1
+
+### 新功能
+
+- **拦截 Bilibili 地址栏跟踪参数**
+  MAIN 世界 SPA 钩子现在会拦截 `bilibili.com` 上的 `history.pushState`/`replaceState`，在写入浏览器历史之前移除跟踪参数（包括 `vd_source`）。页面首次加载时也会清洗当前地址栏。
+
+---
+
 ## Version 1.5.0
 
 ### 新功能
