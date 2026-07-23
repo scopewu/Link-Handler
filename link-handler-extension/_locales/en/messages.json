@@ -79,6 +79,10 @@
     "message": "Parameter",
     "description": "Parameter label"
   },
+  "pathPattern": {
+    "message": "Path Prefix",
+    "description": "Path prefix label"
+  },
   "description": {
     "message": "Description",
     "description": "Description label"
@@ -340,5 +344,125 @@
         "example": "example.com"
       }
     }
+  },
+  "tabHelp": {
+    "message": "Help",
+    "description": "Help tab label"
+  },
+  "helpTitle": {
+    "message": "User Guide",
+    "description": "User guide title"
+  },
+  "helpSubtitle": {
+    "message": "Learn what the extension does and what each setting means",
+    "description": "User guide subtitle"
+  },
+  "helpOverviewTitle": {
+    "message": "Overview",
+    "description": "Overview section title"
+  },
+  "helpOverviewDesc": {
+    "message": "The extension processes links on every page automatically in this order: unwrap redirect links, remove same-origin target=\"_blank\", and clean tracking parameters. It only modifies links, not page behavior.",
+    "description": "Overview section content"
+  },
+  "helpGlobalTitle": {
+    "message": "General Settings",
+    "description": "General settings help title"
+  },
+  "helpGlobalIntro": {
+    "message": "These switches control the three main features globally.",
+    "description": "General settings help intro"
+  },
+  "helpTargetDesc": {
+    "message": "When enabled, links pointing to the same website (including relative URLs) will have target=\"_blank\" removed and open in the current tab. Cross-site links are not affected.",
+    "description": "Target setting help content"
+  },
+  "helpRedirectToggleDesc": {
+    "message": "Global switch. When on, redirect links are replaced with the real destination according to the rules on the Redirects tab. When off, all redirect rules are ignored.",
+    "description": "Redirect global switch help content"
+  },
+  "helpTrackingToggleDesc": {
+    "message": "Global switch. When on, tracking attributes and URL parameters are removed according to the rules on the Tracking tab. When off, all tracking rules are ignored.",
+    "description": "Tracking global switch help content"
+  },
+  "helpRedirectTitle": {
+    "message": "Redirect Rules",
+    "description": "Redirect rules help title"
+  },
+  "helpRedirectIntro": {
+    "message": "Each rule matches redirect links on a given domain and extracts the real URL from a query parameter. Common sites like Juejin, Zhihu, Weibo are built in, and you can add custom rules.",
+    "description": "Redirect rules help intro"
+  },
+  "helpRedirectFieldDomain": {
+    "message": "The domain to match (suffix match). For example, weibo.cn also matches www.weibo.cn.",
+    "description": "Redirect rule domain field help"
+  },
+  "helpRedirectFieldParam": {
+    "message": "The query parameter that carries the real URL, such as target or url. The value is decoded and assigned as the new link.",
+    "description": "Redirect rule param field help"
+  },
+  "helpRedirectFieldPath": {
+    "message": "Optional. Only applies when the path matches this prefix, used when only certain paths are redirect pages (e.g. jianshu.com/go).",
+    "description": "Redirect rule pathPattern field help"
+  },
+  "helpFieldEnabled": {
+    "message": "Temporarily disable the rule without deleting it.",
+    "description": "Rule enabled field help"
+  },
+  "helpFieldDesc": {
+    "message": "A note shown only for your reference.",
+    "description": "Rule description field help"
+  },
+  "helpTrackingTitle": {
+    "message": "Tracking Cleanup Rules",
+    "description": "Tracking rules help title"
+  },
+  "helpTrackingIntro": {
+    "message": "Each rule matches a domain and performs three kinds of cleanup on its links. Common sites like Bilibili, Weibo, and Zhihu are built in.",
+    "description": "Tracking rules help intro"
+  },
+  "helpTrackingFieldRemoveAttrs": {
+    "message": "HTML attributes to remove from the link element, such as data-spmid or suda-uatrack.",
+    "description": "Tracking rule removeAttributes field help"
+  },
+  "helpTrackingFieldPrevent": {
+    "message": "Block the page from rewriting the link on click, forcing direct navigation instead of a tracked redirect.",
+    "description": "Tracking rule preventClickRewrite field help"
+  },
+  "helpTrackingFieldParams": {
+    "message": "Query parameters to remove from the link URL, such as utm_source or spm_id_from. Enter * to remove all parameters. Keep functional parameters like p and t out of this list.",
+    "description": "Tracking rule cleanUrlParams field help"
+  },
+  "helpWhitelistTitle": {
+    "message": "Whitelist",
+    "description": "Whitelist help title"
+  },
+  "helpWhitelistDesc": {
+    "message": "Websites on the whitelist are skipped entirely. Matching uses domain suffixes: adding example.com also covers www.example.com and sub.example.com. You can also add or remove the current site from the popup.",
+    "description": "Whitelist help content"
+  },
+  "helpBackupTitle": {
+    "message": "Backup & Restore",
+    "description": "Backup help title"
+  },
+  "helpBackupExport": {
+    "message": "Export downloads the current configuration (diff from built-in rules) as a JSON file for migration or backup.",
+    "description": "Export help content"
+  },
+  "helpBackupImport": {
+    "message": "Import restores a previously exported JSON file and overwrites all current custom settings.",
+    "description": "Import help content"
+  },
+  "helpBackupReset": {
+    "message": "Reset clears all custom rules, overrides, and whitelist changes and restores factory defaults.",
+    "description": "Reset help content"
+  },
+  "helpStorageNoteTitle": {
+    "message": "About built-in rules",
+    "description": "Built-in rules help title"
+  },
+  "helpStorageNoteDesc": {
+    "message": "Config is stored as a diff against built-in rules, so new or corrected built-in rules automatically take effect after the extension updates unless you modified or removed them.",
+    "description": "Built-in rules help content"
   }
 }

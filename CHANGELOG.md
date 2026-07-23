@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 1.5.2
+
+### New Features
+
+- **In-Options User Guide**
+  Added a "Help" tab to the options page with documentation explaining every configuration option, including redirect rules, tracking cleanup rules, whitelist behavior, and backup/restore.
+
+---
+
 ## Version 1.5.1
 
 ### New Features

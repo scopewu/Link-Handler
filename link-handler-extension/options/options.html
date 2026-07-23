@@ -64,6 +64,14 @@
           </svg>
           <span data-i18n="tabBackup">Backup</span>
         </button>
+        <button class="tab-btn" data-tab="help">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span data-i18n="tabHelp">Help</span>
+        </button>
       </nav>
 
       <div class="tab-content">
@@ -236,6 +244,82 @@
               <button class="btn btn-danger" id="resetSettings">
                 <span data-i18n="reset">Reset</span>
               </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-help">
+          <div class="panel-header">
+            <h2 data-i18n="helpTitle">User Guide</h2>
+            <p data-i18n="helpSubtitle">Learn what the extension does and what each setting means</p>
+          </div>
+
+          <div class="help-content">
+            <div class="help-section">
+              <h3 data-i18n="helpOverviewTitle">Overview</h3>
+              <p data-i18n="helpOverviewDesc">The extension processes links on every page automatically in this order: unwrap redirect links, remove same-origin target=&quot;_blank&quot;, and clean tracking parameters. It only modifies links, not page behavior.</p>
+            </div>
+
+            <div class="help-section">
+              <h3 data-i18n="helpGlobalTitle">General Settings</h3>
+              <p data-i18n="helpGlobalIntro">These switches control the three main features globally.</p>
+              <ul>
+                <li>
+                  <strong data-i18n="removeTargetSameOrigin">Open same-site links in same tab</strong> —
+                  <span data-i18n="helpTargetDesc">When enabled, links pointing to the same website (including relative URLs) will have target=&quot;_blank&quot; removed and open in the current tab. Cross-site links are not affected.</span>
+                </li>
+                <li>
+                  <strong data-i18n="enableRedirect">Enable redirect unwrapping</strong> —
+                  <span data-i18n="helpRedirectToggleDesc">Global switch. When on, redirect links are replaced with the real destination according to the rules on the Redirects tab. When off, all redirect rules are ignored.</span>
+                </li>
+                <li>
+                  <strong data-i18n="enableTracking">Enable tracking cleanup</strong> —
+                  <span data-i18n="helpTrackingToggleDesc">Global switch. When on, tracking attributes and URL parameters are removed according to the rules on the Tracking tab. When off, all tracking rules are ignored.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="help-section">
+              <h3 data-i18n="helpRedirectTitle">Redirect Rules</h3>
+              <p data-i18n="helpRedirectIntro">Each rule matches redirect links on a given domain and extracts the real URL from a query parameter. Common sites like Juejin, Zhihu, Weibo are built in, and you can add custom rules.</p>
+              <ul>
+                <li><strong data-i18n="domain">Domain</strong> — <span data-i18n="helpRedirectFieldDomain">The domain to match (suffix match). For example, weibo.cn also matches www.weibo.cn.</span></li>
+                <li><strong data-i18n="param">Parameter</strong> — <span data-i18n="helpRedirectFieldParam">The query parameter that carries the real URL, such as target or url. The value is decoded and assigned as the new link.</span></li>
+                <li><strong data-i18n="pathPattern">Path prefix</strong> — <span data-i18n="helpRedirectFieldPath">Optional. Only applies when the path matches this prefix, used when only certain paths are redirect pages (e.g. jianshu.com/go).</span></li>
+                <li><strong data-i18n="enabled">Enabled</strong> — <span data-i18n="helpFieldEnabled">Temporarily disable the rule without deleting it.</span></li>
+                <li><strong data-i18n="description">Description</strong> — <span data-i18n="helpFieldDesc">A note shown only for your reference.</span></li>
+              </ul>
+            </div>
+
+            <div class="help-section">
+              <h3 data-i18n="helpTrackingTitle">Tracking Cleanup Rules</h3>
+              <p data-i18n="helpTrackingIntro">Each rule matches a domain and performs three kinds of cleanup on its links. Common sites like Bilibili, Weibo, and Zhihu are built in.</p>
+              <ul>
+                <li><strong data-i18n="removeAttributes">Remove attributes</strong> — <span data-i18n="helpTrackingFieldRemoveAttrs">HTML attributes to remove from the link element, such as data-spmid or suda-uatrack.</span></li>
+                <li><strong data-i18n="preventClickRewrite">Prevent click rewrite</strong> — <span data-i18n="helpTrackingFieldPrevent">Block the page from rewriting the link on click, forcing direct navigation instead of a tracked redirect.</span></li>
+                <li><strong data-i18n="cleanUrlParams">Clean URL params</strong> — <span data-i18n="helpTrackingFieldParams">Query parameters to remove from the link URL, such as utm_source or spm_id_from. Enter * to remove all parameters. Keep functional parameters like p and t out of this list.</span></li>
+                <li><strong data-i18n="enabled">Enabled</strong> — <span data-i18n="helpFieldEnabled">Temporarily disable the rule without deleting it.</span></li>
+                <li><strong data-i18n="description">Description</strong> — <span data-i18n="helpFieldDesc">A note shown only for your reference.</span></li>
+              </ul>
+            </div>
+
+            <div class="help-section">
+              <h3 data-i18n="helpWhitelistTitle">Whitelist</h3>
+              <p data-i18n="helpWhitelistDesc">Websites on the whitelist are skipped entirely. Matching uses domain suffixes: adding example.com also covers www.example.com and sub.example.com. You can also add or remove the current site from the popup.</p>
+            </div>
+
+            <div class="help-section">
+              <h3 data-i18n="helpBackupTitle">Backup &amp; Restore</h3>
+              <ul>
+                <li><span data-i18n="helpBackupExport">Export downloads the current configuration (diff from built-in rules) as a JSON file for migration or backup.</span></li>
+                <li><span data-i18n="helpBackupImport">Import restores a previously exported JSON file and overwrites all current custom settings.</span></li>
+                <li><span data-i18n="helpBackupReset">Reset clears all custom rules, overrides, and whitelist changes and restores factory defaults.</span></li>
+              </ul>
+            </div>
+
+            <div class="help-section">
+              <h3 data-i18n="helpStorageNoteTitle">About built-in rules</h3>
+              <p data-i18n="helpStorageNoteDesc">Config is stored as a diff against built-in rules, so new or corrected built-in rules automatically take effect after the extension updates unless you modified or removed them.</p>
             </div>
           </div>
         </div>

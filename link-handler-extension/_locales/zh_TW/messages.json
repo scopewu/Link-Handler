@@ -79,6 +79,10 @@
     "message": "參數名稱",
     "description": "參數名稱標籤"
   },
+  "pathPattern": {
+    "message": "路徑前綴",
+    "description": "路徑前綴標籤"
+  },
   "description": {
     "message": "描述",
     "description": "描述標籤"
@@ -340,5 +344,125 @@
         "example": "example.com"
       }
     }
+  },
+  "tabHelp": {
+    "message": "使用說明",
+    "description": "使用說明標籤"
+  },
+  "helpTitle": {
+    "message": "使用說明",
+    "description": "使用說明標題"
+  },
+  "helpSubtitle": {
+    "message": "了解擴充功能的功能與各項設定的含義",
+    "description": "使用說明副標題"
+  },
+  "helpOverviewTitle": {
+    "message": "功能簡介",
+    "description": "功能簡介標題"
+  },
+  "helpOverviewDesc": {
+    "message": "擴充功能會在每個網頁上自動處理連結，依以下順序執行：先解析重定向連結，再移除同站 target=\"_blank\"，最後清理追蹤參數。所有處理只修改連結本身，不影響頁面其他功能。",
+    "description": "功能簡介內容"
+  },
+  "helpGlobalTitle": {
+    "message": "通用設定",
+    "description": "通用設定說明標題"
+  },
+  "helpGlobalIntro": {
+    "message": "這三個開關分別控制三大核心功能的全局啟停。",
+    "description": "通用設定說明引言"
+  },
+  "helpTargetDesc": {
+    "message": "開啟後，指向同一網站的連結（含相對位址）會被移除 target=\"_blank\"，在目前分頁開啟。跨站連結不受影響。",
+    "description": "target 設定說明內容"
+  },
+  "helpRedirectToggleDesc": {
+    "message": "全局開關。開啟後按「重定向」標籤頁中的規則，把跳轉中間頁連結替換為真實目標位址。關閉後所有重定向規則失效。",
+    "description": "重定向全局開關說明內容"
+  },
+  "helpTrackingToggleDesc": {
+    "message": "全局開關。開啟後按「跟蹤清理」標籤頁中的規則，移除連結上的追蹤屬性和 URL 統計參數。關閉後所有跟蹤規則失效。",
+    "description": "跟蹤清理全局開關說明內容"
+  },
+  "helpRedirectTitle": {
+    "message": "重定向規則",
+    "description": "重定向規則說明標題"
+  },
+  "helpRedirectIntro": {
+    "message": "每條規則匹配某個網域的跳轉連結，從 URL 參數中取出真實位址直接替換。內建了掘金、知乎、微博等常見網站的規則，也可以新增自訂規則。",
+    "description": "重定向規則說明引言"
+  },
+  "helpRedirectFieldDomain": {
+    "message": "匹配連結的網域（後綴匹配，如 weibo.cn 也匹配 www.weibo.cn）。",
+    "description": "重定向規則 domain 欄位說明"
+  },
+  "helpRedirectFieldParam": {
+    "message": "攜帶真實位址的 URL 參數名，如 target、url。參數值會自動解碼後作為新連結。",
+    "description": "重定向規則 param 欄位說明"
+  },
+  "helpRedirectFieldPath": {
+    "message": "選用。只有路徑符合此前綴時才套用規則，用於同一網域只有特定路徑是跳轉頁的情況（如 jianshu.com/go）。",
+    "description": "重定向規則 pathPattern 欄位說明"
+  },
+  "helpFieldEnabled": {
+    "message": "暫時停用該規則而不刪除。",
+    "description": "規則 enabled 欄位說明"
+  },
+  "helpFieldDesc": {
+    "message": "規則的備註說明，僅用於展示。",
+    "description": "規則 description 欄位說明"
+  },
+  "helpTrackingTitle": {
+    "message": "跟蹤清理規則",
+    "description": "跟蹤清理規則說明標題"
+  },
+  "helpTrackingIntro": {
+    "message": "每條規則匹配某個網域，對該網域頁面上的連結做三類清理。內建了 Bilibili、微博、知乎等網站的規則。",
+    "description": "跟蹤清理規則說明引言"
+  },
+  "helpTrackingFieldRemoveAttrs": {
+    "message": "從連結元素上刪除的 HTML 屬性，如 data-spmid、suda-uatrack 等統計屬性。",
+    "description": "跟蹤清理規則 removeAttributes 欄位說明"
+  },
+  "helpTrackingFieldPrevent": {
+    "message": "攔截網站的點擊事件重寫，阻止點擊時把連結替換回帶統計的位址，強制直接跳轉。",
+    "description": "跟蹤清理規則 preventClickRewrite 欄位說明"
+  },
+  "helpTrackingFieldParams": {
+    "message": "從連結 URL 中刪除的查詢參數，如 utm_source、spm_id_from。輸入 * 表示刪除所有參數。功能參數（如 B 站的 p、t）應保留在名單之外。",
+    "description": "跟蹤清理規則 cleanUrlParams 欄位說明"
+  },
+  "helpWhitelistTitle": {
+    "message": "白名單",
+    "description": "白名單說明標題"
+  },
+  "helpWhitelistDesc": {
+    "message": "白名單中的網站完全不處理連結。使用網域後綴匹配：新增 example.com 會同時涵蓋 www.example.com、sub.example.com 等子網域。也可以在彈出視窗中一鍵把目前網站加入或移出白名單。",
+    "description": "白名單說明內容"
+  },
+  "helpBackupTitle": {
+    "message": "備份與還原",
+    "description": "備份與還原說明標題"
+  },
+  "helpBackupExport": {
+    "message": "匯出：將目前設定（與內建規則的差異）下載為 JSON 檔案，可用於移轉或備份。",
+    "description": "匯出說明"
+  },
+  "helpBackupImport": {
+    "message": "匯入：從之前匯出的 JSON 檔案恢復設定，會覆蓋目前所有自訂設定。",
+    "description": "匯入說明"
+  },
+  "helpBackupReset": {
+    "message": "恢復預設：清空所有自訂規則、覆蓋和白名單修改，回到出廠設定。",
+    "description": "恢復預設說明"
+  },
+  "helpStorageNoteTitle": {
+    "message": "關於內建規則",
+    "description": "內建規則說明標題"
+  },
+  "helpStorageNoteDesc": {
+    "message": "設定以「與內建規則的差異」形式儲存，擴充功能升級後新增或修正的內建規則會自動生效，除非你主動修改或刪除了它們。",
+    "description": "內建規則說明內容"
   }
 }

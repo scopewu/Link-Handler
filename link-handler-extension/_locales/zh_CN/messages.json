@@ -83,6 +83,10 @@
     "message": "参数名",
     "description": "参数名标签"
   },
+  "pathPattern": {
+    "message": "路径前缀",
+    "description": "路径前缀标签"
+  },
   "description": {
     "message": "描述",
     "description": "描述标签"
@@ -340,5 +344,125 @@
         "example": "example.com"
       }
     }
+  },
+  "tabHelp": {
+    "message": "使用说明",
+    "description": "使用说明标签"
+  },
+  "helpTitle": {
+    "message": "使用说明",
+    "description": "使用说明标题"
+  },
+  "helpSubtitle": {
+    "message": "了解扩展功能与各项配置的含义",
+    "description": "使用说明副标题"
+  },
+  "helpOverviewTitle": {
+    "message": "功能简介",
+    "description": "功能简介标题"
+  },
+  "helpOverviewDesc": {
+    "message": "扩展会在每个网页上自动处理链接，按以下顺序执行：先解析重定向链接，再移除同站 target=\"_blank\"，最后清理跟踪参数。所有处理只修改链接本身，不影响页面其他功能。",
+    "description": "功能简介内容"
+  },
+  "helpGlobalTitle": {
+    "message": "通用设置",
+    "description": "通用设置说明标题"
+  },
+  "helpGlobalIntro": {
+    "message": "这三个开关分别控制三大核心功能的全局启停。",
+    "description": "通用设置说明引言"
+  },
+  "helpTargetDesc": {
+    "message": "开启后，指向同一网站的链接（含相对地址）会被移除 target=\"_blank\"，在当前标签页打开。跨站链接不受影响。",
+    "description": "target 设置说明内容"
+  },
+  "helpRedirectToggleDesc": {
+    "message": "全局开关。开启后按「重定向」标签页中的规则，把跳转中间页链接替换为真实目标地址。关闭后所有重定向规则失效。",
+    "description": "重定向全局开关说明内容"
+  },
+  "helpTrackingToggleDesc": {
+    "message": "全局开关。开启后按「跟踪清理」标签页中的规则，移除链接上的跟踪属性和 URL 统计参数。关闭后所有跟踪规则失效。",
+    "description": "跟踪清理全局开关说明内容"
+  },
+  "helpRedirectTitle": {
+    "message": "重定向规则",
+    "description": "重定向规则说明标题"
+  },
+  "helpRedirectIntro": {
+    "message": "每条规则匹配某个域名的跳转链接，从 URL 参数中取出真实地址直接替换。内置了掘金、知乎、微博等常见网站的规则，也可以添加自定义规则。",
+    "description": "重定向规则说明引言"
+  },
+  "helpRedirectFieldDomain": {
+    "message": "匹配链接的域名（后缀匹配，如 weibo.cn 也匹配 www.weibo.cn）。",
+    "description": "重定向规则 domain 字段说明"
+  },
+  "helpRedirectFieldParam": {
+    "message": "携带真实地址的 URL 参数名，如 target、url。参数值会自动解码后作为新链接。",
+    "description": "重定向规则 param 字段说明"
+  },
+  "helpRedirectFieldPath": {
+    "message": "可选。只有路径匹配该前缀时才应用规则，用于同一域名只有特定路径是跳转页的情况（如 jianshu.com/go）。",
+    "description": "重定向规则 pathPattern 字段说明"
+  },
+  "helpFieldEnabled": {
+    "message": "临时停用该规则而不删除。",
+    "description": "规则 enabled 字段说明"
+  },
+  "helpFieldDesc": {
+    "message": "规则的备注说明，仅用于展示。",
+    "description": "规则 description 字段说明"
+  },
+  "helpTrackingTitle": {
+    "message": "跟踪清理规则",
+    "description": "跟踪清理规则说明标题"
+  },
+  "helpTrackingIntro": {
+    "message": "每条规则匹配某个域名，对该域名页面上的链接做三类清理。内置了 Bilibili、微博、知乎等网站的规则。",
+    "description": "跟踪清理规则说明引言"
+  },
+  "helpTrackingFieldRemoveAttrs": {
+    "message": "从链接元素上删除的 HTML 属性，如 data-spmid、suda-uatrack 等统计属性。",
+    "description": "跟踪清理规则 removeAttributes 字段说明"
+  },
+  "helpTrackingFieldPrevent": {
+    "message": "拦截网站的点击事件重写，阻止点击时把链接替换回带统计的地址，强制直接跳转。",
+    "description": "跟踪清理规则 preventClickRewrite 字段说明"
+  },
+  "helpTrackingFieldParams": {
+    "message": "从链接 URL 中删除的查询参数，如 utm_source、spm_id_from。输入 * 表示删除所有参数。功能参数（如 B 站的 p、t）应保留在名单之外。",
+    "description": "跟踪清理规则 cleanUrlParams 字段说明"
+  },
+  "helpWhitelistTitle": {
+    "message": "白名单",
+    "description": "白名单说明标题"
+  },
+  "helpWhitelistDesc": {
+    "message": "白名单中的网站完全不处理链接。使用域名后缀匹配：添加 example.com 会同时覆盖 www.example.com、sub.example.com 等子域名。也可以在弹窗中一键把当前网站加入或移出白名单。",
+    "description": "白名单说明内容"
+  },
+  "helpBackupTitle": {
+    "message": "备份与恢复",
+    "description": "备份与恢复说明标题"
+  },
+  "helpBackupExport": {
+    "message": "导出：将当前配置（与内置规则的差异）下载为 JSON 文件，可用于迁移或备份。",
+    "description": "导出说明"
+  },
+  "helpBackupImport": {
+    "message": "导入：从之前导出的 JSON 文件恢复配置，会覆盖当前所有自定义设置。",
+    "description": "导入说明"
+  },
+  "helpBackupReset": {
+    "message": "恢复默认：清空所有自定义规则、覆盖和白名单修改，回到出厂配置。",
+    "description": "恢复默认说明"
+  },
+  "helpStorageNoteTitle": {
+    "message": "关于内置规则",
+    "description": "内置规则说明标题"
+  },
+  "helpStorageNoteDesc": {
+    "message": "配置以「与内置规则的差异」形式保存，扩展升级后新增或修正的内置规则会自动生效，除非你主动修改或删除了它们。",
+    "description": "内置规则说明内容"
   }
 }
