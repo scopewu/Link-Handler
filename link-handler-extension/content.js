@@ -495,8 +495,11 @@
   function onNavigation() {
     if (isWhitelisted(location.hostname)) return;
 
-    // 更新 lastUrl
-    lastUrl = location.href;
+    // URL 未变化时不触发重处理：pushState/replaceState 可能频繁触发导航事件
+    // （如 Bilibili），但实际地址未变时重跑全量扫描只会造成卡顿
+    const currentUrl = location.href;
+    if (currentUrl === lastUrl) return;
+    lastUrl = currentUrl;
 
     // 防抖：快速连续导航只执行最后一次
     if (navigationDebounceTimer) {

@@ -821,7 +821,7 @@
       const ruleData = {
         ...(isEdit ? currentConfig.redirectRules[currentEditIndex] : {}),
         domain,
-        param: param || 'target',
+        param,
         enabled,
         description
       };
