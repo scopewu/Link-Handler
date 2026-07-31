@@ -22,7 +22,7 @@ Firefox: `about:debugging` → **This Firefox** → **Load Temporary Add-on** �
 link-handler-extension/
 ├── manifest.json          # MV3 manifest; declares TWO content-script entries (see below)
 ├── config.js              # DEFAULT_CONFIG + getConfig/saveConfig/mergeConfig/decomposeConfig/applyConfigDiff
-├── spa-hook.js            # MAIN-world script; patches history.pushState/replaceState
+├── spa-hook.js            # MAIN-world script; patches history + sanitizes address-bar tracking params
 ├── content.js             # Isolated-world content script; core link processing
 ├── _locales/{en,zh_CN,zh_TW}/messages.json
 ├── options/               # popup.{html,css,js}, options.{html,css,js}, i18n.js
@@ -33,15 +33,22 @@ link-handler-extension/
 
 `manifest.json` registers **two** content scripts that must stay in sync:
 
-- `spa-hook.js` — `run_at: document_start`, `world: MAIN`. Patches `history.pushState` /
-  `replaceState` and notifies the isolated world via `window.postMessage` with
-  `source: 'link-handler-spa'`, `type: 'navigation'`.
+- `spa-hook.js` — `run_at: document_start`, `world: MAIN`. Two responsibilities:
+  1. Patches `history.pushState` / `replaceState` and notifies the isolated world via
+     `window.postMessage` with `source: 'link-handler-spa'`, `type: 'navigation'`.
+  2. **Strips tracking params from the address bar** — both from URLs passed into the patched
+     `pushState`/`replaceState` and via an initial-load rewrite (`sanitizeCurrentUrl()`).
+     Gated by a hardcoded `SANITIZE_HOSTS` map (currently `bilibili.com` only) with a parallel
+     `BILIBILI_TRACKING_PARAMS` list whose comment says it must stay in sync with the bilibili
+     rule in `config.js`. **If you change bilibili tracking params in `config.js`, update this
+     list too.**
 - `config.js` + `content.js` — `run_at: document_end`, default (isolated) world. `content.js`
   listens for the postMessage above, plus `popstate` / `hashchange`, and re-runs processing.
 
-**Why split?** Isolated-world content scripts cannot patch the page's own `history` object — that
-requires MAIN world. Do not collapse the two scripts or you will silently break SPA navigation
-on React/Vue/Angular apps. The message source string is the contract between the two files.
+**Why split?** Isolated-world content scripts cannot patch the page's own `history` object or
+rewrite the address bar — both require MAIN world. Do not collapse the two scripts or you will
+silently break SPA navigation (React/Vue/Angular) and address-bar sanitization. The message
+source string is the contract between the two files.
 
 ## Storage Format (v2 diff-based) — DO NOT BREAK
 
