@@ -1,5 +1,22 @@
 # Changelog
 
+## Version 1.6.0
+
+### New Features
+
+- **Global Tracking Parameter Cleanup**
+  Added a global parameter blocklist that strips common tracking parameters (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `fbclid`, `gclid`, `msclkid`, `mc_cid`, `mc_eid`) from links on all websites. Stacks on top of the existing per-domain tracking rules and follows the global tracking toggle. Editable from the General tab.
+
+### Bug Fixes
+
+- **Stats Counting**
+  The per-domain and global cleanup steps no longer double-count a single link in the "cleaned" statistic.
+
+- **URL Cleaning Consistency**
+  The wildcard (`*`) URL-parameter cleanup now records the rewritten `href`, fixing a latent inconsistency where the change could be misclassified on later mutations.
+
+---
+
 ## Version 1.5.2
 
 ### New Features
