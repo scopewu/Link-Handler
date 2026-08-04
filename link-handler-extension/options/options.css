@@ -348,6 +348,26 @@ body {
   font-size: 0.85rem;
 }
 
+/* 全局通用跟踪参数卡片（General 标签页） */
+.global-tracking-params-card {
+  margin-top: 16px;
+  padding: 18px 20px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+}
+
+.global-tracking-params-card .form-group label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.global-tracking-params-card .setting-desc {
+  margin-bottom: 10px;
+}
+
 /* Rules Container */
 .rules-container {
   display: flex;

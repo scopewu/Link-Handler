@@ -464,5 +464,17 @@
   "helpStorageNoteDesc": {
     "message": "Config is stored as a diff against built-in rules, so new or corrected built-in rules automatically take effect after the extension updates unless you modified or removed them.",
     "description": "Built-in rules help content"
+  },
+  "globalTrackingParams": {
+    "message": "Global Tracking Parameters",
+    "description": "Global tracking parameters card title on General tab"
+  },
+  "globalTrackingParamsDesc": {
+    "message": "Common tracking parameters removed from links on all websites. Stacks with per-domain rules. Keep functional parameters (e.g. Bilibili p, t) out of this list.",
+    "description": "Global tracking parameters card description"
+  },
+  "globalTrackingParamsPlaceholder": {
+    "message": "Type a parameter and press Enter",
+    "description": "Global tracking parameters input placeholder"
   }
 }

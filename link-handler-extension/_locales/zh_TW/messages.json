@@ -464,5 +464,17 @@
   "helpStorageNoteDesc": {
     "message": "設定以「與內建規則的差異」形式儲存，擴充功能升級後新增或修正的內建規則會自動生效，除非你主動修改或刪除了它們。",
     "description": "內建規則說明內容"
+  },
+  "globalTrackingParams": {
+    "message": "全域追蹤參數",
+    "description": "一般設定頁全域追蹤參數卡片標題"
+  },
+  "globalTrackingParamsDesc": {
+    "message": "對所有網站的連結統一清除的通用追蹤參數，與按網域規則疊加生效。功能參數（如 B 站的 p、t）請勿加入此清單。",
+    "description": "全域追蹤參數卡片說明"
+  },
+  "globalTrackingParamsPlaceholder": {
+    "message": "輸入參數名後按 Enter 新增",
+    "description": "全域追蹤參數輸入框佔位符"
   }
 }

@@ -152,7 +152,13 @@ const DEFAULT_CONFIG = {
   global: {
     removeTargetSameOrigin: true,    // 同域名/相对地址移除 target
     enableRedirect: true,            // 启用重定向解析
-    enableTracking: true             // 启用跟踪清理
+    enableTracking: true,            // 启用跟踪清理
+    // 全局通用跟踪参数黑名单：对所有非白名单链接统一清除
+    // 与按域名 tracking 规则叠加生效，跟随 enableTracking 总开关
+    globalTrackingParams: [
+      'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+      'fbclid', 'gclid', 'msclkid', 'mc_cid', 'mc_eid'
+    ]
   }
 };
 

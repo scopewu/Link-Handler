@@ -216,6 +216,8 @@
 
     // 阶段3: 清理跟踪属性
     if (config.global.enableTracking !== false) {
+      let trackingCounted = false; // 防止 per-domain 与全局双重计数
+
       const trackingRule = findTrackingRule(link.href);
       if (trackingRule && trackingRule.enabled !== false) {
         cleanTrackingAttributes(link, trackingRule);
@@ -228,6 +230,18 @@
         const actuallyCleaned = (trackingRule.removeAttributes && trackingRule.removeAttributes.length > 0) ||
                                 (trackingRule.cleanUrlParams && trackingRule.cleanUrlParams.length > 0);
         if (actuallyCleaned || !wasRedirect) {
+          stats.trackingCleaned++;
+          trackingCounted = true;
+        }
+      }
+
+      // 全局通用跟踪参数清理（与按域名规则叠加，对所有非白名单链接生效）
+      const globalParams = config.global.globalTrackingParams;
+      if (globalParams && globalParams.length > 0) {
+        const before = link.getAttribute('href');
+        cleanUrlParams(link, globalParams);
+        // 仅当实际改动且本链接尚未计入时计数，避免与 per-domain 块重复
+        if (!trackingCounted && link.getAttribute('href') !== before) {
           stats.trackingCleaned++;
         }
       }
@@ -357,6 +371,8 @@
         if (url.search) {
           url.search = '';
           link.href = url.toString();
+          // 记录规范化后的属性值，与 MutationObserver 中的比较保持一致
+          link.dataset[LAST_HREF_DATA] = link.getAttribute('href') || '';
         }
         return;
       }

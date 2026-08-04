@@ -464,5 +464,17 @@
   "helpStorageNoteDesc": {
     "message": "配置以「与内置规则的差异」形式保存，扩展升级后新增或修正的内置规则会自动生效，除非你主动修改或删除了它们。",
     "description": "内置规则说明内容"
+  },
+  "globalTrackingParams": {
+    "message": "全局跟踪参数",
+    "description": "通用设置页全局跟踪参数卡片标题"
+  },
+  "globalTrackingParamsDesc": {
+    "message": "对所有网站的链接统一清除的通用跟踪参数，与按域名规则叠加生效。功能参数（如 B 站的 p、t）请勿加入此列表。",
+    "description": "全局跟踪参数卡片说明"
+  },
+  "globalTrackingParamsPlaceholder": {
+    "message": "输入参数名后回车添加",
+    "description": "全局跟踪参数输入框占位符"
   }
 }

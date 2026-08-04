@@ -137,6 +137,16 @@
     document.getElementById('removeTargetSameOrigin').checked = global.removeTargetSameOrigin !== false;
     document.getElementById('enableRedirect').checked = global.enableRedirect !== false;
     document.getElementById('enableTracking').checked = global.enableTracking !== false;
+
+    // 渲染全局通用跟踪参数标签（复用 tracking 规则的 .tags-input 结构）
+    const params = Array.isArray(global.globalTrackingParams) ? global.globalTrackingParams : [];
+    const container = document.getElementById('globalTrackingParamsInput');
+    if (container) {
+      container.innerHTML = params.map(p =>
+        `<span class="tag"><span class="tag-text">${escapeHtml(p)}</span><span class="tag-remove">×</span></span>`
+      ).join('') + `<input type="text" placeholder="${i18n.getMessage('globalTrackingParamsPlaceholder')}">`;
+      bindTagInputEvents(container);
+    }
   }
 
   // 渲染重定向规则 - 静态卡片展示
@@ -432,6 +442,17 @@
     document.getElementById('enableRedirect').addEventListener('change', autoSaveGlobalSettings);
     document.getElementById('enableTracking').addEventListener('change', autoSaveGlobalSettings);
 
+    // 全局通用跟踪参数标签：增删/失焦时自动保存
+    // handleTagInput(回车提交)、handleTagRemove(点×删除) 已是 document 级委托，
+    // 这里只需在容器上监听后续 input/click 事件触发防抖保存
+    const globalParamsInput = document.getElementById('globalTrackingParamsInput');
+    if (globalParamsInput) {
+      globalParamsInput.addEventListener('input', saveGlobalTrackingParams);
+      globalParamsInput.addEventListener('click', (e) => {
+        if (e.target.classList.contains('tag-remove')) saveGlobalTrackingParams();
+      });
+    }
+
     // 恢复默认
     document.getElementById('resetSettings').addEventListener('click', resetSettings);
 
@@ -558,12 +579,22 @@
 
   // 自动保存全局设置
   async function autoSaveGlobalSettings() {
+    // 用 spread 保留 globalTrackingParams 等 UI 未覆盖的字段，
+    // 否则重建对象会把这些字段擦掉
     currentConfig.global = {
+      ...currentConfig.global,
       removeTargetSameOrigin: document.getElementById('removeTargetSameOrigin').checked,
       enableRedirect: document.getElementById('enableRedirect').checked,
       enableTracking: document.getElementById('enableTracking').checked
     };
 
+    debouncedSave(currentConfig);
+  }
+
+  // 收集并保存全局通用跟踪参数（标签增删/输入时调用）
+  function saveGlobalTrackingParams() {
+    const values = collectTagValues(document.getElementById('tab-general'), 'globalTrackingParams');
+    currentConfig.global = { ...currentConfig.global, globalTrackingParams: values };
     debouncedSave(currentConfig);
   }
 
