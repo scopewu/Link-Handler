@@ -42,7 +42,7 @@ Automatically extract real URLs from redirect services:
 | 知乎 (Zhihu) | `link.zhihu.com/?target=xxx` → direct link |
 | 微博 (Weibo) | `weibo.cn/xxx?url=xxx` → direct link |
 | CSDN | `link.csdn.net/?target=xxx` → direct link |
-| 简书 (Jianshu) | `jianshu.com/go-wild?url=xxx` → direct link |
+| 简书 (Jianshu) | `links.jianshu.com/go?to=xxx` → direct link |
 | Bilibili | `link.bilibili.com/?url=xxx` → direct link |
 | 京东联盟 | `link.jd.com/?to=xxx` → direct link |
 | 淘宝联盟 | `s.click.taobao.com` → direct link |
@@ -124,7 +124,7 @@ Access full settings via the options page to:
 ### Redirect Services
 - 掘金 (juejin.cn)
 - 知乎 (zhihu.com)
-- 微博 (weibo.cn, t.cn)
+- 微博 (weibo.cn)
 - CSDN (csdn.net)
 - 简书 (jianshu.com)
 - Bilibili (bilibili.com)

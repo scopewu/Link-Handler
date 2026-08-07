@@ -1,5 +1,48 @@
 # Changelog
 
+## Version 1.6.1
+
+### Bug Fixes
+
+- **Config-Driven Address-Bar Sanitization**
+  The Bilibili tracking-parameter list is no longer hardcoded in the MAIN-world SPA hook.
+  `content.js` now sends the sanitization map via a `sanitize-config` message, built from
+  **all enabled tracking rules with `cleanUrlParams`** — address-bar cleaning is a default
+  behavior of tracking cleanup, sharing the same parameter list as link cleaning. Editing a
+  rule in options takes effect on the address bar immediately; disabling the rule,
+  whitelisting the site, or turning off the global tracking toggle disables address-bar
+  cleaning too.
+
+- **Jianshu Redirect Rule**
+  Verified against real links on Jianshu: redirect links use `links.jianshu.com/go?to=...`,
+  so the unwrap parameter is `to` (path `/go`, matching the `links.jianshu.com` subdomain via
+  suffix matching). README examples updated to match.
+
+- **Removed Dead t.cn Rule**
+  `t.cn` short links never carry a `url` query parameter, so the rule could never match.
+  Removed it from the built-in redirect rules.
+
+- **Reprocess Coalescing**
+  The popup's manual reprocess message and `chrome.storage.onChanged` fired back-to-back on
+  every config save, causing a double full-page rescan. Both paths now share a single
+  debounced reprocess.
+
+- **Minimal Permissions**
+  Dropped `host_permissions: <all_urls>` (not needed by manifest-declared content scripts);
+  added `activeTab` so the popup can still read the current tab's URL.
+
+- **Renamed `mergeConfig` → `applyStoredConfig`**
+  The old name suggested legacy-v1 handling; it actually dispatches on `stored.version`
+  (v2 diff → `applyConfigDiff`, anything else → defaults).
+
+### Tests
+
+- Added `tests/config.test.mjs` (built-in `node:test`, no dependencies) covering diff
+  round-trips, canonicalized rule comparison, fallback behavior, and
+  `buildSanitizeHostMap()`. Run with `node --test`.
+
+---
+
 ## Version 1.6.0
 
 ### New Features

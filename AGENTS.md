@@ -10,9 +10,10 @@ directly from `link-handler-extension/`. Do not introduce any of these without e
 
 No build/test/lint commands exist. To verify a change:
 
-1. `chrome://extensions` (or `edge://extensions`) → enable **Developer Mode**
-2. **Load unpacked** → select `link-handler-extension/`
-3. Reload the extension after each edit; test manually on real pages.
+1. `node --test` from the repo root runs the unit tests in `tests/` (built-in `node:test`, no deps).
+2. `chrome://extensions` (or `edge://extensions`) → enable **Developer Mode**
+3. **Load unpacked** → select `link-handler-extension/`
+4. Reload the extension after each edit; test manually on real pages.
 
 Firefox: `about:debugging` → **This Firefox** → **Load Temporary Add-on** → select `manifest.json`.
 
@@ -21,7 +22,7 @@ Firefox: `about:debugging` → **This Firefox** → **Load Temporary Add-on** �
 ```
 link-handler-extension/
 ├── manifest.json          # MV3 manifest; declares TWO content-script entries (see below)
-├── config.js              # DEFAULT_CONFIG + getConfig/saveConfig/mergeConfig/decomposeConfig/applyConfigDiff
+├── config.js              # DEFAULT_CONFIG + getConfig/saveConfig/applyStoredConfig/decomposeConfig/applyConfigDiff/buildSanitizeHostMap
 ├── spa-hook.js            # MAIN-world script; patches history + sanitizes address-bar tracking params
 ├── content.js             # Isolated-world content script; core link processing
 ├── _locales/{en,zh_CN,zh_TW}/messages.json
@@ -37,13 +38,18 @@ link-handler-extension/
   1. Patches `history.pushState` / `replaceState` and notifies the isolated world via
      `window.postMessage` with `source: 'link-handler-spa'`, `type: 'navigation'`.
   2. **Strips tracking params from the address bar** — both from URLs passed into the patched
-     `pushState`/`replaceState` and via an initial-load rewrite (`sanitizeCurrentUrl()`).
-     Gated by a hardcoded `SANITIZE_HOSTS` map (currently `bilibili.com` only) with a parallel
-     `BILIBILI_TRACKING_PARAMS` list whose comment says it must stay in sync with the bilibili
-     rule in `config.js`. **If you change bilibili tracking params in `config.js`, update this
-     list too.**
+     `pushState`/`replaceState` and via `sanitizeCurrentUrl()`. The sanitization config is
+     **not hardcoded here**: `content.js` sends `{ source: 'link-handler-spa',
+     type: 'sanitize-config', hosts }` (built by `buildSanitizeHostMap()` from **all enabled
+     tracking rules that have `cleanUrlParams`** — address-bar cleaning is a default behavior
+     of tracking cleanup, sharing one parameter list with link cleaning).
+     Whitelisted pages — or the global tracking toggle being off — receive an empty map,
+     which disables address-bar cleaning.
+     If you add tracking params for a site, only edit `config.js`.
 - `config.js` + `content.js` — `run_at: document_end`, default (isolated) world. `content.js`
   listens for the postMessage above, plus `popstate` / `hashchange`, and re-runs processing.
+  It re-sends `sanitize-config` whenever the config is (re)loaded (initial load,
+  `storage.onChanged`, popup `reprocess` message).
 
 **Why split?** Isolated-world content scripts cannot patch the page's own `history` object or
 rewrite the address bar — both require MAIN world. Do not collapse the two scripts or you will
@@ -63,7 +69,8 @@ automatically take effect for existing users.
   removedBuiltinRedirectRules, removedBuiltinTrackingRules, whitelistAdded, whitelistRemoved,
   global }`.
 - `getConfig()` runs `applyConfigDiff(DEFAULT_CONFIG, diff)` → reconstructs the full config.
-- `mergeConfig()` is currently only the legacy v1 path.
+- `applyStoredConfig()` dispatches on `stored.version`: v2 → `applyConfigDiff`; anything else
+  (including v1 leftovers) falls back to a deep copy of `DEFAULT_CONFIG`.
 
 If you add a config field, you must update BOTH `decomposeConfig` and `applyConfigDiff`, or
 round-tripping through storage will silently drop it.
@@ -104,5 +111,6 @@ See `processLink()`.
 - No English comments where the file already uses Chinese.
 - Do not bypass the `[Link Handler]` log prefix.
 - Do not collapse `spa-hook.js` into `content.js`, and do not change the
-  `'link-handler-spa'` / `'navigation'` message contract without updating both files.
+  `'link-handler-spa'` / `'navigation'` / `'sanitize-config'` message contract without updating
+  both files.
 - Do not change the storage format without bumping `STORAGE_VERSION` and handling migration.

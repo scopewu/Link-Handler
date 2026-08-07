@@ -1,5 +1,42 @@
 # 更新日志
 
+## Version 1.6.1
+
+### 问题修复
+
+- **地址栏清洗改为配置驱动**
+  MAIN world 的 SPA 钩子不再硬编码 Bilibili 跟踪参数列表。`content.js` 现在通过
+  `sanitize-config` 消息下发清洗映射，取自**所有启用且配置了 `cleanUrlParams` 的跟踪规则**
+  ——地址栏清洗是跟踪清理的默认行为，与链接清洗共用同一参数列表。在选项页修改规则会
+  立即反映到地址栏；禁用该规则、将站点加入白名单或关闭跟踪清理总开关后，地址栏清洗
+  也随之关闭。
+
+- **简书重定向规则**
+  对照简书站内真实链接核实：跳转格式为 `links.jianshu.com/go?to=...`，解包参数为 `to`
+  （路径 `/go`，域名经后缀匹配覆盖 `links.jianshu.com` 子域）。README 示例已同步。
+
+- **移除无效的 t.cn 规则**
+  t.cn 短链不携带 `url` 查询参数，该规则永远无法匹配，已从内置重定向规则中移除。
+
+- **重扫合并**
+  popup 的手动处理消息与 `chrome.storage.onChanged` 在每次保存配置时几乎同时触发，
+  导致整页重复重扫。两条路径现共用一次防抖重扫。
+
+- **最小权限**
+  移除 `host_permissions: <all_urls>`（manifest 声明的 content script 不需要它）；
+  新增 `activeTab` 权限，popup 仍可读取当前标签页 URL。
+
+- **`mergeConfig` 更名为 `applyStoredConfig`**
+  旧名称暗示只处理 v1 遗留数据；实际按 `stored.version` 分发（v2 diff →
+  `applyConfigDiff`，其他 → 默认配置）。
+
+### 测试
+
+- 新增 `tests/config.test.mjs`（内置 `node:test`，零依赖），覆盖 diff 往返、
+  规范化规则比较、回落行为与 `buildSanitizeHostMap()`。运行：`node --test`。
+
+---
+
 ## Version 1.6.0
 
 ### 新功能

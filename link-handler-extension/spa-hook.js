@@ -2,7 +2,10 @@
 // 本脚本运行在 MAIN world（见 manifest.json 的 world 字段），
 // 可以拦截页面主世界脚本发起的 history.pushState / replaceState 调用。
 // 拦截后通过 window.postMessage 通知隔离世界中的 content.js，
-// 并对特定站点（如 Bilibili）清洗地址栏中的跟踪参数。
+// 并按 content.js 下发的配置（type: 'sanitize-config'）清洗地址栏跟踪参数。
+// 地址栏清洗的站点名单与参数列表完全由 config.js 驱动：
+// 所有启用且配置了 cleanUrlParams 的跟踪规则都会默认清洗该站点地址栏，
+// 与链接清洗共用同一参数列表，此处不再硬编码。
 (function() {
   'use strict';
 
@@ -12,18 +15,10 @@
 
   const MESSAGE_SOURCE = 'link-handler-spa';
 
-  // Bilibili 跟踪参数黑名单（与 config.js 中的 bilibili 规则保持一致）
-  const BILIBILI_TRACKING_PARAMS = [
-    'spm_id_from', 'from_spmid', 'vd_source', 'from', 'seid',
-    'share_source', 'share_medium', 'share_plat', 'share_session_id',
-    'share_tag', 'timestamp', 'unique_k', 'up_id',
-    '-Arouter', 'is_story_h5', 'broadcast_type', 'trackid'
-  ];
-
-  // 需要清洗地址栏参数的主机名映射
-  const SANITIZE_HOSTS = {
-    'bilibili.com': BILIBILI_TRACKING_PARAMS
-  };
+  // 地址栏清洗参数映射：{ hostname: [参数列表] }
+  // 由隔离世界中的 content.js 在配置就绪后通过消息下发；
+  // 为空对象时表示当前页面无需清洗（白名单站点、跟踪清理总开关关闭等）。
+  let sanitizeParamsByHost = {};
 
   function notifyNavigation() {
     try {
@@ -33,16 +28,26 @@
     }
   }
 
-  // 判断给定主机名是否需要清洗
+  // 判断给定主机名是否需要清洗，返回参数列表或 null
   function getParamsToRemove(hostname) {
-    const direct = SANITIZE_HOSTS[hostname];
-    if (direct) return direct;
-    for (const domain of Object.keys(SANITIZE_HOSTS)) {
+    if (sanitizeParamsByHost[hostname]) return sanitizeParamsByHost[hostname];
+    for (const domain of Object.keys(sanitizeParamsByHost)) {
       if (hostname.endsWith('.' + domain)) {
-        return SANITIZE_HOSTS[domain];
+        return sanitizeParamsByHost[domain];
       }
     }
     return null;
+  }
+
+  // 校验消息中的 hosts 结构：{ domain: [string, ...] }，防止页面脚本注入异常数据
+  function isValidHosts(hosts) {
+    if (!hosts || typeof hosts !== 'object' || Array.isArray(hosts)) return false;
+    for (const domain of Object.keys(hosts)) {
+      const params = hosts[domain];
+      if (!Array.isArray(params)) return false;
+      if (params.some(p => typeof p !== 'string')) return false;
+    }
+    return true;
   }
 
   // 清洗 URL 中的跟踪参数；若无需清洗则原样返回
@@ -53,12 +58,21 @@
       if (!params || params.length === 0) return urlString;
 
       let modified = false;
-      params.forEach(param => {
-        if (url.searchParams.has(param)) {
-          url.searchParams.delete(param);
+
+      // 通配符 * 表示清除全部参数（与 content.js 的 cleanUrlParams 语义一致）
+      if (params.includes('*')) {
+        if (url.search) {
+          url.search = '';
           modified = true;
         }
-      });
+      } else {
+        params.forEach(param => {
+          if (url.searchParams.has(param)) {
+            url.searchParams.delete(param);
+            modified = true;
+          }
+        });
+      }
 
       return modified ? url.toString() : urlString;
     } catch {
@@ -98,8 +112,7 @@
     return result;
   };
 
-  // 清洗当前地址栏（页面首次加载时可能已携带跟踪参数）
-  // 使用原生 replaceState 避免进入我们自己的包装层造成递归
+  // 清洗当前地址栏（配置到达后执行；使用原生 replaceState 避免进入我们自己的包装层造成递归）
   function sanitizeCurrentUrl() {
     const paramsToRemove = getParamsToRemove(location.hostname);
     if (!paramsToRemove) return;
@@ -111,10 +124,16 @@
     }
   }
 
-  // 尽早执行一次初始清洗
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', sanitizeCurrentUrl);
-  } else {
+  // 接收隔离世界 content.js 下发的地址栏清洗配置（见 config.js 的 buildSanitizeHostMap）
+  // 每次配置变化（用户修改规则/白名单）后都会重新下发，因此这里总是以最新配置为准
+  window.addEventListener('message', (event) => {
+    if (event.source !== window) return;
+    const data = event.data;
+    if (!data || data.source !== MESSAGE_SOURCE || data.type !== 'sanitize-config') return;
+    if (!isValidHosts(data.hosts)) return;
+
+    sanitizeParamsByHost = data.hosts;
+    // 配置到达后立即清洗一次当前地址栏，覆盖页面加载早期的等待窗口
     sanitizeCurrentUrl();
-  }
+  });
 })();

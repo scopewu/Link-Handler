@@ -21,12 +21,6 @@ const DEFAULT_CONFIG = {
       description: '微博短链接'
     },
     {
-      domain: 't.cn',
-      param: 'url',
-      enabled: true,
-      description: '微博 t.cn 短链接'
-    },
-    {
       domain: 'link.csdn.net',
       param: 'target',
       enabled: true,
@@ -275,7 +269,7 @@ async function getConfig() {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
       const result = await chrome.storage.sync.get('linkHandlerConfig');
       if (result.linkHandlerConfig) {
-        return mergeConfig(DEFAULT_CONFIG, result.linkHandlerConfig);
+        return applyStoredConfig(DEFAULT_CONFIG, result.linkHandlerConfig);
       }
     }
   } catch (e) {
@@ -285,13 +279,31 @@ async function getConfig() {
   return deepCopy(DEFAULT_CONFIG);
 }
 
-// 合并配置（仅支持 v2 diff；无法识别的数据直接回落默认配置）
-function mergeConfig(defaults, custom) {
-  if (custom && custom.version === STORAGE_VERSION) {
-    return applyConfigDiff(defaults, custom);
+// 将存储的配置数据还原为完整配置：
+// 仅接受 v2 格式的 diff（applyConfigDiff）；无法识别的数据（含 v1 遗留）直接回落默认配置
+function applyStoredConfig(defaults, stored) {
+  if (stored && stored.version === STORAGE_VERSION) {
+    return applyConfigDiff(defaults, stored);
   }
 
   return deepCopy(defaults);
+}
+
+// 构建「地址栏清洗」主机映射：{ domain: [参数列表] }
+// 供 content.js 下发到 MAIN world 的 spa-hook.js 使用。
+// 地址栏清洗是跟踪清理的默认行为：所有启用且配置了 cleanUrlParams 的跟踪规则
+// 都会同时清洗该站点地址栏中的同名参数，与链接清洗共用同一参数列表（单一数据源）
+function buildSanitizeHostMap(config) {
+  const hosts = {};
+  if (!config || !Array.isArray(config.trackingRules)) return hosts;
+  // 跟踪清理被全局关闭时，地址栏清洗一并停用（跟随 enableTracking 总开关）
+  if (config.global && config.global.enableTracking === false) return hosts;
+  config.trackingRules.forEach(rule => {
+    if (!rule || rule.enabled === false) return;
+    if (!Array.isArray(rule.cleanUrlParams) || rule.cleanUrlParams.length === 0) return;
+    hosts[rule.domain] = rule.cleanUrlParams.slice();
+  });
+  return hosts;
 }
 
 // 保存配置（只保存与内置配置的差异）
@@ -316,5 +328,5 @@ async function saveConfig(config) {
 
 // 导出配置（用于 content script）
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { DEFAULT_CONFIG, getConfig, saveConfig, mergeConfig, decomposeConfig, applyConfigDiff };
+  module.exports = { DEFAULT_CONFIG, getConfig, saveConfig, applyStoredConfig, decomposeConfig, applyConfigDiff, buildSanitizeHostMap };
 }

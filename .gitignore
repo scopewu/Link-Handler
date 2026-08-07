@@ -6,3 +6,5 @@
 .vscode/
 
 *.crx
+
+.DS_Store

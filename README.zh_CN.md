@@ -42,7 +42,7 @@
 | 知乎 | `link.zhihu.com/?target=xxx` → 直达链接 |
 | 微博 | `weibo.cn/xxx?url=xxx` → 直达链接 |
 | CSDN | `link.csdn.net/?target=xxx` → 直达链接 |
-| 简书 | `jianshu.com/go-wild?url=xxx` → 直达链接 |
+| 简书 | `links.jianshu.com/go?to=xxx` → 直达链接 |
 | Bilibili | `link.bilibili.com/?url=xxx` → 直达链接 |
 | 京东联盟 | `link.jd.com/?to=xxx` → 直达链接 |
 | 淘宝联盟 | `s.click.taobao.com` → 直达链接 |
@@ -124,7 +124,7 @@
 ### 重定向服务
 - 掘金 (juejin.cn)
 - 知乎 (zhihu.com)
-- 微博 (weibo.cn, t.cn)
+- 微博 (weibo.cn)
 - CSDN (csdn.net)
 - 简书 (jianshu.com)
 - Bilibili (bilibili.com)

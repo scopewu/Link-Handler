@@ -47,6 +47,10 @@
 
     buildRuleMaps();
 
+    // 向 MAIN world 的 spa-hook.js 下发地址栏清洗配置
+    // （白名单页面下发空表，禁用地址栏清洗）
+    sendSanitizeConfig();
+
     // 检查当前页面是否在白名单中
     if (isWhitelisted(location.hostname)) {
       console.log('[Link Handler] Current site is whitelisted, skipping processing');
@@ -82,18 +86,49 @@
     });
   }
 
+  // SPA 导航消息来源标识（与 spa-hook.js 约定一致）
+  const SPA_MESSAGE_SOURCE = 'link-handler-spa';
+
+  // 向 MAIN world 下发地址栏清洗配置：{ source, type: 'sanitize-config', hosts }
+  // hosts 取自 config.js 的 buildSanitizeHostMap；白名单页面下发空对象
+  // （spa-hook.js 收到后会以最新配置重新清洗当前地址栏）
+  function sendSanitizeConfig() {
+    try {
+      const hosts = isWhitelisted(location.hostname)
+        ? {}
+        : buildSanitizeHostMap(config);
+      window.postMessage({ source: SPA_MESSAGE_SOURCE, type: 'sanitize-config', hosts }, '*');
+    } catch (e) {
+      // postMessage 不可用时静默忽略
+    }
+  }
+
+  // 重新加载配置并重扫（防抖合并）：
+  // popup 的「处理当前页面」消息与 chrome.storage.onChanged 可能同时触发
+  // （popup 保存配置时二者几乎同时到达），合并为一次执行避免重复重扫
+  let reprocessTimer = null;
+  const REPROCESS_DEBOUNCE_MS = 150;
+
+  function scheduleReprocess() {
+    if (reprocessTimer) clearTimeout(reprocessTimer);
+    reprocessTimer = setTimeout(async () => {
+      reprocessTimer = null;
+      config = await getConfig();
+      buildRuleMaps();
+      // 始终重新下发清洗配置（白名单站点下发空表以禁用地址栏清洗）
+      sendSanitizeConfig();
+      if (!isWhitelisted(location.hostname)) {
+        clearProcessedMarksAndReprocess();
+      }
+    }, REPROCESS_DEBOUNCE_MS);
+  }
+
   // 监听来自 popup 的配置更新
   if (typeof chrome !== 'undefined' && chrome.runtime) {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.action === 'reprocess') {
-        // 重新加载配置后处理所有链接（跳过白名单网站）
-        (async () => {
-          config = await getConfig();
-          buildRuleMaps();
-          if (!isWhitelisted(location.hostname)) {
-            clearProcessedMarksAndReprocess();
-          }
-        })();
+        // 与 storage.onChanged 去重合并，避免双重重扫
+        scheduleReprocess();
       }
       if (message.action === 'getStats') {
         // 返回统计信息
@@ -110,13 +145,8 @@
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if (areaName !== 'sync' || !changes.linkHandlerConfig) return;
-      (async () => {
-        config = await getConfig();
-        buildRuleMaps();
-        if (!isWhitelisted(location.hostname)) {
-          clearProcessedMarksAndReprocess();
-        }
-      })();
+      // 与 popup 的 reprocess 消息去重合并，避免双重重扫
+      scheduleReprocess();
     });
   }
 
@@ -504,9 +534,6 @@
 
     console.log('[Link Handler] Observing dynamic content (including href changes)');
   }
-
-  // SPA 导航消息来源标识（与 spa-hook.js 约定一致）
-  const SPA_MESSAGE_SOURCE = 'link-handler-spa';
 
   function onNavigation() {
     if (isWhitelisted(location.hostname)) return;
