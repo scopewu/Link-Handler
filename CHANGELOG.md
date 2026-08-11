@@ -35,6 +35,12 @@
   The old name suggested legacy-v1 handling; it actually dispatches on `stored.version`
   (v2 diff → `applyConfigDiff`, anything else → defaults).
 
+### UI Enhancements
+
+- **Global Tracking Parameters Card Moved**
+  The global tracking parameter editor moved from the General tab to the Tracking tab,
+  grouped with the per-domain tracking rules it stacks on.
+
 ### Tests
 
 - Added `tests/config.test.mjs` (built-in `node:test`, no dependencies) covering diff
