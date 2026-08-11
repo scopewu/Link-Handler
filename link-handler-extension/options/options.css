@@ -348,9 +348,10 @@ body {
   font-size: 0.85rem;
 }
 
-/* 全局通用跟踪参数卡片（General 标签页） */
+/* 全局通用跟踪参数卡片（Tracking 标签页） */
 .global-tracking-params-card {
-  margin-top: 16px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   padding: 18px 20px;
   background: var(--bg-tertiary);
   border-radius: var(--radius-lg);

@@ -593,7 +593,7 @@
 
   // 收集并保存全局通用跟踪参数（标签增删/输入时调用）
   function saveGlobalTrackingParams() {
-    const values = collectTagValues(document.getElementById('tab-general'), 'globalTrackingParams');
+    const values = collectTagValues(document.getElementById('tab-tracking'), 'globalTrackingParams');
     currentConfig.global = { ...currentConfig.global, globalTrackingParams: values };
     debouncedSave(currentConfig);
   }
