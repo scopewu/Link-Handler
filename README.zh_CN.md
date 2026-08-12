@@ -25,41 +25,40 @@
 
 ### 智能链接处理
 
-| 功能 | 说明 |
-|------|------|
-| **同源链接** | 移除同域名链接的 `target="_blank"` |
-| **相对链接** | 相对地址在当前标签页打开 |
-| **重定向解包** | 绕过中间跳转页面，直达目标链接 |
-| **跟踪清理** | 移除跟踪参数和属性 |
+- **同源链接**：移除同域名链接的 `target="_blank"`
+- **相对链接**：相对地址在当前标签页打开
+- **重定向解包**：绕过中间跳转页面，直达目标链接
+- **跟踪清理**：移除跟踪参数和属性
+- **全局跟踪清理**：在所有网站上剥离常见跟踪参数（`utm_*`、`fbclid`、`gclid` 等）
+- **地址栏清理**：移除地址栏中的跟踪参数，SPA 导航同样生效
 
 ### 重定向解包
 
 自动从跳转服务中提取真实 URL：
 
-| 平台 | 示例 |
-|------|------|
-| 掘金 | `link.juejin.cn/?target=xxx` → 直达链接 |
-| 知乎 | `link.zhihu.com/?target=xxx` → 直达链接 |
-| 微博 | `weibo.cn/xxx?url=xxx` → 直达链接 |
-| CSDN | `link.csdn.net/?target=xxx` → 直达链接 |
-| 简书 | `links.jianshu.com/go?to=xxx` → 直达链接 |
-| Bilibili | `link.bilibili.com/?url=xxx` → 直达链接 |
-| 京东联盟 | `link.jd.com/?to=xxx` → 直达链接 |
-| 淘宝联盟 | `s.click.taobao.com` → 直达链接 |
-| 少数派 | `sspai.com/?target=xxx` → 直达链接 |
-| Reddit | `out.reddit.com/?url=xxx` → 直达链接 |
-| Facebook | `facebook.com/?u=xxx` → 直达链接 |
+- 掘金：`link.juejin.cn/?target=xxx` → 直达链接
+- 知乎：`link.zhihu.com/?target=xxx` → 直达链接
+- 微博：`weibo.cn/xxx?url=xxx` → 直达链接
+- CSDN：`link.csdn.net/?target=xxx` → 直达链接
+- 简书：`jianshu.com/go?to=xxx` → 直达链接
+- Bilibili：`link.bilibili.com/?url=xxx` → 直达链接
+- 京东联盟：`link.jd.com/?to=xxx` → 直达链接
+- 淘宝联盟：`s.click.taobao.com/?u=xxx` → 直达链接
+- 少数派：`sspai.com/link?target=xxx` → 直达链接
+- Reddit：`out.reddit.com/?url=xxx` → 直达链接
+- Facebook：`facebook.com/l.php?u=xxx` → 直达链接
 
 ### 跟踪清理
 
 清理主流平台的跟踪数据：
 
-- **Bilibili**：`data-spmid`、`data-mod`、`data-idx`、`spm_id_from`
-- **微博**：`suda-uatrack`、`suda-data`、`bpfilter`
-- **知乎**：`data-za-*`、`utm_source`、`utm_medium`
+- **所有网站**：`utm_*`、`fbclid`、`gclid`、`msclkid`、`mc_cid`、`mc_eid`
+- **Bilibili**：`spm_id_from`、`vd_source`、`share_*`、`data-spmid`、`data-mod`、`data-idx`
+- **微博**：`suda-uatrack`、`suda-data`、`action-data`、`bpfilter`、`weibo_id`
+- **知乎**：`data-za-*`、`utm_source`、`utm_medium`、`utm_content`
 - **掘金**：`utm_*` 参数
-- **CSDN**：`data-report-*`、`spm`
-- **百度**：`data-click`、跟踪参数
+- **简书**：`data-original`、`utm_*` 参数
+- **CSDN**：`data-report-*` 属性
 
 ### 域名白名单
 
@@ -69,16 +68,15 @@
 - **弹出窗口切换**：直接在工具栏弹出窗口中快速添加/移除当前网站
 - **继承提示**：子域名通过父域名继承白名单状态时，弹出窗口会显示来源域名
 
-### 处理统计
+### 弹出窗口概览
 
-弹出窗口实时显示统计信息：
+弹出窗口实时显示以下信息：
 
 | 指标 | 说明 |
 |------|------|
-| 已处理总数 | 当前页面处理的所有链接 |
-| 重定向解包 | 绕过跳转服务的链接数 |
-| 目标移除 | 移除同源 `target="_blank"` 的链接数 |
-| 跟踪清理 | 清理跟踪数据的链接数 |
+| 重定向规则 | 已启用的重定向解包规则数 |
+| 清理规则 | 已启用的跟踪清理规则数 |
+| 已处理 | 当前页面已处理的链接数 |
 
 ## 安装
 
@@ -104,7 +102,7 @@
 ### 快速访问
 
 点击工具栏中的扩展图标，可以：
-- 查看实时处理统计
+- 查看已启用的规则数和当前页面处理数量
 - 为当前网站切换白名单状态
 - 手动重新处理当前页面
 - 打开设置页面
@@ -141,7 +139,6 @@
 - 掘金
 - 简书
 - CSDN
-- 百度搜索
 
 ## 自定义规则
 
@@ -151,10 +148,13 @@
 {
   "domain": "link.example.com",
   "param": "target",
+  "pathPattern": "/go",
   "enabled": true,
   "description": "示例重定向"
 }
 ```
+
+`pathPattern` 为可选项：设置后仅匹配路径以它开头的 URL。
 
 ### 添加跟踪规则
 
@@ -192,23 +192,19 @@
 ## 技术细节
 
 - **Manifest V3**：现代扩展 API
-- **内容脚本**：注入所有页面
+- **双内容脚本**：隔离世界处理链接 + MAIN 世界实现 SPA 钩子与地址栏清理
 - **MutationObserver**：处理动态加载的内容
 - **SPA 支持**：通过监听 `history.pushState`/`replaceState` 适配 React、Vue、Angular 应用
-
-### 性能
-- 使用 `requestIdleCallback` 批量处理
-- 已处理链接标记，避免重复处理
-- DOM 变更防抖
-- CPU/内存占用极低
+- **同步存储**：设置跨设备同步；以差异（diff）形式存储，内置规则更新自动生效
 
 ## 文件结构
 
 ```
 link-handler-extension/
 ├── manifest.json              # 扩展清单
-├── config.js                  # 默认配置
+├── config.js                  # 默认配置与差异存储
 ├── content.js                 # 核心处理逻辑
+├── spa-hook.js                # SPA 钩子与地址栏清理（MAIN 世界）
 ├── _locales/                  # 翻译文件
 │   ├── en/messages.json
 │   ├── zh_CN/messages.json
