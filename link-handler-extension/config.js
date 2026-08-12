@@ -129,14 +129,6 @@ const DEFAULT_CONFIG = {
       preventClickRewrite: false,
       cleanUrlParams: []
     },
-    {
-      domain: 'baidu.com',
-      enabled: true,
-      description: '百度搜索跟踪清理',
-      removeAttributes: ['data-click'],
-      preventClickRewrite: true,
-      cleanUrlParams: ['rsv_bp', 'rsv_idx', 'ie']
-    }
   ],
 
   // 白名单（域名后缀匹配，满足白名单的网站不处理链接）
