@@ -264,8 +264,8 @@ async function getConfig() {
         return applyStoredConfig(DEFAULT_CONFIG, result.linkHandlerConfig);
       }
     }
-  } catch (e) {
-    console.log('[Link Handler] Using default config');
+  } catch {
+    // 读取失败时静默回落默认配置
   }
   // 返回深拷贝，避免修改污染全局 DEFAULT_CONFIG
   return deepCopy(DEFAULT_CONFIG);

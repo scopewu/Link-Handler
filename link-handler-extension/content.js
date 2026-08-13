@@ -52,10 +52,7 @@
     sendSanitizeConfig();
 
     // 检查当前页面是否在白名单中
-    if (isWhitelisted(location.hostname)) {
-      console.log('[Link Handler] Current site is whitelisted, skipping processing');
-      return;
-    }
+    if (isWhitelisted(location.hostname)) return;
 
     // 处理已有链接
     processAllLinks();
@@ -531,8 +528,6 @@
       attributes: true,
       attributeFilter: ['href']
     });
-
-    console.log('[Link Handler] Observing dynamic content (including href changes)');
   }
 
   function onNavigation() {
