@@ -126,7 +126,7 @@ test('所有启用且配置了 cleanUrlParams 的内置跟踪规则都进入清�
   const hosts = buildSanitizeHostMap(DEFAULT_CONFIG);
   // csdn.net 的 cleanUrlParams 为空数组，不参与地址栏清洗
   assert.deepEqual(Object.keys(hosts), [
-    'bilibili.com', 'weibo.com', 'zhihu.com', 'juejin.cn', 'jianshu.com', 'baidu.com'
+    'bilibili.com', 'weibo.com', 'zhihu.com', 'juejin.cn', 'jianshu.com'
   ]);
   // 参数列表与规则本身一致（单一数据源）
   const bilibili = DEFAULT_CONFIG.trackingRules.find(r => r.domain === 'bilibili.com');
