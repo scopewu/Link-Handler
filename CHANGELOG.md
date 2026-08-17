@@ -1,5 +1,55 @@
 # Changelog
 
+## Version 1.7.0
+
+### Accessibility
+
+- **ARIA Tabs with Keyboard Navigation**
+  The settings page tabs now follow the WAI-ARIA tabs pattern: `role=tablist/tab/tabpanel`,
+  `aria-selected`, roving tabindex, and arrow/Home/End key navigation with automatic
+  activation.
+
+- **Semantic HTML**
+  Options and popup pages use landmark elements (`main`/`header`/`footer`/`section`),
+  the `search` element for search boxes, and a proper `ul` list for the whitelist.
+  Whitelist addition is now a real form submit; labels are associated with their inputs.
+
+- **Modal Dialog Keyboard Support**
+  The rule dialog traps Tab focus inside itself, closes on Escape, and returns focus to
+  the element that opened it. The first input is focused on open.
+
+- **Operable Controls & Announcements**
+  Tag remove controls are real buttons with accessible names. Decorative SVGs are
+  `aria-hidden`. Icon-only buttons expose `aria-label`. Toasts are announced via
+  `aria-live` (`assertive` for errors).
+
+- **Focus Visibility & Contrast**
+  Keyboard focus is visible via `:focus-visible` styles (mouse clicks unaffected).
+  Secondary text color meets WCAG AA contrast on white. `[hidden]` is enforced with
+  `!important` so class-level `display` rules cannot reveal hidden elements.
+
+### Bug Fixes
+
+- **Quote Escaping in `escapeHtml`**
+  `escapeHtml` output is used in double-quoted attribute values (`aria-label`), but only
+  escaped `& < >`. Quotes are now escaped too, closing an attribute-injection path via
+  imported config values.
+
+- **Missing i18n Placeholders**
+  The new `removeTag` message used `$1$` without defining `placeholders`, which made
+  Chrome log `Variable $1$ used but not defined` and return an empty string from
+  `getMessage`. The `placeholders` field is now defined in all locales, and the i18n
+  fallback implementation aligns with `chrome.i18n` (named placeholder expansion,
+  string substitutions, safe replacement).
+
+### Other Changes
+
+- Removed the built-in Baidu tracking rule (per-domain overrides preferred).
+- Kept only error-level console output; informational logs removed.
+- README synced with current rules and features.
+
+---
+
 ## Version 1.6.1
 
 ### Bug Fixes

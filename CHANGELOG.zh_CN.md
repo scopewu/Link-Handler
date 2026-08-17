@@ -1,5 +1,52 @@
 # 更新日志
 
+## Version 1.7.0
+
+### 无障碍
+
+- **ARIA 标签页与键盘导航**
+  设置页标签页遵循 WAI-ARIA Tabs 模式：`role=tablist/tab/tabpanel`、`aria-selected`、
+  动态 tabindex，支持方向键/Home/End 导航并自动激活。
+
+- **语义化 HTML**
+  选项页与 popup 改用地标元素（`main`/`header`/`footer`/`section`）、搜索框使用
+  `search` 元素，白名单改用真正的 `ul` 列表。白名单添加改为表单提交；标签与
+  输入框建立关联。
+
+- **弹窗键盘支持**
+  规则弹窗将 Tab 焦点限制在弹窗内，支持 Esc 关闭，关闭后焦点归还触发元素；
+  打开时自动聚焦首个输入框。
+
+- **可操作控件与播报**
+  标签删除控件改为真正的按钮并具备无障碍名称；装饰性 SVG 标记 `aria-hidden`；
+  纯图标按钮提供 `aria-label`；提示消息通过 `aria-live` 播报（错误为
+  `assertive`）。
+
+- **焦点可见与对比度**
+  键盘焦点通过 `:focus-visible` 样式可见（不影响鼠标点击）。辅助文字颜色满足
+  白底 WCAG AA 对比度。`[hidden]` 以 `!important` 兜底，类选择器的 `display`
+  声明不会让隐藏元素意外可见。
+
+### 问题修复
+
+- **`escapeHtml` 引号转义**
+  `escapeHtml` 的输出会用于双引号属性值（`aria-label`），但此前只转义 `& < >`。
+  现已转义引号，堵住经由导入配置值进行属性注入的路径。
+
+- **i18n 占位符缺失**
+  新增的 `removeTag` 消息使用了 `$1$` 却未定义 `placeholders`，导致 Chrome 报
+  `Variable $1$ used but not defined` 且 `getMessage` 返回空字符串。现已在全部
+  语言定义 `placeholders`，同时 i18n 回退实现对齐 `chrome.i18n`（命名占位符
+  展开、字符串参数、安全替换）。
+
+### 其他变更
+
+- 移除内置百度跟踪规则（优先使用按域名覆盖）。
+- 仅保留错误级控制台输出，移除信息级日志。
+- README 与当前规则和功能同步。
+
+---
+
 ## Version 1.6.1
 
 ### 问题修复
