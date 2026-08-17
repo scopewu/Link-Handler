@@ -91,6 +91,24 @@
     "message": "啟用",
     "description": "啟用標籤"
   },
+  "settingsTabList": {
+    "message": "設定分類",
+    "description": "設定頁標籤列表的無障礙名稱"
+  },
+  "removeTag": {
+    "message": "移除標籤 $1$",
+    "description": "標籤刪除按鈕的無障礙名稱，$1$ 為標籤內容",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "utm_source"
+      }
+    }
+  },
+  "closeModal": {
+    "message": "關閉彈窗",
+    "description": "彈窗關閉按鈕的無障礙名稱"
+  },
   "removeAttributes": {
     "message": "移除屬性",
     "description": "移除屬性標籤"

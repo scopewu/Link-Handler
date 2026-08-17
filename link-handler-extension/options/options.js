@@ -8,6 +8,7 @@
   let trackingSearchKeyword = '';
   let currentModalType = null;
   let currentEditIndex = null; // 当前编辑的规则索引，null表示添加新模式
+  let modalTriggerEl = null; // 打开弹窗的触发元素，关闭弹窗后归还焦点
   let toastTimer = null;
   let saveDebounceTimer = null;
 
@@ -39,20 +40,21 @@
     const whitelist = currentConfig.whitelist || [];
 
     if (whitelist.length === 0) {
-      container.innerHTML = `<div class="empty-state">${i18n.getMessage('noWhitelistDomains')}</div>`;
+      // 容器是 <ul>，空态也用 <li> 保持列表结构合法
+      container.innerHTML = `<li class="empty-state">${i18n.getMessage('noWhitelistDomains')}</li>`;
       return;
     }
 
     const fragment = document.createDocumentFragment();
     // 倒序遍历，最新添加的显示在最前面
     for (let i = whitelist.length - 1; i >= 0; i--) {
-      const item = document.createElement('div');
+      const item = document.createElement('li');
       item.className = 'whitelist-item';
       item.dataset.index = i;
       item.innerHTML = `
         <span class="whitelist-domain">${escapeHtml(whitelist[i])}</span>
-        <button class="btn-icon delete-whitelist" title="${i18n.getMessage('deleteRule')}">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="btn-icon delete-whitelist" title="${i18n.getMessage('deleteRule')}" aria-label="${i18n.getMessage('deleteRule')}: ${escapeHtml(whitelist[i])}">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="3 6 5 6 21 6"/>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
           </svg>
@@ -143,8 +145,8 @@
     const container = document.getElementById('globalTrackingParamsInput');
     if (container) {
       container.innerHTML = params.map(p =>
-        `<span class="tag"><span class="tag-text">${escapeHtml(p)}</span><span class="tag-remove">×</span></span>`
-      ).join('') + `<input type="text" placeholder="${i18n.getMessage('globalTrackingParamsPlaceholder')}">`;
+        `<span class="tag"><span class="tag-text">${escapeHtml(p)}</span><button type="button" class="tag-remove" aria-label="${i18n.getMessage('removeTag', [escapeHtml(p)])}">×</button></span>`
+      ).join('') + `<input type="text" id="globalTrackingParamsField" placeholder="${i18n.getMessage('globalTrackingParamsPlaceholder')}">`;
       bindTagInputEvents(container);
     }
   }
@@ -177,10 +179,10 @@
 
   // 创建重定向规则卡片 - 静态展示
   function createRedirectRuleCard(rule, index) {
-    const div = document.createElement('div');
-    div.className = 'rule-card' + (rule.enabled === false ? ' disabled' : '');
-    div.dataset.index = index;
-    div.dataset.type = 'redirect';
+    const card = document.createElement('article');
+    card.className = 'rule-card' + (rule.enabled === false ? ' disabled' : '');
+    card.dataset.index = index;
+    card.dataset.type = 'redirect';
 
     const ruleTitle = rule.description
       ? `${i18n.getMessage('ruleNumber', (index + 1).toString())} - ${rule.description}`
@@ -195,7 +197,7 @@
       details.push(`<span class="rule-detail"><strong>${i18n.getMessage('param')}:</strong> ${escapeHtml(rule.param)}</span>`);
     }
 
-    div.innerHTML = `
+    card.innerHTML = `
       <div class="rule-card-header">
         <div class="rule-card-title">
           <span class="rule-status ${rule.enabled !== false ? 'enabled' : 'disabled'}"></span>
@@ -203,17 +205,17 @@
         </div>
         <div class="rule-card-actions">
           <label class="rule-toggle-label">
-            <input type="checkbox" class="rule-toggle" ${rule.enabled !== false ? 'checked' : ''}>
+            <input type="checkbox" class="rule-toggle" ${rule.enabled !== false ? 'checked' : ''} aria-label="${escapeHtml(ruleTitle)}">
             <span class="toggle-slider"></span>
           </label>
-          <button class="btn-icon edit-rule" title="${i18n.getMessage('editRule')}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="btn-icon edit-rule" title="${i18n.getMessage('editRule')}" aria-label="${i18n.getMessage('editRule')}">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
           </button>
-          <button class="btn-icon delete-rule" title="${i18n.getMessage('deleteRule')}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="btn-icon delete-rule" title="${i18n.getMessage('deleteRule')}" aria-label="${i18n.getMessage('deleteRule')}">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"/>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
             </svg>
@@ -225,7 +227,7 @@
       </div>
     `;
 
-    return div;
+    return card;
   }
 
   // 渲染跟踪规则 - 静态卡片展示
@@ -256,10 +258,10 @@
 
   // 创建跟踪规则卡片 - 静态展示
   function createTrackingRuleCard(rule, index) {
-    const div = document.createElement('div');
-    div.className = 'rule-card' + (rule.enabled === false ? ' disabled' : '');
-    div.dataset.index = index;
-    div.dataset.type = 'tracking';
+    const card = document.createElement('article');
+    card.className = 'rule-card' + (rule.enabled === false ? ' disabled' : '');
+    card.dataset.index = index;
+    card.dataset.type = 'tracking';
 
     const ruleTitle = rule.description
       ? `${i18n.getMessage('ruleNumber', (index + 1).toString())} - ${rule.description}`
@@ -282,7 +284,7 @@
       details.push(`<span class="rule-detail"><strong>${i18n.getMessage('preventClickRewrite')}:</strong> ✓</span>`);
     }
 
-    div.innerHTML = `
+    card.innerHTML = `
       <div class="rule-card-header">
         <div class="rule-card-title">
           <span class="rule-status ${rule.enabled !== false ? 'enabled' : 'disabled'}"></span>
@@ -290,17 +292,17 @@
         </div>
         <div class="rule-card-actions">
           <label class="rule-toggle-label">
-            <input type="checkbox" class="rule-toggle" ${rule.enabled !== false ? 'checked' : ''}>
+            <input type="checkbox" class="rule-toggle" ${rule.enabled !== false ? 'checked' : ''} aria-label="${escapeHtml(ruleTitle)}">
             <span class="toggle-slider"></span>
           </label>
-          <button class="btn-icon edit-rule" title="${i18n.getMessage('editRule')}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="btn-icon edit-rule" title="${i18n.getMessage('editRule')}" aria-label="${i18n.getMessage('editRule')}">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
           </button>
-          <button class="btn-icon delete-rule" title="${i18n.getMessage('deleteRule')}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="btn-icon delete-rule" title="${i18n.getMessage('deleteRule')}" aria-label="${i18n.getMessage('deleteRule')}">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"/>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
             </svg>
@@ -312,15 +314,18 @@
       </div>
     `;
 
-    return div;
+    return card;
   }
 
-  // 转义 HTML 特殊字符
+  // 转义 HTML 特殊字符（输出会用于元素内容和双引号属性值两种上下文，引号必须一并转义）
   function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
-    return div.innerHTML;
+    // textContent->innerHTML 只转义 & < >，引号需手动补上，否则拼进属性值会被提前闭合
+    return div.innerHTML
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   // 验证配置结构
@@ -366,18 +371,49 @@
   }
 
   function initTabs() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
     const tabPanels = document.querySelectorAll('.tab-panel');
 
-    tabButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const tabId = button.dataset.tab;
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        tabPanels.forEach(panel => panel.classList.remove('active'));
-        button.classList.add('active');
-        document.getElementById(`tab-${tabId}`).classList.add('active');
-        localStorage.setItem('linkHandlerActiveTab', tabId);
+    // 激活指定标签页；setFocus 为 true 时把焦点移到按钮上（键盘导航场景）
+    function activateTab(button, setFocus = false) {
+      const tabId = button.dataset.tab;
+      tabButtons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+        btn.tabIndex = -1;
       });
+      tabPanels.forEach(panel => panel.classList.remove('active'));
+      button.classList.add('active');
+      button.setAttribute('aria-selected', 'true');
+      button.tabIndex = 0;
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+      if (setFocus) button.focus();
+      localStorage.setItem('linkHandlerActiveTab', tabId);
+    }
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => activateTab(button));
+    });
+
+    // 键盘导航（WAI-ARIA Tabs 模式：方向键/Home/End，自动激活）
+    document.querySelector('.tab-nav').addEventListener('keydown', (e) => {
+      const currentIndex = tabButtons.indexOf(document.activeElement);
+      if (currentIndex === -1) return;
+
+      let nextIndex = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        nextIndex = (currentIndex + 1) % tabButtons.length;
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        nextIndex = (currentIndex - 1 + tabButtons.length) % tabButtons.length;
+      } else if (e.key === 'Home') {
+        nextIndex = 0;
+      } else if (e.key === 'End') {
+        nextIndex = tabButtons.length - 1;
+      }
+      if (nextIndex === null) return;
+
+      e.preventDefault();
+      activateTab(tabButtons[nextIndex], true);
     });
 
     const savedTab = localStorage.getItem('linkHandlerActiveTab');
@@ -418,16 +454,11 @@
       openRuleModal('tracking');
     });
 
-    // 白名单事件
-    const whitelistInput = document.getElementById('whitelistDomainInput');
-    whitelistInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        addWhitelistDomain();
-      }
+    // 白名单表单提交（点击按钮或在输入框按回车均触发 submit）
+    document.getElementById('whitelistForm')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      addWhitelistDomain();
     });
-    const addWhitelistBtn = document.getElementById('addWhitelistDomain');
-    addWhitelistBtn?.addEventListener('click', addWhitelistDomain);
 
     // 弹窗事件
     document.getElementById('closeRuleModal').addEventListener('click', closeRuleModal);
@@ -566,7 +597,7 @@
     const tagsInput = input.closest('.tags-input');
     const tag = document.createElement('span');
     tag.className = 'tag';
-    tag.innerHTML = `<span class="tag-text">${escapeHtml(value)}</span><span class="tag-remove">×</span>`;
+    tag.innerHTML = `<span class="tag-text">${escapeHtml(value)}</span><button type="button" class="tag-remove" aria-label="${i18n.getMessage('removeTag', [escapeHtml(value)])}">×</button>`;
     tagsInput.insertBefore(tag, input);
     input.value = '';
   }
@@ -666,6 +697,7 @@
   function openRuleModal(type, editIndex = null) {
     currentModalType = type;
     currentEditIndex = editIndex;
+    modalTriggerEl = document.activeElement;
     const modal = document.getElementById('ruleModal');
     const title = document.getElementById('ruleModalTitle');
     const body = document.getElementById('ruleModalBody');
@@ -696,17 +728,17 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>${i18n.getMessage('domain')}</label>
+              <label for="modalRuleDomain">${i18n.getMessage('domain')}</label>
               <input type="text" id="modalRuleDomain" placeholder="${i18n.getMessage('domainPlaceholder')}">
             </div>
             <div class="form-group">
-              <label>${i18n.getMessage('param')}</label>
+              <label for="modalRuleParam">${i18n.getMessage('param')}</label>
               <input type="text" id="modalRuleParam" placeholder="${i18n.getMessage('paramPlaceholder')}">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group full-width">
-              <label>${i18n.getMessage('description')}</label>
+              <label for="modalRuleDesc">${i18n.getMessage('description')}</label>
               <input type="text" id="modalRuleDesc" placeholder="${i18n.getMessage('descPlaceholder')}">
             </div>
           </div>
@@ -728,29 +760,29 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>${i18n.getMessage('domain')}</label>
+              <label for="modalRuleDomain">${i18n.getMessage('domain')}</label>
               <input type="text" id="modalRuleDomain" placeholder="${i18n.getMessage('domainPlaceholder')}">
             </div>
             <div class="form-group">
-              <label>${i18n.getMessage('description')}</label>
+              <label for="modalRuleDesc">${i18n.getMessage('description')}</label>
               <input type="text" id="modalRuleDesc" placeholder="${i18n.getMessage('descPlaceholder')}">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group full-width">
-              <label>${i18n.getMessage('removeAttributes')}</label>
+              <label for="modalRemoveAttrsInput">${i18n.getMessage('removeAttributes')}</label>
               <div class="tags-input" data-field="modalRemoveAttributes">
-                ${removeAttrs.map(attr => `<span class="tag"><span class="tag-text">${escapeHtml(attr)}</span><span class="tag-remove">×</span></span>`).join('')}
-                <input type="text" placeholder="${i18n.getMessage('attrsPlaceholder')}">
+                ${removeAttrs.map(attr => `<span class="tag"><span class="tag-text">${escapeHtml(attr)}</span><button type="button" class="tag-remove" aria-label="${i18n.getMessage('removeTag', [escapeHtml(attr)])}">×</button></span>`).join('')}
+                <input type="text" id="modalRemoveAttrsInput" placeholder="${i18n.getMessage('attrsPlaceholder')}">
               </div>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group full-width">
-              <label>${i18n.getMessage('cleanUrlParams')}</label>
+              <label for="modalCleanUrlParamsInput">${i18n.getMessage('cleanUrlParams')}</label>
               <div class="tags-input" data-field="modalCleanUrlParams">
-                ${cleanParams.map(param => `<span class="tag"><span class="tag-text">${escapeHtml(param)}</span><span class="tag-remove">×</span></span>`).join('')}
-                <input type="text" placeholder="${i18n.getMessage('attrsPlaceholder')}">
+                ${cleanParams.map(param => `<span class="tag"><span class="tag-text">${escapeHtml(param)}</span><button type="button" class="tag-remove" aria-label="${i18n.getMessage('removeTag', [escapeHtml(param)])}">×</button></span>`).join('')}
+                <input type="text" id="modalCleanUrlParamsInput" placeholder="${i18n.getMessage('attrsPlaceholder')}">
               </div>
             </div>
           </div>
@@ -775,6 +807,8 @@
     if (descInput) descInput.value = isEdit && rule ? (rule.description || '') : '';
 
     modal.classList.add('show');
+    // 弹窗打开期间监听键盘：Esc 关闭、Tab 焦点循环
+    document.addEventListener('keydown', handleModalKeydown, true);
 
     // 绑定标签输入事件（仅在跟踪规则类型且有标签输入框时）
     if (type === 'tracking') {
@@ -790,10 +824,43 @@
     const modalBody = document.getElementById('ruleModalBody');
     // 解绑标签输入事件
     unbindTagInputEvents(modalBody);
+    document.removeEventListener('keydown', handleModalKeydown, true);
 
     document.getElementById('ruleModal').classList.remove('show');
     currentModalType = null;
     currentEditIndex = null;
+
+    // 焦点归还触发元素（触发元素可能已因列表重渲染被销毁，需先确认存在）
+    if (modalTriggerEl && document.contains(modalTriggerEl)) {
+      modalTriggerEl.focus();
+    }
+    modalTriggerEl = null;
+  }
+
+  // 弹窗键盘交互：Esc 关闭，Tab 键把焦点循环限制在弹窗内（焦点陷阱）
+  function handleModalKeydown(e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeRuleModal();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+
+    const modal = document.getElementById('ruleModal');
+    const focusable = Array.from(modal.querySelectorAll('button, input'))
+      .filter(el => !el.disabled);
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const activeOutside = !modal.contains(document.activeElement);
+    if (e.shiftKey && (document.activeElement === first || activeOutside)) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (document.activeElement === last || activeOutside)) {
+      e.preventDefault();
+      first.focus();
+    }
   }
 
   // 显示输入框错误状态
@@ -912,6 +979,8 @@
   // 显示提示
   function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
+    // 错误提示需要屏幕阅读器立即打断播报，普通提示排队播报
+    toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
     toast.textContent = message;
     toast.className = 'toast show ' + type;
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +13,7 @@
       <div class="header-content">
         <div class="brand">
           <div class="brand-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
               <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
             </svg>
@@ -28,44 +28,44 @@
 
     <main class="app-main">
       
-      <nav class="tab-nav">
-        <button class="tab-btn active" data-tab="general">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <nav class="tab-nav" role="tablist" aria-label="Settings sections" data-i18n-aria-label="settingsTabList">
+        <button class="tab-btn active" data-tab="general" role="tab" id="tab-btn-general" aria-controls="tab-general" aria-selected="true">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"/>
             <path d="M12 1v6m0 6v6m4.22-10.22l4.24-4.24M6.34 17.66l-4.24 4.24M23 12h-6m-6 0H1m20.24 4.24l-4.24-4.24M6.34 6.34L2.1 2.1"/>
           </svg>
           <span data-i18n="tabGeneral">General</span>
         </button>
-        <button class="tab-btn" data-tab="redirects">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="tab-btn" data-tab="redirects" role="tab" id="tab-btn-redirects" aria-controls="tab-redirects" aria-selected="false" tabindex="-1">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
           </svg>
           <span data-i18n="tabRedirects">Redirects</span>
         </button>
-        <button class="tab-btn" data-tab="tracking">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="tab-btn" data-tab="tracking" role="tab" id="tab-btn-tracking" aria-controls="tab-tracking" aria-selected="false" tabindex="-1">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
             <line x1="10" y1="11" x2="10" y2="17"/>
             <line x1="14" y1="11" x2="14" y2="17"/>
           </svg>
           <span data-i18n="tabTracking">Tracking</span>
         </button>
-        <button class="tab-btn" data-tab="whitelist">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="tab-btn" data-tab="whitelist" role="tab" id="tab-btn-whitelist" aria-controls="tab-whitelist" aria-selected="false" tabindex="-1">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
           <span data-i18n="tabWhitelist">Whitelist</span>
         </button>
-        <button class="tab-btn" data-tab="backup">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="tab-btn" data-tab="backup" role="tab" id="tab-btn-backup" aria-controls="tab-backup" aria-selected="false" tabindex="-1">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
             <polyline points="17 8 12 3 7 8"/>
             <line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
           <span data-i18n="tabBackup">Backup</span>
         </button>
-        <button class="tab-btn" data-tab="help">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="tab-btn" data-tab="help" role="tab" id="tab-btn-help" aria-controls="tab-help" aria-selected="false" tabindex="-1">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
             <line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -76,7 +76,7 @@
 
       <div class="tab-content">
         
-        <div class="tab-panel active" id="tab-general">
+        <section class="tab-panel active" id="tab-general" role="tabpanel" aria-labelledby="tab-btn-general" tabindex="0">
           <div class="panel-header">
             <h2 data-i18n="globalSettings">General Settings</h2>
             <p data-i18n="globalSettingsDesc">Configure how links are processed across all websites</p>
@@ -110,16 +110,16 @@
               </span>
             </label>
           </div>
-        </div>
+        </section>
 
-        <div class="tab-panel" id="tab-redirects">
+        <section class="tab-panel" id="tab-redirects" role="tabpanel" aria-labelledby="tab-btn-redirects" tabindex="0">
           <div class="panel-header panel-header-with-action">
             <div class="panel-header-text">
               <h2 data-i18n="redirectRules">Redirect Link Rules</h2>
               <p data-i18n="redirectRulesDesc">Automatically unwrap redirect links from intermediate pages</p>
             </div>
             <button class="btn btn-primary" id="addRedirectRule">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="12" y1="5" x2="12" y2="19"/>
                 <line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
@@ -127,25 +127,25 @@
             </button>
           </div>
 
-          <div class="search-box">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <search class="search-box">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.35-4.35"/>
             </svg>
-            <input type="text" id="redirectSearch" data-i18n-placeholder="searchDomainPlaceholder" placeholder="搜索域名...">
-          </div>
+            <input type="text" id="redirectSearch" data-i18n-placeholder="searchDomainPlaceholder" placeholder="搜索域名..." aria-label="搜索域名或描述" data-i18n-aria-label="searchDomainPlaceholder">
+          </search>
 
           <div id="redirectRules" class="rules-container"></div>
-        </div>
+        </section>
 
-        <div class="tab-panel" id="tab-tracking">
+        <section class="tab-panel" id="tab-tracking" role="tabpanel" aria-labelledby="tab-btn-tracking" tabindex="0">
           <div class="panel-header panel-header-with-action">
             <div class="panel-header-text">
               <h2 data-i18n="trackingRules">Tracking Cleanup Rules</h2>
               <p data-i18n="trackingRulesDesc">Remove tracking attributes and parameters from links</p>
             </div>
             <button class="btn btn-primary" id="addTrackingRule">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="12" y1="5" x2="12" y2="19"/>
                 <line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
@@ -155,24 +155,24 @@
 
           <div class="global-tracking-params-card">
             <div class="form-group full-width">
-              <label data-i18n="globalTrackingParams">Global Tracking Parameters</label>
+              <label for="globalTrackingParamsField" data-i18n="globalTrackingParams">Global Tracking Parameters</label>
               <p class="setting-desc" data-i18n="globalTrackingParamsDesc">Common tracking parameters removed from all links regardless of domain</p>
               <div class="tags-input" id="globalTrackingParamsInput" data-field="globalTrackingParams"></div>
             </div>
           </div>
 
-          <div class="search-box">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <search class="search-box">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.35-4.35"/>
             </svg>
-            <input type="text" id="trackingSearch" data-i18n-placeholder="searchDomainPlaceholder" placeholder="搜索域名...">
-          </div>
+            <input type="text" id="trackingSearch" data-i18n-placeholder="searchDomainPlaceholder" placeholder="搜索域名..." aria-label="搜索域名或描述" data-i18n-aria-label="searchDomainPlaceholder">
+          </search>
 
           <div id="trackingRules" class="rules-container"></div>
-        </div>
+        </section>
 
-        <div class="tab-panel" id="tab-whitelist">
+        <section class="tab-panel" id="tab-whitelist" role="tabpanel" aria-labelledby="tab-btn-whitelist" tabindex="0">
           <div class="panel-header panel-header-with-action">
             <div class="panel-header-text">
               <h2 data-i18n="whitelistSettings">Whitelist</h2>
@@ -180,32 +180,32 @@
             </div>
           </div>
 
-          <div class="whitelist-form">
+          <form class="whitelist-form" id="whitelistForm">
             <div class="form-group">
-              <input type="text" id="whitelistDomainInput" data-i18n-placeholder="domainPlaceholder" placeholder="如：example.com">
+              <input type="text" id="whitelistDomainInput" data-i18n-placeholder="domainPlaceholder" placeholder="如：example.com" aria-label="域名" data-i18n-aria-label="domain">
             </div>
-            <button class="btn btn-primary" id="addWhitelistDomain">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <button type="submit" class="btn btn-primary" id="addWhitelistDomain">
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="12" y1="5" x2="12" y2="19"/>
                 <line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
               <span data-i18n="addDomain">Add Domain</span>
             </button>
-          </div>
+          </form>
 
-          <div id="whitelistContainer" class="whitelist-container"></div>
-        </div>
+          <ul id="whitelistContainer" class="whitelist-container"></ul>
+        </section>
 
-        <div class="tab-panel" id="tab-backup">
+        <section class="tab-panel" id="tab-backup" role="tabpanel" aria-labelledby="tab-btn-backup" tabindex="0">
           <div class="panel-header">
             <h2 data-i18n="backupSettings">Backup & Restore</h2>
             <p data-i18n="backupSettingsDesc">Save your configuration or restore from a backup</p>
           </div>
           
           <div class="backup-actions">
-            <div class="backup-card">
+            <section class="backup-card">
               <div class="backup-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                   <polyline points="7 10 12 15 17 10"/>
                   <line x1="12" y1="15" x2="12" y2="3"/>
@@ -218,11 +218,11 @@
               <button class="btn btn-secondary" id="exportSettings">
                 <span data-i18n="export">Export</span>
               </button>
-            </div>
+            </section>
             
-            <div class="backup-card">
+            <section class="backup-card">
               <div class="backup-icon import">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                   <polyline points="17 8 12 3 7 8"/>
                   <line x1="12" y1="3" x2="12" y2="15"/>
@@ -235,12 +235,12 @@
               <button class="btn btn-secondary" id="importSettings">
                 <span data-i18n="import">Import</span>
               </button>
-              <input type="file" id="importFile" accept=".json" style="display: none;">
-            </div>
+              <input type="file" id="importFile" accept=".json" hidden>
+            </section>
             
-            <div class="backup-card danger">
+            <section class="backup-card danger">
               <div class="backup-icon reset">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="23 4 23 10 17 10"/>
                   <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
                 </svg>
@@ -252,23 +252,23 @@
               <button class="btn btn-danger" id="resetSettings">
                 <span data-i18n="reset">Reset</span>
               </button>
-            </div>
+            </section>
           </div>
-        </div>
+        </section>
 
-        <div class="tab-panel" id="tab-help">
+        <section class="tab-panel" id="tab-help" role="tabpanel" aria-labelledby="tab-btn-help" tabindex="0">
           <div class="panel-header">
             <h2 data-i18n="helpTitle">User Guide</h2>
             <p data-i18n="helpSubtitle">Learn what the extension does and what each setting means</p>
           </div>
 
           <div class="help-content">
-            <div class="help-section">
+            <section class="help-section">
               <h3 data-i18n="helpOverviewTitle">Overview</h3>
               <p data-i18n="helpOverviewDesc">The extension processes links on every page automatically in this order: unwrap redirect links, remove same-origin target=&quot;_blank&quot;, and clean tracking parameters. It only modifies links, not page behavior.</p>
-            </div>
+            </section>
 
-            <div class="help-section">
+            <section class="help-section">
               <h3 data-i18n="helpGlobalTitle">General Settings</h3>
               <p data-i18n="helpGlobalIntro">These switches control the three main features globally.</p>
               <ul>
@@ -285,9 +285,9 @@
                   <span data-i18n="helpTrackingToggleDesc">Global switch. When on, tracking attributes and URL parameters are removed according to the rules on the Tracking tab. When off, all tracking rules are ignored.</span>
                 </li>
               </ul>
-            </div>
+            </section>
 
-            <div class="help-section">
+            <section class="help-section">
               <h3 data-i18n="helpRedirectTitle">Redirect Rules</h3>
               <p data-i18n="helpRedirectIntro">Each rule matches redirect links on a given domain and extracts the real URL from a query parameter. Common sites like Juejin, Zhihu, Weibo are built in, and you can add custom rules.</p>
               <ul>
@@ -297,9 +297,9 @@
                 <li><strong data-i18n="enabled">Enabled</strong> — <span data-i18n="helpFieldEnabled">Temporarily disable the rule without deleting it.</span></li>
                 <li><strong data-i18n="description">Description</strong> — <span data-i18n="helpFieldDesc">A note shown only for your reference.</span></li>
               </ul>
-            </div>
+            </section>
 
-            <div class="help-section">
+            <section class="help-section">
               <h3 data-i18n="helpTrackingTitle">Tracking Cleanup Rules</h3>
               <p data-i18n="helpTrackingIntro">Each rule matches a domain and performs three kinds of cleanup on its links. Common sites like Bilibili, Weibo, and Zhihu are built in.</p>
               <ul>
@@ -309,41 +309,41 @@
                 <li><strong data-i18n="enabled">Enabled</strong> — <span data-i18n="helpFieldEnabled">Temporarily disable the rule without deleting it.</span></li>
                 <li><strong data-i18n="description">Description</strong> — <span data-i18n="helpFieldDesc">A note shown only for your reference.</span></li>
               </ul>
-            </div>
+            </section>
 
-            <div class="help-section">
+            <section class="help-section">
               <h3 data-i18n="helpWhitelistTitle">Whitelist</h3>
               <p data-i18n="helpWhitelistDesc">Websites on the whitelist are skipped entirely. Matching uses domain suffixes: adding example.com also covers www.example.com and sub.example.com. You can also add or remove the current site from the popup.</p>
-            </div>
+            </section>
 
-            <div class="help-section">
+            <section class="help-section">
               <h3 data-i18n="helpBackupTitle">Backup &amp; Restore</h3>
               <ul>
                 <li><span data-i18n="helpBackupExport">Export downloads the current configuration (diff from built-in rules) as a JSON file for migration or backup.</span></li>
                 <li><span data-i18n="helpBackupImport">Import restores a previously exported JSON file and overwrites all current custom settings.</span></li>
                 <li><span data-i18n="helpBackupReset">Reset clears all custom rules, overrides, and whitelist changes and restores factory defaults.</span></li>
               </ul>
-            </div>
+            </section>
 
-            <div class="help-section">
+            <section class="help-section">
               <h3 data-i18n="helpStorageNoteTitle">About built-in rules</h3>
               <p data-i18n="helpStorageNoteDesc">Config is stored as a diff against built-in rules, so new or corrected built-in rules automatically take effect after the extension updates unless you modified or removed them.</p>
-            </div>
+            </section>
           </div>
-        </div>
+        </section>
       </div>
 
     </main>
 
-    <div id="toast" class="toast"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <!-- 添加规则弹窗 -->
     <div class="modal-overlay" id="ruleModal" role="dialog" aria-modal="true" aria-labelledby="ruleModalTitle">
       <div class="modal">
         <div class="modal-header">
           <h3 id="ruleModalTitle" data-i18n="addRule">Add Rule</h3>
-          <button class="modal-close" id="closeRuleModal" aria-label="Close">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="modal-close" id="closeRuleModal" aria-label="Close" data-i18n-aria-label="closeModal">
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>

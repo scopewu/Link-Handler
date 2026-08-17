@@ -28,7 +28,7 @@
   /* Text Colors - Soft darks */
   --text-primary: #1F2937;
   --text-secondary: #6B7280;
-  --text-tertiary: #9CA3AF;
+  --text-tertiary: #6E7683; /* 正文级辅助文字色，白色背景上对比度 4.58:1（WCAG AA） */
   --text-muted: #D1D5DB;
   
   /* Gradients */
@@ -61,6 +61,17 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* hidden 属性兜底：.toggle-card 等类选择器上的 display 声明会覆盖 UA 的 [hidden] 样式 */
+[hidden] {
+  display: none !important;
+}
+
+/* 键盘焦点可见样式（鼠标点击不触发） */
+:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
 }
 
 body {
@@ -301,7 +312,7 @@ input:checked + .slider::before {
   transform: translateX(22px);
 }
 
-input:focus + .slider {
+input:focus-visible + .slider {
   box-shadow: 0 0 0 3px var(--primary-100);
 }
 

@@ -91,6 +91,24 @@
     "message": "Enabled",
     "description": "Enabled label"
   },
+  "settingsTabList": {
+    "message": "Settings sections",
+    "description": "Accessible label for the settings tab list"
+  },
+  "removeTag": {
+    "message": "Remove tag $1$",
+    "description": "Accessible label for tag remove button, $1$ is the tag value",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "utm_source"
+      }
+    }
+  },
+  "closeModal": {
+    "message": "Close dialog",
+    "description": "Accessible label for modal close button"
+  },
   "removeAttributes": {
     "message": "Remove Attributes",
     "description": "Remove attributes label"

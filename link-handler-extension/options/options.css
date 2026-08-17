@@ -28,7 +28,7 @@
   /* Text Colors */
   --text-primary: #1F2937;
   --text-secondary: #6B7280;
-  --text-tertiary: #9CA3AF;
+  --text-tertiary: #6E7683; /* 正文级辅助文字色，白色背景上对比度 4.58:1（WCAG AA） */
   --text-muted: #D1D5DB;
 
   /* Gradients */
@@ -61,6 +61,23 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* hidden 属性兜底：类选择器上的 display 声明会覆盖 UA 的 [hidden] 样式 */
+[hidden] {
+  display: none !important;
+}
+
+/* 键盘焦点可见样式（鼠标点击不触发；自带焦点指示的控件由更高优先级规则覆盖） */
+:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+/* 开关的 input 视觉隐藏，聚焦时改为高亮滑块 */
+.rule-toggle-label input:focus-visible + .toggle-slider {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
 }
 
 body {
@@ -175,7 +192,8 @@ body {
 }
 
 .tab-btn.active {
-  color: var(--primary-600);
+  /* primary-700 在白底上对比度 5.47:1，满足 WCAG AA */
+  color: var(--primary-700);
   background: var(--bg-secondary);
 }
 
@@ -709,7 +727,14 @@ body {
   font-weight: 500;
 }
 
+/* 标签删除按钮（button 元素）的无障碍化重置：清除 UA 按钮样式，保留原视觉 */
 .tag .tag-remove {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  line-height: 1;
+  color: inherit;
   cursor: pointer;
   opacity: 0.6;
   transition: opacity 0.2s;
@@ -980,6 +1005,8 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
+  /* <ul> 语义化后清除默认列表样式（margin/padding 已由全局 reset 处理） */
+  list-style: none;
 }
 
 @media (min-width: 375px) {

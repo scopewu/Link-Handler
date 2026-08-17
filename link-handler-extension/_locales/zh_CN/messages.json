@@ -95,6 +95,24 @@
     "message": "启用",
     "description": "启用标签"
   },
+  "settingsTabList": {
+    "message": "设置分类",
+    "description": "设置页标签列表的无障碍名称"
+  },
+  "removeTag": {
+    "message": "移除标签 $1$",
+    "description": "标签删除按钮的无障碍名称，$1$ 为标签内容",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "utm_source"
+      }
+    }
+  },
+  "closeModal": {
+    "message": "关闭弹窗",
+    "description": "弹窗关闭按钮的无障碍名称"
+  },
   "removeAttributes": {
     "message": "移除属性",
     "description": "移除属性标签"

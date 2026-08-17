@@ -83,7 +83,7 @@
       const descEl = document.getElementById('whitelistToggleDesc');
 
       hostnameEl.textContent = hostname;
-      card.style.display = '';
+      card.hidden = false;
 
       const matchedDomain = findWhitelistMatch(hostname, config.whitelist);
       const whitelisted = matchedDomain !== null;

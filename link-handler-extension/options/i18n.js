@@ -105,18 +105,38 @@ const i18n = {
     // 使用本地缓存的翻译
     const messageObj = this.translations[key];
     if (messageObj && messageObj.message) {
-      let message = messageObj.message;
-      // 处理占位符
-      if (substitutions && Array.isArray(substitutions)) {
-        substitutions.forEach((sub, index) => {
-          message = message.replace(new RegExp(`\\$${index + 1}\\$`, 'g'), sub);
-        });
-      }
-      return message;
+      // 与 chrome.i18n 一致，substitutions 允许 string | string[]
+      const subs = typeof substitutions === 'string' ? [substitutions] : substitutions;
+      return this.substitutePlaceholders(messageObj, Array.isArray(subs) ? subs : []);
     }
 
     // 降级处理：返回 key
     return key;
+  },
+
+  // 展开消息中的占位符：先按 placeholders 定义展开命名变量（其 content 再做位置替换），
+  // 最后替换消息中直接出现的 $1$、$2$… 位置占位符，行为与 chrome.i18n 对齐
+  substitutePlaceholders: function(messageObj, subs) {
+    // 把字符串中的 $1、$1$、$2、$2$… 替换为 subs 对应项（用函数替换，避免 $&、$' 等被特殊解释）
+    const replacePositional = (text) => text.replace(/\$([0-9]+)\$?(?![0-9])/g, (match, num) => {
+      const index = parseInt(num, 10) - 1;
+      return index >= 0 && index < subs.length ? subs[index] : match;
+    });
+
+    // placeholders 的变量名不区分大小写
+    const placeholders = {};
+    if (messageObj.placeholders) {
+      for (const [name, def] of Object.entries(messageObj.placeholders)) {
+        placeholders[name.toLowerCase()] = def;
+      }
+    }
+
+    let message = messageObj.message;
+    message = message.replace(/\$([A-Za-z0-9_]+)\$/g, (match, name) => {
+      const def = placeholders[name.toLowerCase()];
+      return def && typeof def.content === 'string' ? replacePositional(def.content) : match;
+    });
+    return replacePositional(message);
   },
 
   // 填充页面所有带 data-i18n 属性的元素
@@ -151,6 +171,16 @@ const i18n = {
       }
     });
 
+    // 处理 aria-label 属性（无障碍名称）
+    const ariaLabelElements = document.querySelectorAll('[data-i18n-aria-label]');
+    ariaLabelElements.forEach(el => {
+      const key = el.getAttribute('data-i18n-aria-label');
+      const message = this.getMessage(key);
+      if (message && message !== key) {
+        el.setAttribute('aria-label', message);
+      }
+    });
+
     // 更新页面语言属性
     document.documentElement.lang = this.currentLocale === 'zh_CN' ? 'zh-CN' :
                                     this.currentLocale === 'zh_TW' ? 'zh-TW' : 'en';
@@ -162,7 +192,8 @@ const i18n = {
     if (!message || message === key) return key;
 
     args.forEach((arg, index) => {
-      message = message.replace(new RegExp(`\\$${index + 1}\\$`, 'g'), arg);
+      // 用函数替换，避免 arg 中的 $&、$' 等被 String.replace 特殊解释
+      message = message.replace(new RegExp(`\\$${index + 1}\\$`, 'g'), () => arg);
     });
     return message;
   }

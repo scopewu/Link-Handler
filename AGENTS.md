@@ -101,8 +101,12 @@ See `processLink()`.
   when the error is intentionally ignored.
 - `config.js` and `i18n.js` end with a CommonJS export shim
   (`if (typeof module !== 'undefined' && module.exports)`) for Node-based tooling/tests.
-- i18n message placeholders use Chrome's `$1$`, `$2$` syntax. Locale files live under
-  `_locales/{locale}/messages.json` in Chrome's `{ "key": { "message": "...", "description": "..." } }` shape.
+- i18n message placeholders use Chrome's `$1$`, `$2$` syntax. Every `$name$` referenced in a
+  `message` MUST also have a matching entry in that message's `placeholders` field
+  (e.g. `"placeholders": { "1": { "content": "$1", "example": "utm_source" } }`); otherwise
+  Chrome logs `Variable $1$ used but not defined` on load and `getMessage` returns `""` for that key.
+  Locale files live under `_locales/{locale}/messages.json` in Chrome's
+  `{ "key": { "message": "...", "description": "..." } }` shape.
 
 ## What NOT to Do
 
