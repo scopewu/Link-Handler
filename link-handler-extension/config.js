@@ -73,7 +73,7 @@ const DEFAULT_CONFIG = {
     }
   ],
 
-  // 跟踪清理规则（按域名匹配）
+  // 跟踪清理规则
   trackingRules: [
     {
       domain: 'bilibili.com',
@@ -136,11 +136,10 @@ const DEFAULT_CONFIG = {
 
   // 全局设置
   global: {
-    removeTargetSameOrigin: true,    // 同域名/相对地址移除 target
-    enableRedirect: true,            // 启用重定向解析
-    enableTracking: true,            // 启用跟踪清理
-    // 全局通用跟踪参数黑名单：对所有非白名单链接统一清除
-    // 与按域名 tracking 规则叠加生效，跟随 enableTracking 总开关
+    removeTargetSameOrigin: true,
+    enableRedirect: true,
+    enableTracking: true,
+    // 全局通用跟踪参数黑名单：对所有非白名单链接生效，与按域名规则叠加
     globalTrackingParams: [
       'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
       'fbclid', 'gclid', 'msclkid', 'mc_cid', 'mc_eid'
@@ -148,12 +147,33 @@ const DEFAULT_CONFIG = {
   }
 };
 
-// 存储格式版本：v2 起只保存用户配置与内置配置的差异（diff），
-// 这样扩展升级后新增/修正的内置规则可以自动生效
+// 存储格式版本：v2 起只保存与内置配置的差异，升级后新增内置规则可自动生效
 const STORAGE_VERSION = 2;
 
 function deepCopy(obj) {
   return JSON.parse(JSON.stringify(obj));
+}
+
+// 归一化主机名：去掉 IPv6 字面量两侧的方括号
+function normalizeHostname(hostname) {
+  return String(hostname || '').replace(/^\[/, '').replace(/\]$/, '');
+}
+
+// 域名列表查找：精确匹配优先，其次后缀匹配（example.com 覆盖子域名），返回命中项或 null；白名单与各处规则查找共用
+function findDomainMatch(hostname, domains) {
+  if (!Array.isArray(domains) || domains.length === 0) return null;
+  const normalized = normalizeHostname(hostname);
+  if (!normalized) return null;
+
+  let suffixMatch = null;
+  for (const domain of domains) {
+    const normalizedDomain = normalizeHostname(domain);
+    if (normalized === normalizedDomain) return domain;
+    if (!suffixMatch && normalized.endsWith('.' + normalizedDomain)) {
+      suffixMatch = domain;
+    }
+  }
+  return suffixMatch;
 }
 
 // 规范化对象（键名排序），用于深比较规则是否被用户修改过（与键顺序无关）
@@ -226,7 +246,6 @@ function decomposeConfig(fullConfig) {
   return diff;
 }
 
-// 将 diff 应用回内置默认配置，得到完整配置
 function applyConfigDiff(defaults, diff) {
   const removedRedirect = new Set(diff.removedBuiltinRedirectRules || []);
   const redirectOverrides = diff.redirectRuleOverrides || {};
@@ -255,7 +274,6 @@ function applyConfigDiff(defaults, diff) {
   };
 }
 
-// 获取合并后的配置
 async function getConfig() {
   try {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
@@ -271,8 +289,7 @@ async function getConfig() {
   return deepCopy(DEFAULT_CONFIG);
 }
 
-// 将存储的配置数据还原为完整配置：
-// 仅接受 v2 格式的 diff（applyConfigDiff）；无法识别的数据（含 v1 遗留）直接回落默认配置
+// 还原存储数据：仅接受 v2 diff；其他数据（含 v1 遗留）回落默认配置
 function applyStoredConfig(defaults, stored) {
   if (stored && stored.version === STORAGE_VERSION) {
     return applyConfigDiff(defaults, stored);
@@ -281,14 +298,12 @@ function applyStoredConfig(defaults, stored) {
   return deepCopy(defaults);
 }
 
-// 构建「地址栏清洗」主机映射：{ domain: [参数列表] }
-// 供 content.js 下发到 MAIN world 的 spa-hook.js 使用。
-// 地址栏清洗是跟踪清理的默认行为：所有启用且配置了 cleanUrlParams 的跟踪规则
-// 都会同时清洗该站点地址栏中的同名参数，与链接清洗共用同一参数列表（单一数据源）
+// 构建「地址栏清洗」主机映射 { domain: [参数] }，供 content.js 下发到 spa-hook.js；
+// 所有启用且有 cleanUrlParams 的跟踪规则默认同时清洗地址栏（与链接清洗共用参数列表）
 function buildSanitizeHostMap(config) {
   const hosts = {};
   if (!config || !Array.isArray(config.trackingRules)) return hosts;
-  // 跟踪清理被全局关闭时，地址栏清洗一并停用（跟随 enableTracking 总开关）
+  // 总开关关闭时地址栏清洗一并停用
   if (config.global && config.global.enableTracking === false) return hosts;
   config.trackingRules.forEach(rule => {
     if (!rule || rule.enabled === false) return;
@@ -298,7 +313,6 @@ function buildSanitizeHostMap(config) {
   return hosts;
 }
 
-// 保存配置（只保存与内置配置的差异）
 async function saveConfig(config) {
   try {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
@@ -318,7 +332,7 @@ async function saveConfig(config) {
   return false;
 }
 
-// 导出配置（用于 content script）
+// CommonJS 导出（供 Node 测试使用）
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { DEFAULT_CONFIG, getConfig, saveConfig, applyStoredConfig, decomposeConfig, applyConfigDiff, buildSanitizeHostMap };
+  module.exports = { DEFAULT_CONFIG, getConfig, saveConfig, applyStoredConfig, decomposeConfig, applyConfigDiff, buildSanitizeHostMap, findDomainMatch, normalizeHostname };
 }

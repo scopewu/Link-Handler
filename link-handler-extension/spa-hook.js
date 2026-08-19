@@ -1,11 +1,7 @@
 // SPA 导航钩子 - 链接处理器
-// 本脚本运行在 MAIN world（见 manifest.json 的 world 字段），
-// 可以拦截页面主世界脚本发起的 history.pushState / replaceState 调用。
-// 拦截后通过 window.postMessage 通知隔离世界中的 content.js，
-// 并按 content.js 下发的配置（type: 'sanitize-config'）清洗地址栏跟踪参数。
-// 地址栏清洗的站点名单与参数列表完全由 config.js 驱动：
-// 所有启用且配置了 cleanUrlParams 的跟踪规则都会默认清洗该站点地址栏，
-// 与链接清洗共用同一参数列表，此处不再硬编码。
+// 运行在 MAIN world（见 manifest.json），拦截 pushState/replaceState 并 postMessage
+// 通知隔离世界的 content.js；同时按其下发的配置清洗地址栏跟踪参数
+// （参数列表由 config.js 驱动，与链接清洗共用，此处不硬编码）。
 (function() {
   'use strict';
 
@@ -15,9 +11,7 @@
 
   const MESSAGE_SOURCE = 'link-handler-spa';
 
-  // 地址栏清洗参数映射：{ hostname: [参数列表] }
-  // 由隔离世界中的 content.js 在配置就绪后通过消息下发；
-  // 为空对象时表示当前页面无需清洗（白名单站点、跟踪清理总开关关闭等）。
+  // 地址栏清洗参数映射 { hostname: [参数] }，由 content.js 下发；空对象 = 无需清洗
   let sanitizeParamsByHost = {};
 
   function notifyNavigation() {
@@ -28,7 +22,6 @@
     }
   }
 
-  // 判断给定主机名是否需要清洗，返回参数列表或 null
   function getParamsToRemove(hostname) {
     if (sanitizeParamsByHost[hostname]) return sanitizeParamsByHost[hostname];
     for (const domain of Object.keys(sanitizeParamsByHost)) {
@@ -39,7 +32,7 @@
     return null;
   }
 
-  // 校验消息中的 hosts 结构：{ domain: [string, ...] }，防止页面脚本注入异常数据
+  // 校验 hosts 结构，防页面脚本注入
   function isValidHosts(hosts) {
     if (!hosts || typeof hosts !== 'object' || Array.isArray(hosts)) return false;
     for (const domain of Object.keys(hosts)) {
@@ -59,7 +52,7 @@
 
       let modified = false;
 
-      // 通配符 * 表示清除全部参数（与 content.js 的 cleanUrlParams 语义一致）
+      // 通配符 *：清除全部参数（与 content.js 语义一致）
       if (params.includes('*')) {
         if (url.search) {
           url.search = '';
@@ -112,7 +105,7 @@
     return result;
   };
 
-  // 清洗当前地址栏（配置到达后执行；使用原生 replaceState 避免进入我们自己的包装层造成递归）
+  // 清洗当前地址栏；用原生 replaceState 避免进入自己的包装层造成递归
   function sanitizeCurrentUrl() {
     const paramsToRemove = getParamsToRemove(location.hostname);
     if (!paramsToRemove) return;
@@ -124,8 +117,7 @@
     }
   }
 
-  // 接收隔离世界 content.js 下发的地址栏清洗配置（见 config.js 的 buildSanitizeHostMap）
-  // 每次配置变化（用户修改规则/白名单）后都会重新下发，因此这里总是以最新配置为准
+  // 接收 content.js 下发的清洗配置，总是以最新下发为准
   window.addEventListener('message', (event) => {
     if (event.source !== window) return;
     const data = event.data;
@@ -133,7 +125,7 @@
     if (!isValidHosts(data.hosts)) return;
 
     sanitizeParamsByHost = data.hosts;
-    // 配置到达后立即清洗一次当前地址栏，覆盖页面加载早期的等待窗口
+    // 配置到达立即清洗一次，覆盖加载早期的等待窗口
     sanitizeCurrentUrl();
   });
 })();

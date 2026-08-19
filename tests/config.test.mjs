@@ -7,15 +7,14 @@ import {
   decomposeConfig,
   applyConfigDiff,
   applyStoredConfig,
-  buildSanitizeHostMap
+  buildSanitizeHostMap,
+  findDomainMatch
 } from '../link-handler-extension/config.js';
 
 // 测试用深拷贝
 function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
-
-// ---------- 基础工具 ----------
 
 test('DEFAULT_CONFIG 包含预期的内置规则', () => {
   const redirectDomains = DEFAULT_CONFIG.redirectRules.map(r => r.domain);
@@ -37,8 +36,6 @@ test('DEFAULT_CONFIG 包含预期的内置规则', () => {
   // 跟踪规则
   assert.ok(trackingDomains.includes('bilibili.com'));
 });
-
-// ---------- v2 diff 存储往返 ----------
 
 test('默认配置 decompose 后 apply 往返不变（空 diff）', () => {
   const diff = decomposeConfig(DEFAULT_CONFIG);
@@ -120,7 +117,32 @@ test('空/非对象存储数据回落默认配置', () => {
   assert.deepEqual(applyStoredConfig(DEFAULT_CONFIG, undefined), DEFAULT_CONFIG);
 });
 
-// ---------- buildSanitizeHostMap ----------
+test('findDomainMatch 精确匹配优先于后缀匹配', () => {
+  const domains = ['example.com', 'a.example.com'];
+  // 主机名 a.example.com 同时命中两条规则，应返回精确匹配项
+  assert.equal(findDomainMatch('a.example.com', domains), 'a.example.com');
+  assert.equal(findDomainMatch('example.com', domains), 'example.com');
+});
+
+test('findDomainMatch 后缀匹配覆盖子域名（白名单语义）', () => {
+  assert.equal(findDomainMatch('chat.deepseek.com', ['deepseek.com']), 'deepseek.com');
+  assert.equal(findDomainMatch('links.jianshu.com', ['jianshu.com']), 'jianshu.com');
+  // 后缀必须落在域名边界上：notdeepseek.com 不得命中 deepseek.com
+  assert.equal(findDomainMatch('notdeepseek.com', ['deepseek.com']), null);
+  assert.equal(findDomainMatch('deepseek.com.evil.com', ['deepseek.com']), null);
+});
+
+test('findDomainMatch 容忍 IPv6 字面量方括号', () => {
+  assert.equal(findDomainMatch('[::1]', ['::1']), '::1');
+  assert.equal(findDomainMatch('::1', ['[::1]']), '[::1]');
+});
+
+test('findDomainMatch 空列表/空主机名返回 null', () => {
+  assert.equal(findDomainMatch('example.com', []), null);
+  assert.equal(findDomainMatch('example.com', null), null);
+  assert.equal(findDomainMatch('', ['example.com']), null);
+  assert.equal(findDomainMatch(null, ['example.com']), null);
+});
 
 test('所有启用且配置了 cleanUrlParams 的内置跟踪规则都进入清洗映射', () => {
   const hosts = buildSanitizeHostMap(DEFAULT_CONFIG);

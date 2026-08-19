@@ -1,9 +1,15 @@
-// 国际化工具
+// data-i18n* 绑定属性 → 写入方式的映射表（localizePage 按表驱动，新增属性只需加一行）
+const I18N_BINDINGS = [
+  { attr: 'data-i18n', apply: (el, msg) => { el.textContent = msg; } },
+  { attr: 'data-i18n-placeholder', apply: (el, msg) => { el.placeholder = msg; } },
+  { attr: 'data-i18n-title', apply: (el, msg) => { el.title = msg; } },
+  { attr: 'data-i18n-aria-label', apply: (el, msg) => { el.setAttribute('aria-label', msg); } }
+];
+
+// 国际化工具（ES module）
 const i18n = {
-  // 当前语言
   currentLocale: 'en',
 
-  // 可用的语言列表
   availableLocales: ['en', 'zh_CN', 'zh_TW'],
 
   // 语言映射表（浏览器语言 -> 插件语言）
@@ -23,25 +29,19 @@ const i18n = {
     'en-AU': 'en'
   },
 
-  // 翻译缓存
   translations: {},
 
-  // 初始化语言设置
   init: async function() {
-    // 检测浏览器语言
     const browserLocale = this.detectBrowserLocale();
     this.currentLocale = browserLocale;
 
-    // 加载翻译文件
     await this.loadTranslations(browserLocale);
 
-    // 应用翻译
     this.localizePage();
   },
 
-  // 检测浏览器语言
   detectBrowserLocale: function() {
-    // 优先使用 chrome.i18n 的 API（如果在扩展环境中）
+    // 扩展环境优先 chrome.i18n
     if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getUILanguage) {
       const uiLang = chrome.i18n.getUILanguage();
       if (this.localeMapping[uiLang]) {
@@ -64,15 +64,12 @@ const i18n = {
       return this.localeMapping[navPrefix];
     }
 
-    // 默认返回英文
     return 'en';
   },
 
-  // 加载翻译文件
   loadTranslations: async function(locale) {
-    // 如果在扩展环境中，优先使用 chrome.i18n
+    // 扩展环境交由 chrome.i18n 处理
     if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage) {
-      // chrome.i18n 会自动处理，不需要手动加载
       return;
     }
 
@@ -82,7 +79,7 @@ const i18n = {
       if (response.ok) {
         this.translations = await response.json();
       } else {
-        // 如果加载失败，尝试加载英文
+        // 加载失败时回落英文
         const enResponse = await fetch(`../_locales/en/messages.json`);
         if (enResponse.ok) {
           this.translations = await enResponse.json();
@@ -94,7 +91,6 @@ const i18n = {
     }
   },
 
-  // 获取本地化消息
   getMessage: function(key, substitutions) {
     // 优先使用 chrome.i18n API
     if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage) {
@@ -110,7 +106,7 @@ const i18n = {
       return this.substitutePlaceholders(messageObj, Array.isArray(subs) ? subs : []);
     }
 
-    // 降级处理：返回 key
+    // 降级：返回 key
     return key;
   },
 
@@ -139,54 +135,22 @@ const i18n = {
     return replacePositional(message);
   },
 
-  // 填充页面所有带 data-i18n 属性的元素
+  // 填充页面所有带 data-i18n* 属性的元素
   localizePage: function() {
-    // 处理 data-i18n 属性
-    const elements = document.querySelectorAll('[data-i18n]');
-    elements.forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      const message = this.getMessage(key);
-      if (message && message !== key) {
-        el.textContent = message;
-      }
+    I18N_BINDINGS.forEach(({ attr, apply }) => {
+      document.querySelectorAll(`[${attr}]`).forEach(el => {
+        const key = el.getAttribute(attr);
+        const message = this.getMessage(key);
+        if (message && message !== key) {
+          apply(el, message);
+        }
+      });
     });
 
-    // 处理 placeholder
-    const placeholderElements = document.querySelectorAll('[data-i18n-placeholder]');
-    placeholderElements.forEach(el => {
-      const key = el.getAttribute('data-i18n-placeholder');
-      const message = this.getMessage(key);
-      if (message && message !== key) {
-        el.placeholder = message;
-      }
-    });
-
-    // 处理 title 属性
-    const titleElements = document.querySelectorAll('[data-i18n-title]');
-    titleElements.forEach(el => {
-      const key = el.getAttribute('data-i18n-title');
-      const message = this.getMessage(key);
-      if (message && message !== key) {
-        el.title = message;
-      }
-    });
-
-    // 处理 aria-label 属性（无障碍名称）
-    const ariaLabelElements = document.querySelectorAll('[data-i18n-aria-label]');
-    ariaLabelElements.forEach(el => {
-      const key = el.getAttribute('data-i18n-aria-label');
-      const message = this.getMessage(key);
-      if (message && message !== key) {
-        el.setAttribute('aria-label', message);
-      }
-    });
-
-    // 更新页面语言属性
     document.documentElement.lang = this.currentLocale === 'zh_CN' ? 'zh-CN' :
                                     this.currentLocale === 'zh_TW' ? 'zh-TW' : 'en';
   },
 
-  // 动态替换模板中的变量
   format: function(key, ...args) {
     let message = this.getMessage(key);
     if (!message || message === key) return key;
@@ -199,16 +163,8 @@ const i18n = {
   }
 };
 
-// 页面加载完成后自动初始化
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    i18n.init();
-  });
-} else {
-  i18n.init();
-}
+// 模块 defer 语义，DOM 已就绪，直接初始化
+i18n.init();
 
 // 导出
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = i18n;
-}
+export { i18n };

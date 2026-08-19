@@ -2,25 +2,25 @@
 (function() {
   'use strict';
 
-  // 标记已处理的链接，避免重复处理
   const PROCESSED_MARK = 'data-link-handler-processed';
   const PREVENTED_MARK = 'data-link-handler-prevented';
   const LAST_HREF_DATA = 'linkHandlerLastHref';
 
-  // 当前配置
   let config = null;
 
-  // 批处理队列
   let pendingLinks = [];
   let processTimer = null;
 
-  // 统计计数器
-  let stats = {
-    totalProcessed: 0,
-    redirectUnwrapped: 0,
-    targetRemoved: 0,
-    trackingCleaned: 0
-  };
+  function createEmptyStats() {
+    return {
+      totalProcessed: 0,
+      redirectUnwrapped: 0,
+      targetRemoved: 0,
+      trackingCleaned: 0
+    };
+  }
+
+  let stats = createEmptyStats();
 
   let contentObserver = null;
   let isProcessing = false;
@@ -33,34 +33,23 @@
   let lastUrl = location.href;
 
   function isWhitelisted(hostname) {
-    if (!config || !config.whitelist || config.whitelist.length === 0) return false;
-    const normalized = hostname.replace(/^\[/, '').replace(/\]$/, '');
-    return config.whitelist.some(domain => {
-      const normalizedDomain = domain.replace(/^\[/, '').replace(/\]$/, '');
-      return normalized === normalizedDomain || normalized.endsWith('.' + normalizedDomain);
-    });
+    // 域名匹配见 config.js 的 findDomainMatch
+    return findDomainMatch(hostname, config && config.whitelist) !== null;
   }
 
-  // 初始化
   async function init() {
     config = await getConfig();
 
     buildRuleMaps();
 
-    // 向 MAIN world 的 spa-hook.js 下发地址栏清洗配置
-    // （白名单页面下发空表，禁用地址栏清洗）
     sendSanitizeConfig();
 
-    // 检查当前页面是否在白名单中
     if (isWhitelisted(location.hostname)) return;
 
-    // 处理已有链接
     processAllLinks();
 
-    // 监听动态内容（默认始终启用）
     observeDynamicContent();
 
-    // 监听 SPA 路由变化（默认始终启用）
     listenToSPANavigation();
   }
 
@@ -83,12 +72,10 @@
     });
   }
 
-  // SPA 导航消息来源标识（与 spa-hook.js 约定一致）
+  // 消息来源标识（与 spa-hook.js 约定的契约）
   const SPA_MESSAGE_SOURCE = 'link-handler-spa';
 
-  // 向 MAIN world 下发地址栏清洗配置：{ source, type: 'sanitize-config', hosts }
-  // hosts 取自 config.js 的 buildSanitizeHostMap；白名单页面下发空对象
-  // （spa-hook.js 收到后会以最新配置重新清洗当前地址栏）
+  // 向 MAIN world 下发地址栏清洗配置；白名单页面下发空表以禁用
   function sendSanitizeConfig() {
     try {
       const hosts = isWhitelisted(location.hostname)
@@ -100,9 +87,7 @@
     }
   }
 
-  // 重新加载配置并重扫（防抖合并）：
-  // popup 的「处理当前页面」消息与 chrome.storage.onChanged 可能同时触发
-  // （popup 保存配置时二者几乎同时到达），合并为一次执行避免重复重扫
+  // 重载配置并重扫：popup 的 reprocess 与 storage.onChanged 几乎同时到达，防抖合并
   let reprocessTimer = null;
   const REPROCESS_DEBOUNCE_MS = 150;
 
@@ -112,7 +97,6 @@
       reprocessTimer = null;
       config = await getConfig();
       buildRuleMaps();
-      // 始终重新下发清洗配置（白名单站点下发空表以禁用地址栏清洗）
       sendSanitizeConfig();
       if (!isWhitelisted(location.hostname)) {
         clearProcessedMarksAndReprocess();
@@ -124,11 +108,9 @@
   if (typeof chrome !== 'undefined' && chrome.runtime) {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.action === 'reprocess') {
-        // 与 storage.onChanged 去重合并，避免双重重扫
         scheduleReprocess();
       }
       if (message.action === 'getStats') {
-        // 返回统计信息
         sendResponse(stats);
         return true; // 保持消息通道开启
       }
@@ -142,12 +124,10 @@
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if (areaName !== 'sync' || !changes.linkHandlerConfig) return;
-      // 与 popup 的 reprocess 消息去重合并，避免双重重扫
       scheduleReprocess();
     });
   }
 
-  // 处理所有链接
   function processAllLinks() {
     if (isWhitelisted(location.hostname)) return;
     const nodeList = document.querySelectorAll('a[href]:not([' + PROCESSED_MARK + '])');
@@ -159,15 +139,8 @@
     batchProcessLinks(links);
   }
 
-  // 清除已处理标记并重新处理所有链接
   function clearProcessedMarksAndReprocess() {
-    // 重置统计
-    stats = {
-      totalProcessed: 0,
-      redirectUnwrapped: 0,
-      targetRemoved: 0,
-      trackingCleaned: 0
-    };
+    stats = createEmptyStats();
 
     document.querySelectorAll('[' + PROCESSED_MARK + ']').forEach(link => {
       link.removeAttribute(PROCESSED_MARK);
@@ -178,7 +151,6 @@
     processAllLinks();
   }
 
-  // 批量处理链接（性能优化）
   const scheduleProcess = typeof requestIdleCallback !== 'undefined'
     ? requestIdleCallback
     : (fn) => setTimeout(fn, 16);
@@ -191,7 +163,6 @@
       // 用 concat 而非 spread push，避免超大数组触发参数数量上限
       pendingLinks = pendingLinks.concat(links);
       if (pendingLinks.length > MAX_PENDING) {
-        // 超出容量时丢弃最旧的，保留最新的 MAX_PENDING 条
         pendingLinks = pendingLinks.slice(-MAX_PENDING);
       }
     }
@@ -213,40 +184,43 @@
     });
   }
 
-  // 处理单个链接
+  // 记录规范化后的 href，供 MutationObserver 判断 href 变化是否由本扩展引起
+  function recordHref(link, fallback = '') {
+    link.dataset[LAST_HREF_DATA] = link.getAttribute('href') || fallback;
+  }
+
   function processLink(link) {
     if (!link || !link.href || link.hasAttribute(PROCESSED_MARK)) {
       return;
     }
 
-    // 标记为已处理
     link.setAttribute(PROCESSED_MARK, 'true');
-    link.dataset[LAST_HREF_DATA] = link.getAttribute('href') || '';
+    recordHref(link);
     stats.totalProcessed++;
 
-    // 阶段1: 处理重定向链接
+    // 阶段1：重定向解析（规则表只含启用规则）
     let wasRedirect = false;
     if (config.global.enableRedirect !== false) {
-      const redirectRule = findRedirectRule(link.href);
-      if (redirectRule && redirectRule.enabled !== false) {
+      const redirectRule = findRuleFor(redirectRuleMap, link.href, matchRedirectRule);
+      if (redirectRule) {
         unwrapRedirectLink(link, redirectRule);
         stats.redirectUnwrapped++;
         wasRedirect = true;
       }
     }
 
-    // 阶段2: 同域名/相对地址，移除 target
+    // 阶段2：同域名/相对地址移除 target
     if (shouldRemoveTarget(link)) {
-      removeTargetAttribute(link);
+      link.removeAttribute('target');
       stats.targetRemoved++;
     }
 
-    // 阶段3: 清理跟踪属性
+    // 阶段3：清理跟踪属性（规则表只含启用规则）
     if (config.global.enableTracking !== false) {
       let trackingCounted = false; // 防止 per-domain 与全局双重计数
 
-      const trackingRule = findTrackingRule(link.href);
-      if (trackingRule && trackingRule.enabled !== false) {
+      const trackingRule = findRuleFor(trackingRuleMap, link.href, null);
+      if (trackingRule) {
         cleanTrackingAttributes(link, trackingRule);
         if (trackingRule.cleanUrlParams && trackingRule.cleanUrlParams.length > 0) {
           cleanUrlParams(link, trackingRule.cleanUrlParams);
@@ -262,12 +236,12 @@
         }
       }
 
-      // 全局通用跟踪参数清理（与按域名规则叠加，对所有非白名单链接生效）
+      // 全局通用跟踪参数（与按域名规则叠加）
       const globalParams = config.global.globalTrackingParams;
       if (globalParams && globalParams.length > 0) {
         const before = link.getAttribute('href');
         cleanUrlParams(link, globalParams);
-        // 仅当实际改动且本链接尚未计入时计数，避免与 per-domain 块重复
+        // 避免与 per-domain 块重复计数
         if (!trackingCounted && link.getAttribute('href') !== before) {
           stats.trackingCleaned++;
         }
@@ -275,13 +249,14 @@
     }
   }
 
-  function findRedirectRule(href) {
+  // 按主机名查规则表：精确匹配优先，其次后缀匹配；matchFn 为可选的逐规则校验
+  function findRuleFor(ruleMap, href, matchFn) {
     try {
       const url = new URL(href);
-      const directMatch = redirectRuleMap.get(url.hostname);
-      if (directMatch && matchRedirectRule(url, directMatch)) return directMatch;
-      for (const [domain, rule] of redirectRuleMap) {
-        if (url.hostname.endsWith('.' + domain) && matchRedirectRule(url, rule)) return rule;
+      const direct = ruleMap.get(url.hostname);
+      if (direct && (!matchFn || matchFn(url, direct))) return direct;
+      for (const [domain, rule] of ruleMap) {
+        if (url.hostname.endsWith('.' + domain) && (!matchFn || matchFn(url, rule))) return rule;
       }
       return null;
     } catch {
@@ -289,8 +264,7 @@
     }
   }
 
-  // 判断 URL 是否命中重定向规则：目标参数存在且非空，
-  // 若规则声明了 pathPattern，则路径必须以该前缀开头（避免误伤站内正常链接）
+  // 目标参数存在且非空；声明 pathPattern 时路径需以该前缀开头
   function matchRedirectRule(url, rule) {
     if (rule.pathPattern && !url.pathname.startsWith(rule.pathPattern)) return false;
     if (!url.searchParams.has(rule.param)) return false;
@@ -298,23 +272,6 @@
     return !!(val && val.trim().length > 0);
   }
 
-  function findTrackingRule(href) {
-    try {
-      const url = new URL(href);
-      const directMatch = trackingRuleMap.get(url.hostname);
-      if (directMatch) return directMatch;
-      for (const [domain, rule] of trackingRuleMap) {
-        if (url.hostname.endsWith('.' + domain)) {
-          return rule;
-        }
-      }
-      return null;
-    } catch {
-      return null;
-    }
-  }
-
-  // 解析重定向链接
   function unwrapRedirectLink(link, rule) {
     try {
       const url = new URL(link.href);
@@ -334,11 +291,9 @@
           }
         }
 
-        // 验证 URL 安全性
         if (isValidUrl(realUrl)) {
           link.href = realUrl;
-          // 记录规范化后的属性值，与 MutationObserver 中的比较保持一致
-          link.dataset[LAST_HREF_DATA] = link.getAttribute('href') || realUrl;
+          recordHref(link, realUrl);
         }
       }
     } catch (e) {
@@ -357,7 +312,7 @@
   }
 
   function isRelativeUrl(href) {
-    // 检查是否为相对 URL（不以协议或 // 开头）
+    // 不以协议或 // 开头
     return href && !/^([a-zA-Z][a-zA-Z0-9+\-.]*:|\/\/)/.test(href);
   }
 
@@ -370,11 +325,6 @@
     }
   }
 
-  function removeTargetAttribute(link) {
-    link.removeAttribute('target');
-  }
-
-  // 清理跟踪属性
   function cleanTrackingAttributes(link, rule) {
     if (!rule.removeAttributes) return;
 
@@ -388,18 +338,16 @@
     });
   }
 
-  // 清理 URL 参数
   function cleanUrlParams(link, paramsToRemove) {
     try {
       const url = new URL(link.href);
 
-      // 通配符 * 表示直接移除所有参数，产出干净 URL
+      // 通配符 *：移除全部参数
       if (paramsToRemove.includes('*')) {
         if (url.search) {
           url.search = '';
           link.href = url.toString();
-          // 记录规范化后的属性值，与 MutationObserver 中的比较保持一致
-          link.dataset[LAST_HREF_DATA] = link.getAttribute('href') || '';
+          recordHref(link);
         }
         return;
       }
@@ -415,17 +363,14 @@
 
       if (modified) {
         link.href = url.toString();
-        // 记录规范化后的属性值，与 MutationObserver 中的比较保持一致
-        link.dataset[LAST_HREF_DATA] = link.getAttribute('href') || '';
+        recordHref(link);
       }
     } catch (e) {
       console.error('[Link Handler] Failed to clean URL params:', e);
     }
   }
 
-  // 阻止点击重写：在 document 捕获阶段统一委托拦截
-  // 捕获阶段先于目标元素上的任何监听器执行，能可靠打断网站的点击跟踪/链接重写；
-  // 相比在每个链接上单独注册监听，也更省内存
+  // 阻止点击重写：document 捕获阶段统一委托拦截（捕获先于目标监听器，可靠打断重写且省内存）
   let clickRewriteGuardInstalled = false;
 
   function installClickRewriteGuard() {
@@ -439,9 +384,7 @@
       const link = e.target && e.target.closest ? e.target.closest('a[' + PREVENTED_MARK + ']') : null;
       if (!link) return;
 
-      // 阻止事件继续传播，网站的 click 监听器不会触发
-      // 不调用 preventDefault()，让浏览器继续执行默认导航
-      // 这样普通点击正常跳转，Ctrl+Click 仍会在新标签页打开
+      // 只 stopImmediatePropagation 不 preventDefault：打断网站监听器，默认导航照常（Ctrl+Click 仍开新标签）
       e.stopImmediatePropagation();
     }, true);
   }
@@ -452,7 +395,6 @@
     installClickRewriteGuard();
   }
 
-  // 验证 URL 安全性
   function isValidUrl(url) {
     try {
       const parsed = new URL(url);
@@ -463,7 +405,7 @@
   }
 
   function observeDynamicContent() {
-    // 如果 body 还不存在，等待它出现（防御极端情况）
+    // body 不存在时等待其出现
     if (!document.body) {
       const bodyObserver = new MutationObserver(() => {
         if (document.body) {
@@ -487,7 +429,6 @@
         if (mutation.type === 'childList') {
           mutation.addedNodes.forEach(node => {
             if (node.nodeType === Node.ELEMENT_NODE) {
-              // 查找新增的链接
               if (node.tagName === 'A' && node.href) {
                 if (!node.hasAttribute(PROCESSED_MARK)) {
                   newLinks.push(node);
@@ -504,7 +445,7 @@
           // SPA 经常复用 <a> 节点只改 href
           const target = mutation.target;
           if (target.tagName === 'A' && target.hasAttribute(PROCESSED_MARK)) {
-            // 只有当 href 真正改变且不是我们自己修改时才重新处理
+            // href 真正改变且非本扩展修改时才重处理
             const currentHref = target.getAttribute('href') || '';
             const processedHref = target.dataset.linkHandlerLastHref;
             if (currentHref !== processedHref) {
@@ -533,22 +474,19 @@
   function onNavigation() {
     if (isWhitelisted(location.hostname)) return;
 
-    // URL 未变化时不触发重处理：pushState/replaceState 可能频繁触发导航事件
-    // （如 Bilibili），但实际地址未变时重跑全量扫描只会造成卡顿
+    // 地址未变时不重扫：频繁触发的导航事件（如 Bilibili）重跑全量扫描只会卡顿
     const currentUrl = location.href;
     if (currentUrl === lastUrl) return;
     lastUrl = currentUrl;
 
-    // 防抖：快速连续导航只执行最后一次
     if (navigationDebounceTimer) {
       clearTimeout(navigationDebounceTimer);
     }
 
-    // 首次在 100ms 后执行（尽快响应）
     navigationDebounceTimer = setTimeout(() => {
       clearProcessedMarksAndReprocess();
 
-      // 额外再执行两次，捕获异步加载的内容
+      // 再补两次扫描，捕获异步加载内容
       setTimeout(() => processAllLinks(), 300);
       setTimeout(() => processAllLinks(), 800);
     }, 100);
@@ -561,8 +499,7 @@
     window.addEventListener('popstate', onNavigation);
     window.addEventListener('hashchange', onNavigation);
 
-    // 接收 MAIN world 中 spa-hook.js 转发的 pushState/replaceState 导航事件
-    // （content script 运行在隔离世界，无法直接 patch 页面主世界的 history）
+    // 接收 spa-hook.js 转发的导航事件（隔离世界无法 patch 主世界 history）
     window.addEventListener('message', (event) => {
       if (event.source !== window) return;
       const data = event.data;
@@ -571,7 +508,6 @@
     });
   }
 
-  // DOM 加载完成后初始化
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

@@ -22,11 +22,11 @@ Firefox: `about:debugging` → **This Firefox** → **Load Temporary Add-on** �
 ```
 link-handler-extension/
 ├── manifest.json          # MV3 manifest; declares TWO content-script entries (see below)
-├── config.js              # DEFAULT_CONFIG + getConfig/saveConfig/applyStoredConfig/decomposeConfig/applyConfigDiff/buildSanitizeHostMap
+├── config.js              # DEFAULT_CONFIG + getConfig/saveConfig/applyStoredConfig/decomposeConfig/applyConfigDiff/buildSanitizeHostMap/findDomainMatch（域名后缀匹配，白名单与规则查找共用）
 ├── spa-hook.js            # MAIN-world script; patches history + sanitizes address-bar tracking params
 ├── content.js             # Isolated-world content script; core link processing
 ├── _locales/{en,zh_CN,zh_TW}/messages.json
-├── options/               # base.css（共享设计变量 + prefers-color-scheme 深色模式）, popup.{html,css,js}, options.{html,css,js}, i18n.js
+├── options/               # base.css（共享设计变量 + prefers-color-scheme 深色模式）, popup.{html,css,js}, options.{html,css,js}, rule-modal.js（规则弹窗，ES module，由 options.js `import * as RuleModal` 后 init(deps) 注入依赖）, i18n.js（ES module，`export { i18n }`）
 └── icons/                 # icon{16,32,48,96,128}.png + icon.svg
 ```
 
@@ -92,15 +92,22 @@ See `processLink()`.
 - **Comments are in Chinese (中文).** Top-of-file and inline. Match this — do not switch to English.
 - **`[Link Handler]` log prefix** on every `console.log` / `console.error` — e.g.
   `console.log('[Link Handler]', ...)`.
-- **IIFE + `'use strict'`** for `content.js`, `popup.js`, `options.js`, `spa-hook.js`.
-  Exceptions that expose globals intentionally: `config.js` (`DEFAULT_CONFIG`, `getConfig`, …)
-  and `options/i18n.js` (the `i18n` object).
+- **IIFE + `'use strict'`** for `content.js` and `spa-hook.js` — MV3 content scripts cannot be
+  ES modules, so they need the IIFE for scope isolation. Extension pages (`options.js`,
+  `popup.js`, `rule-modal.js`, `i18n.js`) are ES modules loaded via `<script type="module">`:
+  module scope and strict mode come for free, no IIFE needed, and they import each other
+  explicitly instead of relying on `<script>` order. `config.js` stays a classic script
+  everywhere (it is also a manifest-injected content script); its top-level `const` bindings
+  live in the global lexical environment, so page modules can reference
+  `getConfig`/`saveConfig`/`DEFAULT_CONFIG` directly.
 - **No `var`.** `const` / `let` only.
 - All Chrome API access must be guarded with `typeof chrome !== 'undefined' && chrome.<api>`.
 - Wrap `new URL(...)` and `chrome.storage` calls in `try/catch`; bare `catch {}` is acceptable
   when the error is intentionally ignored.
-- `config.js` and `i18n.js` end with a CommonJS export shim
+- `config.js` ends with a CommonJS export shim
   (`if (typeof module !== 'undefined' && module.exports)`) for Node-based tooling/tests.
+  (`i18n.js` is an ES module and exports via `export { i18n }` — not Node-importable, and the
+  tests don't need it.)
 - i18n message placeholders use Chrome's `$1$`, `$2$` syntax. Every `$name$` referenced in a
   `message` MUST also have a matching entry in that message's `placeholders` field
   (e.g. `"placeholders": { "1": { "content": "$1", "example": "utm_source" } }`); otherwise
