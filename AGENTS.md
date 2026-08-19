@@ -26,7 +26,7 @@ link-handler-extension/
 ├── spa-hook.js            # MAIN-world script; patches history + sanitizes address-bar tracking params
 ├── content.js             # Isolated-world content script; core link processing
 ├── _locales/{en,zh_CN,zh_TW}/messages.json
-├── options/               # popup.{html,css,js}, options.{html,css,js}, i18n.js
+├── options/               # base.css（共享设计变量 + prefers-color-scheme 深色模式）, popup.{html,css,js}, options.{html,css,js}, i18n.js
 └── icons/                 # icon{16,32,48,96,128}.png + icon.svg
 ```
 

@@ -1,0 +1,152 @@
+:root {
+  color-scheme: light dark;
+
+  /* Fresh Color Palette - Clean & Light */
+  --bg-primary: #FAFAF8;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #F5F3EF;
+  --bg-hover: #EDE9E3;
+
+  /* Primary - Ocean Teal */
+  --primary-50: #F0FDFA;
+  --primary-100: #CCFBF1;
+  --primary-200: #99F6E4;
+  --primary-300: #5EEAD4;
+  --primary-400: #2DD4BF;
+  --primary-500: #14B8A6;
+  --primary-600: #0D9488;
+  --primary-700: #0F766E;
+
+  /* Accent Colors */
+  --accent-coral: #FF6B6B;
+  --accent-coral-light: #FFF1F0;
+  --accent-coral-hover: #FFE4E1;  /* backup-card.danger:hover 背景 */
+  --accent-coral-text: #C62828;   /* 珊瑚浅底上的正文级文字（WCAG AA） */
+  --accent-sage: #84CC86;
+  --accent-sage-light: #E8F5E9;
+  --accent-sage-text: #2E7D32;    /* 鼠尾草浅底上的正文级文字（WCAG AA） */
+  --accent-amber: #FBBF24;
+  --accent-amber-light: #FEF3C7;
+
+  /* Text Colors */
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-tertiary: #6E7683; /* 正文级辅助文字色，白色背景上对比度 4.58:1（WCAG AA） */
+  --text-muted: #D1D5DB;
+
+  /* Border Colors（深色模式下反转为白色系半透明） */
+  --border-subtle: rgba(0, 0, 0, 0.04);
+  --border-soft: rgba(0, 0, 0, 0.06);
+  --border-medium: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.12);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+  --gradient-success: linear-gradient(135deg, var(--accent-sage) 0%, #66BB6A 100%);
+  --gradient-danger: linear-gradient(135deg, var(--accent-coral) 0%, #EF5350 100%);
+  --gradient-card: linear-gradient(145deg, #FFFFFF 0%, #FAFAF8 100%);
+  --gradient-glow: linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(132, 204, 134, 0.1) 100%);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 4px 20px rgba(20, 184, 166, 0.25);
+
+  /* Typography */
+  --font-family:
+    -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto,
+    "Helvetica Neue", Arial,
+    "PingFang SC",
+    "Microsoft YaHei", "WenQuanYi Micro Hei", "Noto Sans CJK SC", sans-serif;
+  --font-display: 'Plus Jakarta Sans', var(--font-family);
+  --font-body: 'Outfit', var(--font-family);
+
+  /* Spacing */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 深色模式：仅覆盖变量，组件样式自动适配 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 背景：深色石板系 */
+    --bg-primary: #14161B;
+    --bg-secondary: #1C1F26;
+    --bg-tertiary: #262A32;
+    --bg-hover: #2F343D;
+
+    /* Primary：深色背景下提亮文字/边框用色，按钮渐变同步变亮 */
+    --primary-50: #0F2A27;   /* 深 teal 底（选中卡片、标签背景） */
+    --primary-100: #143C36;
+    --primary-200: #1E5A51;
+    --primary-600: #2DD4BF;
+    --primary-700: #5EEAD4;  /* 深色背景上的正文级 teal，对比度满足 WCAG AA */
+
+    /* Accent：浅色底换成对应的深色低饱和底，文字色提亮 */
+    --accent-coral-light: #3A2226;
+    --accent-coral-hover: #4A2A2C;
+    --accent-coral-text: #FF8A80;
+    --accent-sage-light: #1F3226;
+    --accent-sage-text: #A5D6A7;
+    --accent-amber-light: #3A2E14;
+
+    /* Text Colors */
+    --text-primary: #E8EAED;
+    --text-secondary: #A7AEBA;
+    --text-tertiary: #8A919C; /* 深色卡片背景上对比度约 5:1（WCAG AA） */
+    --text-muted: #4B5260;
+
+    /* Border Colors */
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-soft: rgba(255, 255, 255, 0.09);
+    --border-medium: rgba(255, 255, 255, 0.12);
+    --border-strong: rgba(255, 255, 255, 0.18);
+
+    /* Gradients：卡片渐变换成深色 */
+    --gradient-card: linear-gradient(145deg, #1E222A 0%, #1A1D23 100%);
+
+    /* Shadows：深色背景下阴影需要更深才可见 */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* 繁体中文环境优先使用繁体字形 */
+:root:is(:lang(zh-TW), :lang(zh-HK), :lang(zh-MO)) {
+  --font-family:
+    -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto,
+    "Helvetica Neue", Arial,
+      /* 繁体优先使用 PingFang TC，香港可用 PingFang HK */
+    "PingFang TC", "PingFang HK",
+      /* Windows 繁体系统字体 */
+    "Microsoft JhengHei",
+      /* Linux 繁体可用文泉驿微米黑或思源黑体 */
+    "WenQuanYi Micro Hei", "Noto Sans CJK TC",
+    sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* 键盘焦点可见样式（鼠标点击不触发；自带焦点指示的控件由更高优先级规则覆盖） */
+:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
