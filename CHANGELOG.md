@@ -1,5 +1,31 @@
 # Changelog
 
+## Version 1.7.1
+
+### Appearance
+
+- **Dark Mode**
+  Options and popup pages now follow the system color scheme via
+  `prefers-color-scheme: dark`. Implemented purely as CSS variable overrides,
+  so both themes share a single set of component styles. `color-scheme: light dark`
+  lets native controls (scrollbars, form controls) match the active theme.
+
+- **Shared Base Stylesheet**
+  Design tokens, the CJK font stacks (Simplified/Traditional), the reset, and the
+  `[hidden]` / `:focus-visible` fallbacks moved into a new shared
+  `options/base.css` loaded by both pages. Hard-coded border colors were replaced
+  with semantic tokens (`--border-subtle/soft/medium/strong`) that flip to
+  light-on-dark in dark mode.
+
+### Other Changes
+
+- Options/popup CSS refactored to native CSS nesting, `:is()`, and Media Queries
+  Level 4 range syntax (`width <= 768px`).
+- Declared `minimum_chrome_version: "120"` to guarantee support for these modern
+  CSS features (Firefox minimum is already 130).
+
+---
+
 ## Version 1.7.0
 
 ### Accessibility

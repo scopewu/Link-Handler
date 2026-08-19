@@ -1,5 +1,29 @@
 # 更新日志
 
+## Version 1.7.1
+
+### 外观
+
+- **深色模式**
+  选项页与 popup 通过 `prefers-color-scheme: dark` 跟随系统配色。实现上仅覆盖
+  CSS 变量，两套主题共享同一份组件样式。`color-scheme: light dark` 让原生控件
+  （滚动条、表单控件）与当前主题一致。
+
+- **共享基础样式表**
+  设计变量、简/繁中文字体栈、reset 以及 `[hidden]` / `:focus-visible` 兜底样式
+  移至新的共享文件 `options/base.css`，两个页面共同引用。硬编码边框颜色替换为
+  语义化变量（`--border-subtle/soft/medium/strong`），深色模式下自动反转为
+  浅色半透明。
+
+### 其他变更
+
+- 选项页/popup CSS 重构为原生 CSS 嵌套、`:is()` 与 Media Queries Level 4
+  范围语法（`width <= 768px`）。
+- 声明 `minimum_chrome_version: "120"`，为上述现代 CSS 特性提供版本保证
+  （Firefox 下限已为 130）。
+
+---
+
 ## Version 1.7.0
 
 ### 无障碍
