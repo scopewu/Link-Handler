@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 1.7.2
+
+### Internal
+
+- Refactored options page: extracted rule editor modal into `rule-modal.js` (ES module); merged duplicated rule card renderers and shared SVG icons/tags markup; unified save-and-toast flow.
+- Migrated extension pages (`options`, `popup`, `rule-modal`, `i18n`) to ES modules (`<script type="module">`) — explicit imports, no global namespace, no IIFE. `config.js` stays a classic script since it is also a manifest-injected content script.
+- Consolidated domain suffix-matching into `findDomainMatch()` in `config.js`, shared by whitelist checks, rule lookup, and the popup toggle; covered by unit tests.
+- Fixed rule list not refreshing immediately after saving from the editor modal.
+- Trimmed verbose comments across all source files.
+
 ## Version 1.7.1
 
 ### Appearance

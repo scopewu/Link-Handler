@@ -1,5 +1,15 @@
 # 更新日志
 
+## Version 1.7.2
+
+### 内部改进
+
+- 重构设置页：规则编辑弹窗拆分为 `rule-modal.js`（ES module）；合并重复的规则卡片渲染器，统一 SVG 图标与标签 HTML；统一「保存并提示」流程。
+- 扩展页面（`options`、`popup`、`rule-modal`、`i18n`）迁移到 ES module（`<script type="module">`）——显式 import、无全局命名空间、无需 IIFE。`config.js` 同时是 manifest 注入的 content script，保持 classic script。
+- 域名后缀匹配统一为 `config.js` 中的 `findDomainMatch()`，白名单判断、规则查找与 popup 开关共用，并有单测覆盖。
+- 修复弹窗保存规则后列表未立即刷新的问题。
+- 精简全源码注释。
+
 ## Version 1.7.1
 
 ### 外观
