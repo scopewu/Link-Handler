@@ -75,6 +75,10 @@
     "message": "網域",
     "description": "網域標籤"
   },
+  "builtin": {
+    "message": "內建",
+    "description": "內建規則與內建白名單網域的標識"
+  },
   "param": {
     "message": "參數名稱",
     "description": "參數名稱標籤"

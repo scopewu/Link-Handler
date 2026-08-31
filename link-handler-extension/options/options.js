@@ -101,11 +101,12 @@ function renderWhitelist() {
   const fragment = document.createDocumentFragment();
   // 倒序遍历，最新添加的显示在最前面
   for (let i = whitelist.length - 1; i >= 0; i--) {
+    const isBuiltin = DEFAULT_CONFIG.whitelist.includes(whitelist[i]);
     const item = document.createElement('li');
     item.className = 'whitelist-item';
     item.dataset.index = i;
     item.innerHTML = `
-      <span class="whitelist-domain">${escapeHtml(whitelist[i])}</span>
+      <span class="whitelist-domain">${escapeHtml(whitelist[i])}${isBuiltin ? builtinBadgeHtml() : ''}</span>
       <button class="btn-icon delete-whitelist" title="${i18n.getMessage('deleteRule')}" aria-label="${i18n.getMessage('deleteRule')}: ${escapeHtml(whitelist[i])}">
         ${ICONS.trash}
       </button>
@@ -217,6 +218,15 @@ function renderRuleList(type, containerId, rules, keyword, buildDetails) {
   }
 }
 
+function builtinBadgeHtml() {
+  return `<span class="badge-builtin">${i18n.getMessage('builtin')}</span>`;
+}
+
+function isBuiltinRule(type, rule) {
+  const defaults = type === 'redirect' ? DEFAULT_CONFIG.redirectRules : DEFAULT_CONFIG.trackingRules;
+  return defaults.some(r => r.domain === rule.domain);
+}
+
 function createRuleCard(type, rule, index, buildDetails) {
   const card = document.createElement('article');
   card.className = 'rule-card' + (rule.enabled === false ? ' disabled' : '');
@@ -234,6 +244,7 @@ function createRuleCard(type, rule, index, buildDetails) {
       <div class="rule-card-title">
         <span class="rule-status ${rule.enabled !== false ? 'enabled' : 'disabled'}"></span>
         <h3>${escapeHtml(ruleTitle)}</h3>
+        ${isBuiltinRule(type, rule) ? builtinBadgeHtml() : ''}
       </div>
       <div class="rule-card-actions">
         <label class="rule-toggle-label">

@@ -75,6 +75,10 @@
     "message": "Domain",
     "description": "Domain label"
   },
+  "builtin": {
+    "message": "builtin",
+    "description": "Badge marking built-in rules and whitelist domains"
+  },
   "param": {
     "message": "Parameter",
     "description": "Parameter label"

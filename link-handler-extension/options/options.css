@@ -452,6 +452,18 @@ body {
   flex-shrink: 0;
 }
 
+.badge-builtin {
+  flex-shrink: 0;
+  padding: 3px 5px;
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--primary-700);
+  background: var(--primary-50);
+  border: 1px solid var(--primary-200);
+  border-radius: 999px;
+}
+
 /* Toggle Slider */
 .rule-toggle-label {
   position: relative;
@@ -989,6 +1001,9 @@ body {
 }
 
 .whitelist-domain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-primary);

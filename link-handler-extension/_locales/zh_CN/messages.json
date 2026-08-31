@@ -79,6 +79,10 @@
     "message": "域名",
     "description": "域名标签"
   },
+  "builtin": {
+    "message": "内置",
+    "description": "内置规则与内置白名单域名的标识"
+  },
   "param": {
     "message": "参数名",
     "description": "参数名标签"
