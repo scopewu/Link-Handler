@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 1.8.0
+
+### Appearance
+
+- **Built-in Badge**
+  Built-in redirect/tracking rules and built-in whitelist domains now show a
+  "builtin" badge on the options page, making them easy to tell apart from
+  user-added entries. Determined at render time by matching against
+  `DEFAULT_CONFIG`, so user-modified built-in rules are still recognized.
+  Localized for en / zh_CN / zh_TW.
+
 ## Version 1.7.2
 
 ### Internal
