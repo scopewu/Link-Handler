@@ -47,6 +47,7 @@ Automatically extract real URLs from redirect services:
 - 少数派 (SSPai): `sspai.com/link?target=xxx` → direct link
 - Reddit: `out.reddit.com/?url=xxx` → direct link
 - Facebook: `facebook.com/l.php?u=xxx` → direct link
+- etc.
 
 ### Tracking Removal
 
@@ -59,6 +60,7 @@ Clean tracking data from major platforms:
 - **掘金 (Juejin)**: `utm_*` parameters
 - **简书 (Jianshu)**: `data-original`, `utm_*` parameters
 - **CSDN**: `data-report-*` attributes
+- etc.
 
 ### Domain Whitelist
 
@@ -117,29 +119,6 @@ Access full settings via the options page to:
 - **Whitelist**: Manage domains to skip processing
 - **Import/Export**: Backup and share configurations
 
-## Supported Sites
-
-### Redirect Services
-- 掘金 (juejin.cn)
-- 知乎 (zhihu.com)
-- 微博 (weibo.cn)
-- CSDN (csdn.net)
-- 简书 (jianshu.com)
-- Bilibili (bilibili.com)
-- 京东联盟 (jd.com)
-- 淘宝联盟 (taobao.com)
-- 少数派 (sspai.com)
-- Reddit (reddit.com)
-- Facebook (facebook.com)
-
-### Tracking Cleanup
-- Bilibili
-- 微博 (Weibo)
-- 知乎 (Zhihu)
-- 掘金 (Juejin)
-- 简书 (Jianshu)
-- CSDN
-
 ## Custom Rules
 
 ### Add Redirect Rule
@@ -177,18 +156,6 @@ Use `"cleanUrlParams": ["*"]` to remove **all** URL parameters.
 - **No external requests**: The extension doesn't send any data to external servers
 - **Open source**: Transparent code you can audit
 
-## Internationalization
-
-Supported languages:
-
-| Language | Code | Status |
-|----------|------|--------|
-| 简体中文 | zh_CN | Complete |
-| 繁體中文 | zh_TW | Complete |
-| English | en | Complete |
-
-Browser automatically selects language based on system preferences.
-
 ## Technical Details
 
 - **Manifest V3**: Modern extension API
@@ -224,7 +191,3 @@ link-handler-extension/
 ## License
 
 MIT License
-
-## Contributing
-
-Issues and pull requests are welcome!

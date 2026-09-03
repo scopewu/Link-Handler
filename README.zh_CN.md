@@ -47,6 +47,7 @@
 - 少数派：`sspai.com/link?target=xxx` → 直达链接
 - Reddit：`out.reddit.com/?url=xxx` → 直达链接
 - Facebook：`facebook.com/l.php?u=xxx` → 直达链接
+- 诸如此类，etc.
 
 ### 跟踪清理
 
@@ -59,6 +60,7 @@
 - **掘金**：`utm_*` 参数
 - **简书**：`data-original`、`utm_*` 参数
 - **CSDN**：`data-report-*` 属性
+- 诸如此类，etc.
 
 ### 域名白名单
 
@@ -117,29 +119,6 @@
 - **白名单**：管理跳过处理的域名
 - **导入/导出**：备份和分享配置
 
-## 支持站点
-
-### 重定向服务
-- 掘金 (juejin.cn)
-- 知乎 (zhihu.com)
-- 微博 (weibo.cn)
-- CSDN (csdn.net)
-- 简书 (jianshu.com)
-- Bilibili (bilibili.com)
-- 京东联盟 (jd.com)
-- 淘宝联盟 (taobao.com)
-- 少数派 (sspai.com)
-- Reddit (reddit.com)
-- Facebook (facebook.com)
-
-### 跟踪清理
-- Bilibili
-- 微博
-- 知乎
-- 掘金
-- 简书
-- CSDN
-
 ## 自定义规则
 
 ### 添加重定向规则
@@ -177,18 +156,6 @@
 - **无外部请求**：扩展不会向外部服务器发送任何数据
 - **开源透明**：代码完全公开，可审计
 
-## 国际化
-
-支持语言：
-
-| 语言 | 代码 | 状态 |
-|------|------|--------|
-| 简体中文 | zh_CN | 已完成 |
-| 繁體中文 | zh_TW | 已完成 |
-| English | en | 已完成 |
-
-浏览器根据系统偏好自动选择语言。
-
 ## 技术细节
 
 - **Manifest V3**：现代扩展 API
@@ -224,7 +191,3 @@ link-handler-extension/
 ## 许可证
 
 MIT License
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！

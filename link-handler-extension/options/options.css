@@ -19,7 +19,6 @@ body {
   }
 }
 
-/* Header */
 .app-header {
   margin-bottom: 24px;
 }
@@ -73,7 +72,6 @@ body {
   }
 }
 
-/* Main Layout */
 .app-main {
   flex: 1;
   display: flex;
@@ -85,7 +83,6 @@ body {
   overflow: hidden;
 }
 
-/* Tab Navigation */
 .tab-nav {
   display: flex;
   gap: 4px;
@@ -144,7 +141,6 @@ body {
   }
 }
 
-/* Tab Content */
 .tab-content {
   flex: 1;
   padding: 28px;
@@ -175,7 +171,6 @@ body {
   }
 }
 
-/* Panel Header */
 .panel-header {
   margin-bottom: 24px;
   padding-bottom: 20px;
@@ -226,7 +221,6 @@ body {
   }
 }
 
-/* Settings List */
 .settings-list {
   display: flex;
   flex-direction: column;
@@ -302,7 +296,6 @@ body {
   font-size: 0.85rem;
 }
 
-/* 全局通用跟踪参数卡片（Tracking 标签页） */
 .global-tracking-params-card {
   margin-top: 20px;
   margin-bottom: 20px;
@@ -323,7 +316,6 @@ body {
   }
 }
 
-/* Rules Container */
 .rules-container {
   display: flex;
   flex-direction: column;
@@ -375,7 +367,6 @@ body {
   }
 }
 
-/* Search result stats */
 .search-stats {
   font-size: 0.85rem;
   color: var(--text-secondary);
@@ -383,7 +374,6 @@ body {
   padding: 0 4px;
 }
 
-/* Rule Card - Static Display */
 :is(.rule-card, .rule-item) {
   background: var(--bg-secondary);
   border: 1px solid var(--border-medium);
@@ -464,7 +454,6 @@ body {
   border-radius: 999px;
 }
 
-/* Toggle Slider */
 .rule-toggle-label {
   position: relative;
   display: inline-flex;
@@ -515,7 +504,6 @@ body {
   }
 }
 
-/* Icon Button */
 .btn-icon {
   width: 34px;
   height: 34px;
@@ -544,7 +532,6 @@ body {
   }
 }
 
-/* Rule Card Body */
 .rule-card-body {
   display: flex;
   flex-wrap: wrap;
@@ -598,7 +585,6 @@ body {
   gap: 4px;
 }
 
-/* Form Elements */
 .form-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -650,7 +636,6 @@ body {
   }
 }
 
-/* Tags Input */
 .tags-input {
   display: flex;
   flex-wrap: wrap;
@@ -696,7 +681,6 @@ body {
   font-size: 0.85rem;
   font-weight: 500;
 
-  /* 标签删除按钮（button 元素）的无障碍化重置：清除 UA 按钮样式，保留原视觉 */
   .tag-remove {
     border: none;
     background: none;
@@ -714,7 +698,6 @@ body {
   }
 }
 
-/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -778,7 +761,6 @@ body {
   }
 }
 
-/* Backup Section */
 .backup-actions {
   display: flex;
   flex-direction: column;
@@ -854,7 +836,6 @@ body {
   }
 }
 
-/* Empty State */
 .empty-state {
   text-align: center;
   padding: 48px 24px;
@@ -865,7 +846,6 @@ body {
   background: var(--bg-tertiary);
 }
 
-/* Toast */
 .toast {
   position: fixed;
   bottom: 32px;
@@ -903,7 +883,6 @@ body {
   }
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -923,7 +902,6 @@ body {
   }
 }
 
-/* Whitelist */
 .whitelist-form {
   display: flex;
   gap: 12px;
@@ -965,7 +943,6 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
-  /* <ul> 语义化后清除默认列表样式（margin/padding 已由全局 reset 处理） */
   list-style: none;
 
   @media (width >= 375px) {
@@ -1011,7 +988,6 @@ body {
   min-width: 0;
 }
 
-/* Modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1195,18 +1171,5 @@ body {
   strong {
     font-weight: 600;
     color: var(--text-primary);
-  }
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    &,
-    &::before,
-    &::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
   }
 }

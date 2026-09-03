@@ -140,5 +140,4 @@ async function handleWhitelistToggle(e, hostname, tabId) {
   }
 }
 
-// 模块 defer 语义，DOM 已就绪，直接启动
 init();

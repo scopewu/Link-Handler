@@ -120,7 +120,6 @@
   }
 }
 
-/* 繁体中文环境优先使用繁体字形 */
 :root:is(:lang(zh-TW), :lang(zh-HK), :lang(zh-MO)) {
   --font-family:
     -apple-system, BlinkMacSystemFont,
@@ -149,4 +148,16 @@
 :focus-visible {
   outline: 2px solid var(--primary-500);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    &,
+    &::before,
+    &::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
