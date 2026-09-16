@@ -55,10 +55,6 @@
     "message": "Delete",
     "description": "Delete rule button"
   },
-  "saveSettings": {
-    "message": "Save Settings",
-    "description": "Save settings button"
-  },
   "resetSettings": {
     "message": "Reset to Default",
     "description": "Reset settings button"
@@ -124,6 +120,10 @@
   "cleanUrlParams": {
     "message": "Clean URL Parameters (use * for all)",
     "description": "Clean URL parameters label"
+  },
+  "cleanUrlParamsShort": {
+    "message": "Clean URL Parameters",
+    "description": "Clean URL parameters short label (rule card)"
   },
   "removeTargetSameOrigin": {
     "message": "Open same-site links in same tab",

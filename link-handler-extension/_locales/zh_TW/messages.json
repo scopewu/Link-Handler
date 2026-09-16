@@ -55,10 +55,6 @@
     "message": "刪除",
     "description": "刪除規則按鈕"
   },
-  "saveSettings": {
-    "message": "儲存設定",
-    "description": "儲存設定按鈕"
-  },
   "resetSettings": {
     "message": "恢復預設",
     "description": "恢復預設按鈕"
@@ -124,6 +120,10 @@
   "cleanUrlParams": {
     "message": "清理 URL 參數（輸入 * 清除所有）",
     "description": "清理 URL 參數標籤"
+  },
+  "cleanUrlParamsShort": {
+    "message": "清理 URL 參數",
+    "description": "清理 URL 參數短標籤（規則卡片）"
   },
   "removeTargetSameOrigin": {
     "message": "同一網站內連結在同一分頁開啟",

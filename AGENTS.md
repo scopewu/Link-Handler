@@ -27,6 +27,7 @@ link-handler-extension/
 ├── content.js             # Isolated-world content script; core link processing
 ├── _locales/{en,zh_CN,zh_TW}/messages.json
 ├── options/               # base.css（共享设计变量 + prefers-color-scheme 深色模式）, popup.{html,css,js}, options.{html,css,js}, rule-modal.js（规则弹窗，ES module，由 options.js `import * as RuleModal` 后 init(deps) 注入依赖）, i18n.js（ES module，`export { i18n }`）
+├── fonts/                 # 自托管字体（Outfit / Plus Jakarta Sans 拉丁可变字重 woff2 + fonts.css），扩展页面离线加载，替代远程 Google Fonts
 └── icons/                 # icon{16,32,48,96,128}.png + icon.svg
 ```
 

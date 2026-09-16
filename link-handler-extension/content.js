@@ -112,7 +112,6 @@
       }
       if (message.action === 'getStats') {
         sendResponse(stats);
-        return true; // 保持消息通道开启
       }
       if (message.action === 'reloadPage') {
         location.reload();
@@ -198,9 +197,15 @@
     recordHref(link);
     stats.totalProcessed++;
 
+    // 原始 href 为空或纯锚点（#xxx）时，new URL 会按当前页面地址解析，
+    // 页面自身的查询参数会被误当作链接参数；跳过重定向解析与跟踪清理，
+    // 避免把同页锚点改写成带页面参数的绝对地址（锚点滚动变成整页跳转）
+    const rawHref = link.getAttribute('href') || '';
+    const isFragmentOnly = rawHref === '' || rawHref.startsWith('#');
+
     // 阶段1：重定向解析（规则表只含启用规则）
     let wasRedirect = false;
-    if (config.global.enableRedirect !== false) {
+    if (!isFragmentOnly && config.global.enableRedirect !== false) {
       const redirectRule = findRuleFor(redirectRuleMap, link.href, matchRedirectRule);
       if (redirectRule) {
         unwrapRedirectLink(link, redirectRule);
@@ -216,7 +221,7 @@
     }
 
     // 阶段3：清理跟踪属性（规则表只含启用规则）
-    if (config.global.enableTracking !== false) {
+    if (!isFragmentOnly && config.global.enableTracking !== false) {
       let trackingCounted = false; // 防止 per-domain 与全局双重计数
 
       const trackingRule = findRuleFor(trackingRuleMap, link.href, null);

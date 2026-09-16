@@ -36,10 +36,11 @@ async function saveNow(config, successMessage) {
   return success;
 }
 
-// 防抖保存
-function debouncedSave(config) {
+// 防抖保存；定时器触发时读取最新的 currentConfig，不捕获调用时的引用，
+// 否则恢复默认/导入整体替换配置对象后，挂起的旧引用保存会把新配置覆盖回去
+function debouncedSave() {
   clearTimeout(saveDebounceTimer);
-  saveDebounceTimer = setTimeout(() => saveNow(config), TIMING.SAVE_DEBOUNCE);
+  saveDebounceTimer = setTimeout(() => saveNow(currentConfig), TIMING.SAVE_DEBOUNCE);
 }
 
 // 转义 HTML 特殊字符（输出会用于元素内容和双引号属性值两种上下文，引号必须一并转义）
@@ -163,7 +164,7 @@ async function addWhitelistDomain() {
   input.value = '';
   renderWhitelist();
 
-  debouncedSave(currentConfig);
+  debouncedSave();
 }
 
 async function deleteWhitelistDomain(index) {
@@ -171,7 +172,7 @@ async function deleteWhitelistDomain(index) {
   currentConfig.whitelist.splice(index, 1);
   renderWhitelist();
 
-  debouncedSave(currentConfig);
+  debouncedSave();
 }
 
 function renderGlobalSettings() {
@@ -290,8 +291,7 @@ function trackingRuleDetails(rule) {
   }
   if (rule.cleanUrlParams && rule.cleanUrlParams.length > 0) {
     const paramsDisplay = rule.cleanUrlParams.includes('*') ? '*' : escapeHtml(rule.cleanUrlParams.join(', '));
-    const paramsLabel = i18n.getMessage('cleanUrlParams').split('（')[0].split(' (')[0];
-    details.push(`<span class="rule-detail"><strong>${escapeHtml(paramsLabel)}:</strong> ${paramsDisplay}</span>`);
+    details.push(`<span class="rule-detail"><strong>${i18n.getMessage('cleanUrlParamsShort')}:</strong> ${paramsDisplay}</span>`);
   }
   if (rule.preventClickRewrite) {
     details.push(`<span class="rule-detail"><strong>${i18n.getMessage('preventClickRewrite')}:</strong> ✓</span>`);
@@ -525,7 +525,7 @@ async function handleDelegatedClick(e) {
   // 删除规则
   if (e.target.closest('.delete-rule')) {
     if (!ruleCard) return;
-    const index = parseInt(ruleCard.dataset.index);
+    const index = parseInt(ruleCard.dataset.index, 10);
     const type = ruleCard.dataset.type;
 
     if (type === 'redirect') {
@@ -536,13 +536,13 @@ async function handleDelegatedClick(e) {
       renderTrackingRules();
     }
 
-    debouncedSave(currentConfig);
+    debouncedSave();
   }
 
   // 编辑规则
   if (e.target.closest('.edit-rule')) {
     if (!ruleCard) return;
-    const index = parseInt(ruleCard.dataset.index);
+    const index = parseInt(ruleCard.dataset.index, 10);
     RuleModal.open(ruleCard.dataset.type, index);
   }
 
@@ -550,7 +550,7 @@ async function handleDelegatedClick(e) {
   if (e.target.closest('.delete-whitelist')) {
     const whitelistItem = e.target.closest('.whitelist-item');
     if (whitelistItem) {
-      const index = parseInt(whitelistItem.dataset.index);
+      const index = parseInt(whitelistItem.dataset.index, 10);
       deleteWhitelistDomain(index);
     }
   }
@@ -561,7 +561,7 @@ async function handleDelegatedChange(e) {
   const ruleCard = e.target.closest('.rule-card');
   if (!ruleCard) return;
 
-  const index = parseInt(ruleCard.dataset.index);
+  const index = parseInt(ruleCard.dataset.index, 10);
   const type = ruleCard.dataset.type;
 
   if (e.target.classList.contains('rule-toggle')) {
@@ -572,7 +572,7 @@ async function handleDelegatedChange(e) {
     }
     ruleCard.classList.toggle('disabled', !e.target.checked);
 
-    debouncedSave(currentConfig);
+    debouncedSave();
   }
 }
 
@@ -589,14 +589,14 @@ function autoSaveGlobalSettings() {
     enableTracking: document.getElementById('enableTracking').checked
   };
 
-  debouncedSave(currentConfig);
+  debouncedSave();
 }
 
 // 收集并保存全局通用跟踪参数
 function saveGlobalTrackingParams() {
   const values = collectTagValues(document.getElementById('tab-tracking'), 'globalTrackingParams');
   currentConfig.global = { ...currentConfig.global, globalTrackingParams: values };
-  debouncedSave(currentConfig);
+  debouncedSave();
 }
 
 // ---------- 恢复默认 / 导入 / 导出 ----------
@@ -604,6 +604,8 @@ function saveGlobalTrackingParams() {
 async function resetSettings() {
   if (!confirm(i18n.getMessage('resetConfirm'))) return;
 
+  // 丢弃挂起的防抖保存，否则旧配置会在重置完成后被写回
+  clearTimeout(saveDebounceTimer);
   currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
   await saveNow(currentConfig, i18n.getMessage('resetSettings'));
   renderAll();
@@ -638,6 +640,8 @@ function importSettings(e) {
         throw new Error(i18n.getMessage('importError'));
       }
 
+      // 丢弃挂起的防抖保存，否则旧配置会在导入完成后被写回
+      clearTimeout(saveDebounceTimer);
       currentConfig = imported;
       await saveNow(currentConfig, i18n.getMessage('importSettings'));
       renderAll();

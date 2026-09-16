@@ -149,17 +149,6 @@ const i18n = {
 
     document.documentElement.lang = this.currentLocale === 'zh_CN' ? 'zh-CN' :
                                     this.currentLocale === 'zh_TW' ? 'zh-TW' : 'en';
-  },
-
-  format: function(key, ...args) {
-    let message = this.getMessage(key);
-    if (!message || message === key) return key;
-
-    args.forEach((arg, index) => {
-      // 用函数替换，避免 arg 中的 $&、$' 等被 String.replace 特殊解释
-      message = message.replace(new RegExp(`\\$${index + 1}\\$`, 'g'), () => arg);
-    });
-    return message;
   }
 };
 

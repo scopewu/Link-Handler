@@ -16,6 +16,8 @@ async function init() {
 }
 
 async function updateProcessedStats() {
+  // 非扩展环境直接保留占位符 '-'（与 catch 分支的回落一致）
+  if (typeof chrome === 'undefined' || !chrome.tabs) return;
   const totalProcessedDom = document.getElementById('totalProcessed');
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -35,6 +37,8 @@ async function updateProcessedStats() {
 }
 
 async function processCurrentPage() {
+  // 非扩展环境静默跳过（无活动标签页可处理）
+  if (typeof chrome === 'undefined' || !chrome.tabs) return;
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab) {
@@ -125,13 +129,26 @@ async function handleWhitelistToggle(e, hostname, tabId) {
       config.whitelist = config.whitelist.filter(d => d !== cleanHostname);
     }
 
-    await saveConfig(config);
+    const success = await saveConfig(config);
+    if (!success) {
+      // 保存失败：回滚开关与图标，临时显示错误，不刷新页面（存储中仍是旧状态）
+      e.target.checked = !addToWhitelist;
+      updateWhitelistIcon(!addToWhitelist);
+      const descEl = document.getElementById('whitelistToggleDesc');
+      descEl.textContent = i18n.getMessage('savedError');
+      setTimeout(() => {
+        descEl.textContent = i18n.getMessage('whitelistSiteDesc');
+      }, 1500);
+      return;
+    }
     updateWhitelistIcon(addToWhitelist);
 
-    try {
-      await chrome.tabs.sendMessage(tabId, { action: 'reloadPage' });
-    } catch {
-      // 内容脚本未运行（如 chrome:// 页面），静默忽略
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+      try {
+        await chrome.tabs.sendMessage(tabId, { action: 'reloadPage' });
+      } catch {
+        // 内容脚本未运行（如 chrome:// 页面），静默忽略
+      }
     }
   } catch (err) {
     console.error('[Link Handler] Failed to toggle whitelist:', err);

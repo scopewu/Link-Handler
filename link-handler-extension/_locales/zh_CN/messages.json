@@ -59,10 +59,6 @@
     "message": "删除",
     "description": "删除规则按钮"
   },
-  "saveSettings": {
-    "message": "保存设置",
-    "description": "保存设置按钮"
-  },
   "resetSettings": {
     "message": "恢复默认",
     "description": "恢复默认按钮"
@@ -132,6 +128,10 @@
   "cleanUrlParams": {
     "message": "清理 URL 参数（输入 * 清除所有）",
     "description": "清理 URL 参数标签"
+  },
+  "cleanUrlParamsShort": {
+    "message": "清理 URL 参数",
+    "description": "清理 URL 参数短标签（规则卡片）"
   },
   "removeTargetSameOrigin": {
     "message": "同一网站内链接在同一标签页打开",
