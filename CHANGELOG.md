@@ -1,5 +1,44 @@
 # Changelog
 
+## Version 1.9.0
+
+### Bug Fixes
+
+- **Fragment-Only Links No Longer Rewritten**
+  Links with an empty or `#...` `href` are resolved by the browser against the
+  current page URL, so the page's own query parameters were mistaken for link
+  parameters. Redirect unwrapping and tracking cleanup now skip fragment-only
+  links, preventing same-page anchors from being rewritten into absolute URLs
+  that turn an anchor scroll into a full-page navigation.
+
+- **Debounced Save Race on Options Page**
+  The debounced save captured the config object at call time, so a pending save
+  fired after "Restore defaults" or "Import" could overwrite the fresh config
+  with the stale reference. The timer now reads the live config at fire time,
+  and reset/import cancel any pending save.
+
+- **Popup Whitelist Toggle Rollback**
+  When saving the whitelist fails, the popup toggle and icon now revert to the
+  stored state and an error message is shown, instead of leaving the UI
+  displaying a state that was never persisted.
+
+### Internal
+
+- **Self-Hosted Fonts**
+  Extension pages now bundle Outfit / Plus Jakarta Sans (latin variable-weight
+  woff2) and load them via a local `fonts.css`, replacing remote Google Fonts
+  requests — options and popup render fully offline.
+
+- i18n: the tracking-rule parameter label uses a dedicated `cleanUrlParamsShort`
+  message instead of splitting a locale-derived string; removed the dead
+  `format()` helper and the unused `saveSettings` key.
+- Added `parseInt` radix; guarded `chrome.tabs` access outside the extension
+  context.
+- Deduped `prefers-reduced-motion` styles into the shared `base.css`; pruned
+  README duplication.
+
+---
+
 ## Version 1.8.0
 
 ### Appearance
