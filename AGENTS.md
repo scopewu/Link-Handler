@@ -40,16 +40,18 @@ link-handler-extension/
      `window.postMessage` with `source: 'link-handler-spa'`, `type: 'navigation'`.
   2. **Strips tracking params from the address bar** — both from URLs passed into the patched
      `pushState`/`replaceState` and via `sanitizeCurrentUrl()`. The sanitization config is
-     **not hardcoded here**: `content.js` sends `{ source: 'link-handler-spa',
-     type: 'sanitize-config', hosts }` (built by `buildSanitizeHostMap()` from **all enabled
-     tracking rules that have `cleanUrlParams`** — address-bar cleaning is a default behavior
-     of tracking cleanup, sharing one parameter list with link cleaning).
+     **not hardcoded here**: `content.js` creates a one-time `MessageChannel`, posts
+     `{ source: 'link-handler-spa', type: 'sanitize-channel' }` with the transferred port, then
+     sends `{ hosts }` on that dedicated port (`buildSanitizeHostMap()` comes from **all enabled
+     tracking rules that have `cleanUrlParams`**, merging same-domain rules; address-bar cleaning
+     is a default behavior of tracking cleanup).
      Whitelisted pages — or the global tracking toggle being off — receive an empty map,
-     which disables address-bar cleaning.
+     which disables address-bar cleaning. The port removes the public `sanitize-config`
+     spoofing vector, but MAIN world is still not a security boundary against a fully hostile page.
      If you add tracking params for a site, only edit `config.js`.
 - `config.js` + `content.js` — `run_at: document_end`, default (isolated) world. `content.js`
-  listens for the postMessage above, plus `popstate` / `hashchange`, and re-runs processing.
-  It re-sends `sanitize-config` whenever the config is (re)loaded (initial load,
+  listens for the navigation message above, plus `popstate` / `hashchange`, and re-runs processing.
+  It re-sends the port config whenever the config is (re)loaded (initial load,
   `storage.onChanged`, popup `reprocess` message).
 
 **Why split?** Isolated-world content scripts cannot patch the page's own `history` object or
@@ -57,21 +59,22 @@ rewrite the address bar — both require MAIN world. Do not collapse the two scr
 silently break SPA navigation (React/Vue/Angular) and address-bar sanitization. The message
 source string is the contract between the two files.
 
-## Storage Format (v2 diff-based) — DO NOT BREAK
+## Storage Format (v3 diff-based) — DO NOT BREAK
 
 `chrome.storage.sync` key: **`linkHandlerConfig`**.
 
-Since storage `version: 2`, user config is stored as a **diff against `DEFAULT_CONFIG`**, not a
+Since storage `version: 3`, user config is stored as a **diff against `DEFAULT_CONFIG`**, not a
 full snapshot. This is intentional: when the extension ships new/updated built-in rules, they
-automatically take effect for existing users.
+automatically take effect for existing users. Every rule has a stable `id`; built-in overrides,
+removals, and custom rules are keyed by that ID, so multiple rules may share a domain.
 
-- `saveConfig()` runs `decomposeConfig()` → writes `{ version, customRedirectRules,
-  customTrackingRules, redirectRuleOverrides, trackingRuleOverrides,
+- `saveConfig()` validates the full config, runs `decomposeConfig()` → writes `{ version,
+  customRedirectRules, customTrackingRules, redirectRuleOverrides, trackingRuleOverrides,
   removedBuiltinRedirectRules, removedBuiltinTrackingRules, whitelistAdded, whitelistRemoved,
   global }`.
 - `getConfig()` runs `applyConfigDiff(DEFAULT_CONFIG, diff)` → reconstructs the full config.
-- `applyStoredConfig()` dispatches on `stored.version`: v2 → `applyConfigDiff`; anything else
-  (including v1 leftovers) falls back to a deep copy of `DEFAULT_CONFIG`.
+- `applyStoredConfig()` accepts only the current `STORAGE_VERSION`; any other or damaged data
+  falls back to a deep copy of `DEFAULT_CONFIG` without migration.
 
 If you add a config field, you must update BOTH `decomposeConfig` and `applyConfigDiff`, or
 round-tripping through storage will silently drop it.
@@ -82,11 +85,20 @@ Per-link phases, in order — keep the order: redirect unwrap → target removal
 See `processLink()`.
 
 - Links pushed to `pendingLinks`, drained in batches via `requestIdleCallback` (with `setTimeout`
-  fallback). Hard cap `MAX_PENDING = 10000` (drops oldest).
-- Mark processed links with `data-link-handler-processed="true"` to avoid reprocessing.
-- Unwrapped URLs must pass `isValidUrl()` (only `http:`/`https:` allowed) before assignment.
+  fallback). Hard cap `MAX_PENDING = 10000` (drops oldest). Each link is processed inside its own
+  `try/catch`; one bad rule/link cannot leave `isProcessing` stuck.
+- Mark processed links with `data-link-handler-processed="true"` to avoid reprocessing. Record the
+  normalized href in `data-link-handler-last-href`, and observe href changes even for links whose
+  href was temporarily removed.
+- Unwrapped URLs must pass `isValidUrl()` (only `http:`/`https:` allowed) before assignment. Only
+  decode the redirect parameter again while it is not already a valid HTTP(S) URL.
+- Rules are grouped as `domain -> rule[]`. Exact-domain rules beat suffix-domain rules; redirect
+  uses the first matching path/param rule, tracking applies every matching rule and counts a link
+  at most once.
 - SPA navigation handler debounces (100ms) then re-runs at 0 / 300 / 800 ms to catch async loads.
-- Whitelist uses **suffix matching** — `deepseek.com` covers `chat.deepseek.com`.
+- Whitelist uses **suffix matching** — `deepseek.com` covers `chat.deepseek.com`. A live whitelist
+  update cancels pending work, disconnects the observer, removes click-guard marks, and stops stats;
+  removing the whitelist restores observation and rescans.
 
 ## Conventions That Are Easy to Get Wrong
 
@@ -123,6 +135,8 @@ See `processLink()`.
 - No English comments where the file already uses Chinese.
 - Do not bypass the `[Link Handler]` log prefix.
 - Do not collapse `spa-hook.js` into `content.js`, and do not change the
-  `'link-handler-spa'` / `'navigation'` / `'sanitize-config'` message contract without updating
-  both files.
-- Do not change the storage format without bumping `STORAGE_VERSION` and handling migration.
+  `'link-handler-spa'` / `'navigation'` / `'sanitize-channel'` message contract without updating
+  both files. Configuration must stay on the transferred `MessagePort`, never on a public
+  `window.postMessage`.
+- Do not change the storage format without bumping `STORAGE_VERSION`. The current policy is no
+  migration: non-current versions reset to defaults.

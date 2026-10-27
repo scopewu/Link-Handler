@@ -86,7 +86,7 @@ const i18n = {
         }
       }
     } catch (e) {
-      console.error('[i18n] Failed to load translations:', e);
+      console.error('[Link Handler] Failed to load translations:', e);
       this.translations = {};
     }
   },

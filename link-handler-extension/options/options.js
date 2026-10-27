@@ -225,7 +225,7 @@ function builtinBadgeHtml() {
 
 function isBuiltinRule(type, rule) {
   const defaults = type === 'redirect' ? DEFAULT_CONFIG.redirectRules : DEFAULT_CONFIG.trackingRules;
-  return defaults.some(r => r.domain === rule.domain);
+  return defaults.some(r => r.id === rule.id);
 }
 
 function createRuleCard(type, rule, index, buildDetails) {
@@ -277,6 +277,9 @@ function redirectRuleDetails(rule) {
   if (rule.param) {
     details.push(`<span class="rule-detail"><strong>${i18n.getMessage('param')}:</strong> ${escapeHtml(rule.param)}</span>`);
   }
+  if (rule.pathPattern) {
+    details.push(`<span class="rule-detail"><strong>${i18n.getMessage('pathPattern')}:</strong> ${escapeHtml(rule.pathPattern)}</span>`);
+  }
   return details;
 }
 
@@ -305,27 +308,6 @@ function renderRedirectRules() {
 
 function renderTrackingRules() {
   renderRuleList('tracking', 'trackingRules', currentConfig.trackingRules, trackingSearchKeyword, trackingRuleDetails);
-}
-
-// 验证导入配置的结构
-function validateConfigStructure(config) {
-  if (!config || typeof config !== 'object') return false;
-  if (!Array.isArray(config.redirectRules)) return false;
-  if (!Array.isArray(config.trackingRules)) return false;
-  if (!config.global || typeof config.global !== 'object') return false;
-
-  for (const rule of config.redirectRules) {
-    if (!rule.domain || typeof rule.domain !== 'string') return false;
-    if (!rule.param || typeof rule.param !== 'string') return false;
-  }
-
-  for (const rule of config.trackingRules) {
-    if (!rule.domain || typeof rule.domain !== 'string') return false;
-  }
-
-  if (config.whitelist && !Array.isArray(config.whitelist)) return false;
-
-  return true;
 }
 
 // 过滤规则（根据域名或描述搜索）
@@ -437,15 +419,6 @@ function bindEvents() {
   document.getElementById('enableRedirect').addEventListener('change', autoSaveGlobalSettings);
   document.getElementById('enableTracking').addEventListener('change', autoSaveGlobalSettings);
 
-  // 全局参数标签：回车/删除已是 document 级委托，此处监听容器变化触发防抖保存
-  const globalParamsInput = document.getElementById('globalTrackingParamsInput');
-  if (globalParamsInput) {
-    globalParamsInput.addEventListener('input', saveGlobalTrackingParams);
-    globalParamsInput.addEventListener('click', (e) => {
-      if (e.target.closest('.tag-remove')) saveGlobalTrackingParams();
-    });
-  }
-
   document.getElementById('resetSettings').addEventListener('click', resetSettings);
 
   document.getElementById('exportSettings').addEventListener('click', exportSettings);
@@ -492,12 +465,18 @@ function handleTagInput(e) {
   tag.innerHTML = tagHtml(value);
   tagsInput.insertBefore(tag, input);
   input.value = '';
+  if (tagsInput.id === 'globalTrackingParamsInput') saveGlobalTrackingParams();
 }
 
 // 标签删除（document 级委托）
 function handleTagRemove(e) {
   if (!e.target.closest('.tag-remove')) return;
-  e.target.closest('.tag').remove();
+  const tag = e.target.closest('.tag');
+  const tagsInput = tag.closest('.tags-input');
+  tag.remove();
+  if (tagsInput && tagsInput.id === 'globalTrackingParamsInput') {
+    saveGlobalTrackingParams();
+  }
 }
 
 // 收集标签容器中的所有值，包括输入框里尚未按回车提交的残留文本
@@ -606,9 +585,12 @@ async function resetSettings() {
 
   // 丢弃挂起的防抖保存，否则旧配置会在重置完成后被写回
   clearTimeout(saveDebounceTimer);
-  currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-  await saveNow(currentConfig, i18n.getMessage('resetSettings'));
-  renderAll();
+  const nextConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  const success = await saveNow(nextConfig, i18n.getMessage('resetSettings'));
+  if (success) {
+    currentConfig = nextConfig;
+    renderAll();
+  }
 }
 
 function exportSettings() {
@@ -642,9 +624,11 @@ function importSettings(e) {
 
       // 丢弃挂起的防抖保存，否则旧配置会在导入完成后被写回
       clearTimeout(saveDebounceTimer);
-      currentConfig = imported;
-      await saveNow(currentConfig, i18n.getMessage('importSettings'));
-      renderAll();
+      const success = await saveNow(imported, i18n.getMessage('importSettings'));
+      if (success) {
+        currentConfig = imported;
+        renderAll();
+      }
     } catch (err) {
       showToast(i18n.getMessage('importError') + ': ' + err.message, 'error');
     }

@@ -4,11 +4,15 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   DEFAULT_CONFIG,
+  STORAGE_VERSION,
   decomposeConfig,
   applyConfigDiff,
   applyStoredConfig,
   buildSanitizeHostMap,
-  findDomainMatch
+  findDomainMatch,
+  createRuleId,
+  validateConfigStructure,
+  saveConfig
 } from '../link-handler-extension/config.js';
 
 // 测试用深拷贝
@@ -58,10 +62,11 @@ test('自定义规则 / 覆盖 / 删除 / 白名单 / 全局设置均可往返',
 
   // 自定义规则
   full.redirectRules.push({
-    domain: 'example.com', param: 'target', enabled: true, description: '测试'
+    id: 'custom-redirect-example', domain: 'example.com',
+    param: 'target', enabled: true, description: '测试'
   });
   full.trackingRules.push({
-    domain: 'example.org', enabled: true, description: '测试',
+    id: 'custom-tracking-example', domain: 'example.org', enabled: true, description: '测试',
     removeAttributes: [], cleanUrlParams: ['utm_source']
   });
 
@@ -80,10 +85,11 @@ test('自定义规则 / 覆盖 / 删除 / 白名单 / 全局设置均可往返',
   full.global.globalTrackingParams = ['foo'];
 
   const diff = decomposeConfig(full);
+  assert.equal(diff.version, STORAGE_VERSION);
   assert.deepEqual(diff.customRedirectRules.map(r => r.domain), ['example.com']);
   assert.deepEqual(diff.customTrackingRules.map(r => r.domain), ['example.org']);
-  assert.deepEqual(diff.redirectRuleOverrides['link.zhihu.com'], undefined);
-  assert.ok(diff.removedBuiltinRedirectRules.includes('link.zhihu.com'));
+  assert.deepEqual(diff.redirectRuleOverrides['redirect-zhihu'], undefined);
+  assert.ok(diff.removedBuiltinRedirectRules.includes('redirect-zhihu'));
   assert.deepEqual(diff.whitelistAdded, ['example.net']);
   assert.deepEqual(diff.whitelistRemoved, ['deepseek.com']);
   assert.equal(diff.global.enableTracking, false);
@@ -93,21 +99,19 @@ test('自定义规则 / 覆盖 / 删除 / 白名单 / 全局设置均可往返',
 });
 
 test('规则字段顺序不影响 diff 判定（canonicalize）', () => {
-  const b = { enabled: true, param: 'url', domain: 'x.com' };
-  const diff = decomposeConfig({
-    ...clone(DEFAULT_CONFIG),
-    redirectRules: [
-      ...DEFAULT_CONFIG.redirectRules.filter(r => r.domain !== 'link.juejin.cn'),
-      b
-    ]
-  });
+  const original = DEFAULT_CONFIG.redirectRules.find(r => r.id === 'redirect-juejin');
+  const reordered = Object.fromEntries(Object.entries(original).reverse());
+  const full = clone(DEFAULT_CONFIG);
+  full.redirectRules = full.redirectRules.map(rule => rule.id === original.id ? reordered : rule);
+
+  const diff = decomposeConfig(full);
   // 字段顺序不同的同值规则不应被视为覆盖
   assert.deepEqual(diff.redirectRuleOverrides, {});
 });
 
-test('未知版本（含 v1 遗留）回落默认配置', () => {
-  const legacy = { version: 1, redirectRules: [], trackingRules: [] };
-  const restored = applyStoredConfig(DEFAULT_CONFIG, legacy);
+test('非当前版本直接回落默认配置', () => {
+  const invalid = { version: -1, redirectRules: [], trackingRules: [] };
+  const restored = applyStoredConfig(DEFAULT_CONFIG, invalid);
   assert.deepEqual(restored, DEFAULT_CONFIG);
 });
 
@@ -176,7 +180,7 @@ test('buildSanitizeHostMap 跟随全局跟踪总开关', () => {
 test('buildSanitizeHostMap 支持自定义规则且返回参数副本', () => {
   const config = clone(DEFAULT_CONFIG);
   config.trackingRules.push({
-    domain: 'example.org', enabled: true,
+    id: 'custom-tracking-example', domain: 'example.org', enabled: true,
     cleanUrlParams: ['utm_source', 'utm_medium']
   });
 
@@ -189,13 +193,100 @@ test('buildSanitizeHostMap 支持自定义规则且返回参数副本', () => {
   assert.deepEqual(rule.cleanUrlParams, ['utm_source', 'utm_medium']);
 });
 
-test('buildSanitizeHostMap 遵循全局 enableTracking 总开关', () => {
+test('buildSanitizeHostMap 合并同域名多条规则的参数', () => {
   const config = clone(DEFAULT_CONFIG);
-  config.global.enableTracking = false;
-  assert.deepEqual(buildSanitizeHostMap(config), {});
+  config.trackingRules.push({
+    id: 'custom-tracking-bilibili-extra',
+    domain: 'bilibili.com',
+    enabled: true,
+    removeAttributes: [],
+    cleanUrlParams: ['custom_tracker', 'spm_id_from']
+  });
+
+  const hosts = buildSanitizeHostMap(config);
+  assert.ok(hosts['bilibili.com'].includes('spm_id_from'));
+  assert.ok(hosts['bilibili.com'].includes('custom_tracker'));
+  // 同名参数不重复
+  assert.equal(hosts['bilibili.com'].filter(p => p === 'spm_id_from').length, 1);
 });
 
 test('buildSanitizeHostMap 容忍空配置', () => {
   assert.deepEqual(buildSanitizeHostMap(null), {});
   assert.deepEqual(buildSanitizeHostMap({}), {});
+});
+
+test('同域名多条自定义规则完整往返', () => {
+  const full = clone(DEFAULT_CONFIG);
+  full.redirectRules.push({
+    id: 'custom-zhihu-other-path',
+    domain: 'link.zhihu.com',
+    param: 'url',
+    pathPattern: '/other',
+    enabled: true,
+    description: '同域名第二条规则'
+  });
+
+  const restored = applyConfigDiff(DEFAULT_CONFIG, decomposeConfig(full));
+  assert.equal(restored.redirectRules.length, DEFAULT_CONFIG.redirectRules.length + 1);
+  assert.equal(restored.redirectRules.filter(r => r.domain === 'link.zhihu.com').length, 2);
+  assert.deepEqual(restored.redirectRules.at(-1), full.redirectRules.at(-1));
+});
+
+test('完整配置校验拒绝会导致处理/渲染失败的形状', () => {
+  assert.ok(validateConfigStructure(DEFAULT_CONFIG));
+
+  const stringParams = clone(DEFAULT_CONFIG);
+  stringParams.trackingRules[0].cleanUrlParams = 'utm_source';
+  assert.equal(validateConfigStructure(stringParams), false);
+
+  const objectAttrs = clone(DEFAULT_CONFIG);
+  objectAttrs.trackingRules[0].removeAttributes = {};
+  assert.equal(validateConfigStructure(objectAttrs), false);
+
+  const duplicateId = clone(DEFAULT_CONFIG);
+  duplicateId.redirectRules.push({ ...duplicateId.redirectRules[0] });
+  assert.equal(validateConfigStructure(duplicateId), false);
+
+  const badPath = clone(DEFAULT_CONFIG);
+  badPath.redirectRules[0].pathPattern = 'go';
+  assert.equal(validateConfigStructure(badPath), false);
+
+  const badAttribute = clone(DEFAULT_CONFIG);
+  badAttribute.trackingRules[0].removeAttributes = ['data track'];
+  assert.equal(validateConfigStructure(badAttribute), false);
+
+  const badGlobal = clone(DEFAULT_CONFIG);
+  badGlobal.global.globalTrackingParams = 'utm_source';
+  assert.equal(validateConfigStructure(badGlobal), false);
+});
+
+test('createRuleId 生成互不相同且带类型前缀的 ID', () => {
+  const redirectA = createRuleId('redirect');
+  const redirectB = createRuleId('redirect');
+  const tracking = createRuleId('tracking');
+
+  assert.notEqual(redirectA, redirectB);
+  assert.ok(redirectA.startsWith('custom-redirect-'));
+  assert.ok(tracking.startsWith('custom-tracking-'));
+});
+
+test('saveConfig 拒绝无效配置且不写入存储', async () => {
+  let storageSetCalled = false;
+  globalThis.chrome = {
+    storage: {
+      sync: {
+        get: async () => ({}),
+        set: async () => { storageSetCalled = true; }
+      }
+    }
+  };
+
+  try {
+    const invalid = clone(DEFAULT_CONFIG);
+    invalid.trackingRules[0].cleanUrlParams = 'utm_source';
+    assert.equal(await saveConfig(invalid), false);
+    assert.equal(storageSetCalled, false);
+  } finally {
+    delete globalThis.chrome;
+  }
 });

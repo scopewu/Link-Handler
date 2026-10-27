@@ -125,6 +125,7 @@
 
 ```json
 {
+  "id": "custom-redirect-example",
   "domain": "link.example.com",
   "param": "target",
   "pathPattern": "/go",
@@ -134,11 +135,14 @@
 ```
 
 `pathPattern` 为可选项：设置后仅匹配路径以它开头的 URL。
+`id` 由规则编辑器自动生成；导入的配置必须为每条规则提供唯一且非空的 ID。
+同一域名可以有多条规则（例如同一跳转域名的不同路径前缀），跟踪规则会全部叠加执行。
 
 ### 添加跟踪规则
 
 ```json
 {
+  "id": "custom-tracking-example",
   "domain": "example.com",
   "enabled": true,
   "description": "示例跟踪清理",
@@ -160,9 +164,10 @@
 
 - **Manifest V3**：现代扩展 API
 - **双内容脚本**：隔离世界处理链接 + MAIN 世界实现 SPA 钩子与地址栏清理
-- **MutationObserver**：处理动态加载的内容
+- **MessagePort 配置通道**：地址栏清洗配置通过专用转移端口下发，不再使用公开页面消息
+- **MutationObserver**：处理动态加载内容，包括 `href` 被移除后又恢复的链接
 - **SPA 支持**：通过监听 `history.pushState`/`replaceState` 适配 React、Vue、Angular 应用
-- **同步存储**：设置跨设备同步；以差异（diff）形式存储，内置规则更新自动生效
+- **同步存储**：设置跨设备同步；以稳定规则 ID 为键的 v3 差异（diff）存储，内置规则更新自动生效
 
 ## 文件结构
 

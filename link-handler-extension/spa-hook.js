@@ -32,7 +32,7 @@
     return null;
   }
 
-  // 校验 hosts 结构，防页面脚本注入
+  // 校验端口消息结构；MAIN world 本身不作为对抗恶意页面的安全边界
   function isValidHosts(hosts) {
     if (!hosts || typeof hosts !== 'object' || Array.isArray(hosts)) return false;
     for (const domain of Object.keys(hosts)) {
@@ -117,15 +117,24 @@
     }
   }
 
-  // 接收 content.js 下发的清洗配置，总是以最新下发为准
+  let sanitizePort = null;
+
+  // 只通过握手转移的专用端口接收配置，不再接受公开的 sanitize-config 消息
   window.addEventListener('message', (event) => {
     if (event.source !== window) return;
     const data = event.data;
-    if (!data || data.source !== MESSAGE_SOURCE || data.type !== 'sanitize-config') return;
-    if (!isValidHosts(data.hosts)) return;
+    if (!data || data.source !== MESSAGE_SOURCE || data.type !== 'sanitize-channel') return;
+    if (!event.ports || event.ports.length !== 1) return;
 
-    sanitizeParamsByHost = data.hosts;
-    // 配置到达立即清洗一次，覆盖加载早期的等待窗口
-    sanitizeCurrentUrl();
+    if (sanitizePort) sanitizePort.close();
+    sanitizePort = event.ports[0];
+    sanitizePort.onmessage = (portEvent) => {
+      const portData = portEvent.data;
+      if (!portData || !isValidHosts(portData.hosts)) return;
+      sanitizeParamsByHost = portData.hosts;
+      // 配置到达立即清洗一次，覆盖加载早期的等待窗口
+      sanitizeCurrentUrl();
+    };
+    sanitizePort.start();
   });
 })();

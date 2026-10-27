@@ -41,16 +41,20 @@
     config = await getConfig();
 
     buildRuleMaps();
-
     sendSanitizeConfig();
+    listenToSPANavigation();
 
     if (isWhitelisted(location.hostname)) return;
 
     processAllLinks();
-
     observeDynamicContent();
+  }
 
-    listenToSPANavigation();
+  function addRuleToMap(map, rule) {
+    const domain = normalizeHostname(rule.domain);
+    const rules = map.get(domain) || [];
+    rules.push(rule);
+    map.set(domain, rules);
   }
 
   function buildRuleMaps() {
@@ -60,30 +64,33 @@
     if (!config) return;
 
     config.redirectRules.forEach(rule => {
-      if (rule.enabled !== false) {
-        redirectRuleMap.set(rule.domain, rule);
-      }
+      if (rule.enabled !== false) addRuleToMap(redirectRuleMap, rule);
     });
 
     config.trackingRules.forEach(rule => {
-      if (rule.enabled !== false) {
-        trackingRuleMap.set(rule.domain, rule);
-      }
+      if (rule.enabled !== false) addRuleToMap(trackingRuleMap, rule);
     });
   }
 
   // 消息来源标识（与 spa-hook.js 约定的契约）
   const SPA_MESSAGE_SOURCE = 'link-handler-spa';
+  let sanitizePort = null;
 
-  // 向 MAIN world 下发地址栏清洗配置；白名单页面下发空表以禁用
+  // 配置通过专用 MessagePort 下发，普通 window 消息不能修改清洗规则
   function sendSanitizeConfig() {
     try {
       const hosts = isWhitelisted(location.hostname)
         ? {}
         : buildSanitizeHostMap(config);
-      window.postMessage({ source: SPA_MESSAGE_SOURCE, type: 'sanitize-config', hosts }, '*');
+
+      if (!sanitizePort) {
+        const channel = new MessageChannel();
+        sanitizePort = channel.port1;
+        window.postMessage({ source: SPA_MESSAGE_SOURCE, type: 'sanitize-channel' }, '*', [channel.port2]);
+      }
+      sanitizePort.postMessage({ hosts });
     } catch (e) {
-      // postMessage 不可用时静默忽略
+      console.error('[Link Handler] Failed to send sanitize config:', e);
     }
   }
 
@@ -98,9 +105,15 @@
       config = await getConfig();
       buildRuleMaps();
       sendSanitizeConfig();
-      if (!isWhitelisted(location.hostname)) {
-        clearProcessedMarksAndReprocess();
+
+      if (isWhitelisted(location.hostname)) {
+        stopProcessing();
+        return;
       }
+
+      clearProcessedMarksAndReprocess();
+      observeDynamicContent();
+      listenToSPANavigation();
     }, REPROCESS_DEBOUNCE_MS);
   }
 
@@ -150,6 +163,22 @@
     processAllLinks();
   }
 
+  function stopProcessing() {
+    pendingLinks = [];
+    stats = createEmptyStats();
+
+    if (processTimer) cancelSchedule(processTimer);
+    processTimer = null;
+    if (navigationDebounceTimer) clearTimeout(navigationDebounceTimer);
+    navigationDebounceTimer = null;
+
+    if (contentObserver) contentObserver.disconnect();
+    contentObserver = null;
+    document.querySelectorAll('[' + PREVENTED_MARK + ']').forEach(link => {
+      link.removeAttribute(PREVENTED_MARK);
+    });
+  }
+
   const scheduleProcess = typeof requestIdleCallback !== 'undefined'
     ? requestIdleCallback
     : (fn) => setTimeout(fn, 16);
@@ -158,6 +187,8 @@
     : clearTimeout;
 
   function batchProcessLinks(links) {
+    if (isWhitelisted(location.hostname)) return;
+
     if (links.length > 0) {
       // 用 concat 而非 spread push，避免超大数组触发参数数量上限
       pendingLinks = pendingLinks.concat(links);
@@ -172,10 +203,20 @@
     }
 
     processTimer = scheduleProcess(() => {
+      processTimer = null;
       isProcessing = true;
-      const batch = pendingLinks.splice(0, 100);
-      batch.forEach(link => processLink(link));
-      isProcessing = false;
+      try {
+        const batch = pendingLinks.splice(0, 100);
+        batch.forEach(link => {
+          try {
+            processLink(link);
+          } catch (e) {
+            console.error('[Link Handler] Failed to process link:', e);
+          }
+        });
+      } finally {
+        isProcessing = false;
+      }
 
       if (pendingLinks.length > 0) {
         batchProcessLinks([]);
@@ -189,7 +230,7 @@
   }
 
   function processLink(link) {
-    if (!link || !link.href || link.hasAttribute(PROCESSED_MARK)) {
+    if (isWhitelisted(location.hostname) || !link || !link.href || link.hasAttribute(PROCESSED_MARK)) {
       return;
     }
 
@@ -204,13 +245,10 @@
     const isFragmentOnly = rawHref === '' || rawHref.startsWith('#');
 
     // 阶段1：重定向解析（规则表只含启用规则）
-    let wasRedirect = false;
     if (!isFragmentOnly && config.global.enableRedirect !== false) {
       const redirectRule = findRuleFor(redirectRuleMap, link.href, matchRedirectRule);
-      if (redirectRule) {
-        unwrapRedirectLink(link, redirectRule);
+      if (redirectRule && unwrapRedirectLink(link, redirectRule)) {
         stats.redirectUnwrapped++;
-        wasRedirect = true;
       }
     }
 
@@ -223,50 +261,51 @@
     // 阶段3：清理跟踪属性（规则表只含启用规则）
     if (!isFragmentOnly && config.global.enableTracking !== false) {
       let trackingCounted = false; // 防止 per-domain 与全局双重计数
+      const trackingRules = findRulesFor(trackingRuleMap, link.href, null);
 
-      const trackingRule = findRuleFor(trackingRuleMap, link.href, null);
-      if (trackingRule) {
-        cleanTrackingAttributes(link, trackingRule);
-        if (trackingRule.cleanUrlParams && trackingRule.cleanUrlParams.length > 0) {
-          cleanUrlParams(link, trackingRule.cleanUrlParams);
+      trackingRules.forEach(rule => {
+        const attributesCleaned = cleanTrackingAttributes(link, rule);
+        let paramsCleaned = false;
+        if (rule.cleanUrlParams && rule.cleanUrlParams.length > 0) {
+          paramsCleaned = cleanUrlParams(link, rule.cleanUrlParams);
         }
-        if (trackingRule.preventClickRewrite) {
+        if (rule.preventClickRewrite) {
           preventClickRewrite(link);
         }
-        const actuallyCleaned = (trackingRule.removeAttributes && trackingRule.removeAttributes.length > 0) ||
-                                (trackingRule.cleanUrlParams && trackingRule.cleanUrlParams.length > 0);
-        if (actuallyCleaned || !wasRedirect) {
-          stats.trackingCleaned++;
-          trackingCounted = true;
-        }
-      }
+        if (attributesCleaned || paramsCleaned) trackingCounted = true;
+      });
+      if (trackingCounted) stats.trackingCleaned++;
 
       // 全局通用跟踪参数（与按域名规则叠加）
       const globalParams = config.global.globalTrackingParams;
       if (globalParams && globalParams.length > 0) {
-        const before = link.getAttribute('href');
-        cleanUrlParams(link, globalParams);
-        // 避免与 per-domain 块重复计数
-        if (!trackingCounted && link.getAttribute('href') !== before) {
-          stats.trackingCleaned++;
-        }
+        const globallyCleaned = cleanUrlParams(link, globalParams);
+        if (!trackingCounted && globallyCleaned) stats.trackingCleaned++;
       }
     }
   }
 
-  // 按主机名查规则表：精确匹配优先，其次后缀匹配；matchFn 为可选的逐规则校验
-  function findRuleFor(ruleMap, href, matchFn) {
+  // 按主机名查规则列表：精确匹配优先，其次后缀匹配；同域名规则全部保留
+  function findRulesFor(ruleMap, href, matchFn) {
     try {
       const url = new URL(href);
-      const direct = ruleMap.get(url.hostname);
-      if (direct && (!matchFn || matchFn(url, direct))) return direct;
-      for (const [domain, rule] of ruleMap) {
-        if (url.hostname.endsWith('.' + domain) && (!matchFn || matchFn(url, rule))) return rule;
+      const hostname = normalizeHostname(url.hostname);
+      const matchRules = rules => (rules || []).filter(rule => !matchFn || matchFn(url, rule));
+      const direct = matchRules(ruleMap.get(hostname));
+      if (direct.length > 0) return direct;
+
+      const matches = [];
+      for (const [domain, rules] of ruleMap) {
+        if (hostname.endsWith('.' + domain)) matches.push(...matchRules(rules));
       }
-      return null;
+      return matches;
     } catch {
-      return null;
+      return [];
     }
+  }
+
+  function findRuleFor(ruleMap, href, matchFn) {
+    return findRulesFor(ruleMap, href, matchFn)[0] || null;
   }
 
   // 目标参数存在且非空；声明 pathPattern 时路径需以该前缀开头
@@ -285,7 +324,8 @@
       if (realUrl) {
         const MAX_DECODE_ITERATIONS = 5;
         let decodeIterations = 0;
-        while (realUrl.includes('%') && decodeIterations < MAX_DECODE_ITERATIONS) {
+        // get() 已解码外层；只有尚未形成有效 URL 时才兼容额外的整体编码
+        while (!isValidUrl(realUrl) && realUrl.includes('%') && decodeIterations < MAX_DECODE_ITERATIONS) {
           try {
             const decoded = decodeURIComponent(realUrl);
             if (decoded === realUrl) break;
@@ -299,11 +339,13 @@
         if (isValidUrl(realUrl)) {
           link.href = realUrl;
           recordHref(link, realUrl);
+          return true;
         }
       }
     } catch (e) {
       console.error('[Link Handler] Failed to unwrap redirect link:', e);
     }
+    return false;
   }
 
   function shouldRemoveTarget(link) {
@@ -331,16 +373,22 @@
   }
 
   function cleanTrackingAttributes(link, rule) {
-    if (!rule.removeAttributes) return;
+    if (!Array.isArray(rule.removeAttributes)) return false;
+    let modified = false;
 
     rule.removeAttributes.forEach(attr => {
       if (attr.endsWith('-')) {
         const attrs = link.getAttributeNames().filter(name => name.startsWith(attr));
-        attrs.forEach(a => link.removeAttribute(a));
+        attrs.forEach(a => {
+          link.removeAttribute(a);
+          modified = true;
+        });
       } else if (link.hasAttribute(attr)) {
         link.removeAttribute(attr);
+        modified = true;
       }
     });
+    return modified;
   }
 
   function cleanUrlParams(link, paramsToRemove) {
@@ -349,12 +397,11 @@
 
       // 通配符 *：移除全部参数
       if (paramsToRemove.includes('*')) {
-        if (url.search) {
-          url.search = '';
-          link.href = url.toString();
-          recordHref(link);
-        }
-        return;
+        if (!url.search) return false;
+        url.search = '';
+        link.href = url.toString();
+        recordHref(link);
+        return true;
       }
 
       let modified = false;
@@ -370,8 +417,10 @@
         link.href = url.toString();
         recordHref(link);
       }
+      return modified;
     } catch (e) {
       console.error('[Link Handler] Failed to clean URL params:', e);
+      return false;
     }
   }
 
@@ -410,6 +459,8 @@
   }
 
   function observeDynamicContent() {
+    if (isWhitelisted(location.hostname)) return;
+
     // body 不存在时等待其出现
     if (!document.body) {
       const bodyObserver = new MutationObserver(() => {
@@ -427,6 +478,7 @@
     }
 
     contentObserver = new MutationObserver((mutations) => {
+      if (isWhitelisted(location.hostname)) return;
       const newLinks = [];
       const changedLinks = [];
 
@@ -447,16 +499,17 @@
             }
           });
         } else if (mutation.type === 'attributes' && mutation.attributeName === 'href') {
-          // SPA 经常复用 <a> 节点只改 href
+          // 已处理、未处理和曾被移除 href 的锚点都允许重新入队
           const target = mutation.target;
-          if (target.tagName === 'A' && target.hasAttribute(PROCESSED_MARK)) {
-            // href 真正改变且非本扩展修改时才重处理
+          if (target.tagName === 'A') {
             const currentHref = target.getAttribute('href') || '';
             const processedHref = target.dataset.linkHandlerLastHref;
-            if (currentHref !== processedHref) {
+            const isProcessed = target.hasAttribute(PROCESSED_MARK);
+            // 地址相同且标记仍在，说明是扩展自身写入或重复通知
+            if (currentHref !== processedHref || !isProcessed) {
               target.removeAttribute(PROCESSED_MARK);
               target.removeAttribute(PREVENTED_MARK);
-              changedLinks.push(target);
+              if (target.href) changedLinks.push(target);
             }
           }
         }

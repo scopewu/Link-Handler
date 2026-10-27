@@ -125,6 +125,7 @@ Access full settings via the options page to:
 
 ```json
 {
+  "id": "custom-redirect-example",
   "domain": "link.example.com",
   "param": "target",
   "pathPattern": "/go",
@@ -134,11 +135,15 @@ Access full settings via the options page to:
 ```
 
 `pathPattern` is optional: when set, only URLs whose path starts with it are matched.
+`id` is generated automatically by the rule editor; imported configs must provide a unique,
+non-empty ID for every rule. Multiple rules may share a domain (for example, different path
+prefixes on the same redirect host) and all matching tracking rules are applied.
 
 ### Add Tracking Rule
 
 ```json
 {
+  "id": "custom-tracking-example",
   "domain": "example.com",
   "enabled": true,
   "description": "Example tracking cleanup",
@@ -160,9 +165,10 @@ Use `"cleanUrlParams": ["*"]` to remove **all** URL parameters.
 
 - **Manifest V3**: Modern extension API
 - **Dual Content Scripts**: Isolated world for link processing + MAIN world for SPA hooks & address-bar cleaning
-- **MutationObserver**: Handles dynamically loaded content
+- **MessagePort Config Channel**: Address-bar sanitization settings travel on a dedicated transferred port instead of a public page message
+- **MutationObserver**: Handles dynamically loaded content, including anchors whose `href` is removed and later restored
 - **SPA Support**: Works with React, Vue, Angular apps via `history.pushState`/`replaceState` patching
-- **Sync Storage**: Settings sync across devices; stored as a diff so built-in rule updates apply automatically
+- **Sync Storage**: Settings sync across devices; stored as a v3 diff keyed by stable rule IDs so built-in rule updates apply automatically
 
 ## File Structure
 

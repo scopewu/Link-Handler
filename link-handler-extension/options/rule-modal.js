@@ -69,6 +69,12 @@ function open(type, editIndex = null) {
         </div>
         <div class="form-row">
           <div class="form-group full-width">
+            <label for="modalRulePathPattern">${i18n.getMessage('pathPattern')}</label>
+            <input type="text" id="modalRulePathPattern" placeholder="${i18n.getMessage('pathPatternPlaceholder')}">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full-width">
             <label for="modalRuleDesc">${i18n.getMessage('description')}</label>
             <input type="text" id="modalRuleDesc" placeholder="${i18n.getMessage('descPlaceholder')}">
           </div>
@@ -134,6 +140,8 @@ function open(type, editIndex = null) {
   if (domainInput) domainInput.value = isEdit && rule ? (rule.domain || '') : '';
   const paramInput = body.querySelector('#modalRuleParam');
   if (paramInput) paramInput.value = isEdit && rule ? (rule.param || '') : 'target';
+  const pathInput = body.querySelector('#modalRulePathPattern');
+  if (pathInput) pathInput.value = isEdit && rule ? (rule.pathPattern || '') : '';
   const descInput = body.querySelector('#modalRuleDesc');
   if (descInput) descInput.value = isEdit && rule ? (rule.description || '') : '';
 
@@ -194,16 +202,25 @@ function handleKeydown(e) {
 
 async function confirm() {
   const body = document.getElementById('ruleModalBody');
+  const confirmBtn = document.getElementById('confirmRuleModal');
+  if (confirmBtn.disabled) return;
+
   const config = deps.getConfig();
   const enabled = body.querySelector('#modalRuleEnabled').checked;
   const isEdit = currentEditIndex !== null;
+  const modalType = currentModalType;
+  const previousRules = modalType === 'redirect'
+    ? config.redirectRules.slice()
+    : config.trackingRules.slice();
 
-  if (currentModalType === 'redirect') {
+  if (modalType === 'redirect') {
     const domainInput = body.querySelector('#modalRuleDomain');
     const paramInput = body.querySelector('#modalRuleParam');
+    const pathInput = body.querySelector('#modalRulePathPattern');
     const descInput = body.querySelector('#modalRuleDesc');
-    const domain = domainInput.value.trim();
+    const domain = domainInput.value.trim().toLowerCase();
     const param = paramInput.value.trim();
+    const pathPattern = pathInput.value.trim();
     const description = descInput.value.trim();
 
     if (!domain) {
@@ -211,30 +228,46 @@ async function confirm() {
       deps.showToast(i18n.getMessage('domainRequired'), 'error');
       return;
     }
+    if (!isValidHostname(domain)) {
+      deps.showInputError(domainInput);
+      deps.showToast(i18n.getMessage('domainInvalid'), 'error');
+      return;
+    }
     if (!param) {
       deps.showInputError(paramInput);
       deps.showToast(i18n.getMessage('paramRequired'), 'error');
       return;
     }
+    if (pathPattern && !pathPattern.startsWith('/')) {
+      deps.showInputError(pathInput);
+      deps.showToast(i18n.getMessage('pathPatternInvalid'), 'error');
+      return;
+    }
 
-    // 以旧规则为基础展开，保留 UI 未覆盖的字段（如 pathPattern）
+    // 以旧规则为基础展开，保留 UI 未覆盖的字段
     const ruleData = {
       ...(isEdit ? config.redirectRules[currentEditIndex] : {}),
+      id: isEdit ? config.redirectRules[currentEditIndex].id : createRuleId('redirect'),
       domain,
       param,
       enabled,
       description
     };
+    if (pathPattern) {
+      ruleData.pathPattern = pathPattern;
+    } else {
+      delete ruleData.pathPattern;
+    }
 
     if (isEdit) {
       config.redirectRules[currentEditIndex] = ruleData;
     } else {
       config.redirectRules.push(ruleData);
     }
-  } else if (currentModalType === 'tracking') {
+  } else if (modalType === 'tracking') {
     const domainInput = body.querySelector('#modalRuleDomain');
     const descInput = body.querySelector('#modalRuleDesc');
-    const domain = domainInput.value.trim();
+    const domain = domainInput.value.trim().toLowerCase();
     const description = descInput.value.trim();
     const preventClick = body.querySelector('#modalRulePreventClick').checked;
 
@@ -243,13 +276,24 @@ async function confirm() {
       deps.showToast(i18n.getMessage('domainRequired'), 'error');
       return;
     }
+    if (!isValidHostname(domain)) {
+      deps.showInputError(domainInput);
+      deps.showToast(i18n.getMessage('domainInvalid'), 'error');
+      return;
+    }
 
     const removeAttrs = deps.collectTagValues(body, 'modalRemoveAttributes');
     const cleanParams = deps.collectTagValues(body, 'modalCleanUrlParams');
+    if (!removeAttrs.every(isValidAttributeName)) {
+      deps.showInputError(body.querySelector('#modalRemoveAttrsInput'));
+      deps.showToast(i18n.getMessage('attributeInvalid'), 'error');
+      return;
+    }
 
     // 以旧规则为基础展开，保留 UI 未覆盖的字段
     const ruleData = {
       ...(isEdit ? config.trackingRules[currentEditIndex] : {}),
+      id: isEdit ? config.trackingRules[currentEditIndex].id : createRuleId('tracking'),
       domain,
       enabled,
       description,
@@ -267,8 +311,23 @@ async function confirm() {
     return;
   }
 
+  confirmBtn.disabled = true;
+  let success = false;
+  try {
+    success = await deps.saveNow(config);
+  } finally {
+    if (!success) {
+      if (modalType === 'redirect') {
+        config.redirectRules = previousRules;
+      } else {
+        config.trackingRules = previousRules;
+      }
+    }
+    confirmBtn.disabled = false;
+  }
+
+  if (!success) return;
   // 先刷新再关闭：刷新会销毁触发元素，close() 已安全处理焦点归还
-  await deps.saveNow(config);
   deps.renderAll();
   close();
 }

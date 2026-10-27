@@ -1,5 +1,51 @@
 # Changelog
 
+## Version 2.0.0
+
+### Breaking
+
+- **Config Storage v3**
+  Rules now carry stable IDs and the diff format is keyed by those IDs, allowing multiple rules
+  for the same domain. The extension accepts only the current storage version and does not
+  migrate older formats; non-current data resets to defaults.
+
+### Bug Fixes
+
+- **Redirect URLs Preserve Encoded Values**
+  Redirect parameters are decoded only while they do not yet form a valid HTTP(S) URL. Valid
+  destinations keep their internal `%xx` encoding, so encoded query values and fragments are no
+  longer rewritten or leaked into the top-level query.
+- **Live Whitelist Updates Stop Processing**
+  Adding the current site to the whitelist cancels pending batches, disconnects the mutation
+  observer, removes click-guard marks, and stops statistics. Removing it restores observation.
+- **Restored `href` Values Are Processed**
+  Removing and later re-adding an anchor `href` now requeues the link; the MutationObserver no
+  longer requires the processed mark to detect the change.
+- **Global Parameter Tag Removal Saves Correctly**
+  Global tracking-parameter tags are collected after the tag is removed. Add and delete events
+  save committed values instead of saving every keystroke or preserving deleted tags.
+- **Import and Reset Are Transactional**
+  Imported configs pass full structural validation first; reset and import replace the UI only
+  after storage succeeds. Rule-editor saves roll back on failure and disable duplicate submits
+  while awaiting storage.
+- **Batch Processing Survives Bad Rules**
+  Each link is processed in its own exception boundary and the busy flag is cleared with
+  `finally`, so one malformed rule or invalid DOM attribute cannot stall the queue.
+
+### Security / Internal
+
+- **Dedicated MAIN-World Config Port**
+  Address-bar sanitization settings now travel over a transferred `MessagePort`; the old public
+  `sanitize-config` window message is ignored. MAIN world remains explicitly not a security
+  boundary against a fully hostile page.
+- **Rule Editor Path Prefix**
+  Redirect rules expose the optional `pathPattern`, validate domains/attributes, and show path
+  details on rule cards.
+- Added VM-based tests for `content.js`, `spa-hook.js`, and options-page tag events; config tests
+  now cover v3 IDs, duplicate-domain round-trips, malformed imports, and same-domain sanitization.
+
+---
+
 ## Version 1.9.0
 
 ### Bug Fixes

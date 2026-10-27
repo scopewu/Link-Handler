@@ -83,6 +83,18 @@
     "message": "Path Prefix",
     "description": "Path prefix label"
   },
+  "pathPatternPlaceholder": {
+    "message": "Optional, e.g. /go",
+    "description": "Path prefix input placeholder"
+  },
+  "pathPatternInvalid": {
+    "message": "Path prefix must start with /",
+    "description": "Path prefix validation message"
+  },
+  "attributeInvalid": {
+    "message": "Invalid HTML attribute name",
+    "description": "Attribute validation message"
+  },
   "description": {
     "message": "Description",
     "description": "Description label"
@@ -468,7 +480,7 @@
     "description": "Backup help title"
   },
   "helpBackupExport": {
-    "message": "Export downloads the current configuration (diff from built-in rules) as a JSON file for migration or backup.",
+    "message": "Export downloads the complete current configuration as a JSON file for migration or backup.",
     "description": "Export help content"
   },
   "helpBackupImport": {

@@ -87,6 +87,18 @@
     "message": "路径前缀",
     "description": "路径前缀标签"
   },
+  "pathPatternPlaceholder": {
+    "message": "可选，如 /go",
+    "description": "路径前缀输入框占位提示"
+  },
+  "pathPatternInvalid": {
+    "message": "路径前缀必须以 / 开头",
+    "description": "路径前缀验证提示"
+  },
+  "attributeInvalid": {
+    "message": "HTML 属性名格式不正确",
+    "description": "属性名验证提示"
+  },
   "description": {
     "message": "描述",
     "description": "描述标签"
@@ -468,7 +480,7 @@
     "description": "备份与恢复说明标题"
   },
   "helpBackupExport": {
-    "message": "导出：将当前配置（与内置规则的差异）下载为 JSON 文件，可用于迁移或备份。",
+    "message": "导出：将当前完整配置下载为 JSON 文件，可用于迁移或备份。",
     "description": "导出说明"
   },
   "helpBackupImport": {
