@@ -99,7 +99,7 @@ function loadOptionsModule() {
   return context.__test;
 }
 
-test('全局参数标签提交后按当前标签集合保存', () => {
+test('submitted global parameter tags save the current tag set', () => {
   const exposed = loadOptionsModule();
   const config = clone(DEFAULT_CONFIG);
   config.global.globalTrackingParams = ['foo'];
@@ -114,7 +114,7 @@ test('全局参数标签提交后按当前标签集合保存', () => {
   exposed.cancelPendingSave();
 });
 
-test('全局参数标签先移除 DOM 再收集保存', () => {
+test('global parameter tag removal collects values after removing the DOM node', () => {
   const exposed = loadOptionsModule();
   const config = clone(DEFAULT_CONFIG);
   config.global.globalTrackingParams = ['foo', 'bar'];

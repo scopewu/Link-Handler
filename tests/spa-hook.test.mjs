@@ -76,7 +76,7 @@ function fakePort() {
   return port;
 }
 
-test('旧版公开 sanitize-config 消息不能修改配置', () => {
+test('legacy public sanitize-config messages cannot modify config', () => {
   const world = createSpaWorld('https://www.bilibili.com/video?keep=1');
   world.dispatchFromPage({
     source: 'link-handler-spa',
@@ -88,7 +88,7 @@ test('旧版公开 sanitize-config 消息不能修改配置', () => {
   assert.equal(world.location.href.includes('spm_id_from=dirty'), true);
 });
 
-test('专用端口下发配置后会清洗当前地址栏与 pushState URL', () => {
+test('config delivered on the dedicated port cleans the address bar and pushState URL', () => {
   const world = createSpaWorld();
   const port = fakePort();
   world.dispatch({ source: 'link-handler-spa', type: 'sanitize-channel' }, [port]);
@@ -102,7 +102,7 @@ test('专用端口下发配置后会清洗当前地址栏与 pushState URL', () 
   assert.equal(world.historyCalls.at(-1).url, 'https://www.bilibili.com/video/BV2?keep=2');
 });
 
-test('专用端口上的畸形配置会被忽略', () => {
+test('malformed config on the dedicated port is ignored', () => {
   const world = createSpaWorld('https://www.bilibili.com/video?keep=1');
   const port = fakePort();
   world.dispatch({ source: 'link-handler-spa', type: 'sanitize-channel' }, [port]);
@@ -112,7 +112,7 @@ test('专用端口上的畸形配置会被忽略', () => {
   assert.equal(world.location.href.includes('spm_id_from=dirty'), true);
 });
 
-test('清洗发生时仍向隔离世界发送导航通知', () => {
+test('sanitization still notifies the isolated world about navigation', () => {
   const world = createSpaWorld();
   const port = fakePort();
   world.dispatch({ source: 'link-handler-spa', type: 'sanitize-channel' }, [port]);

@@ -20,7 +20,7 @@ function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-test('DEFAULT_CONFIG 包含预期的内置规则', () => {
+test('DEFAULT_CONFIG contains expected built-in rules', () => {
   const redirectDomains = DEFAULT_CONFIG.redirectRules.map(r => r.domain);
   const trackingDomains = DEFAULT_CONFIG.trackingRules.map(r => r.domain);
 
@@ -41,7 +41,7 @@ test('DEFAULT_CONFIG 包含预期的内置规则', () => {
   assert.ok(trackingDomains.includes('bilibili.com'));
 });
 
-test('默认配置 decompose 后 apply 往返不变（空 diff）', () => {
+test('default config survives a decompose/apply round trip with an empty diff', () => {
   const diff = decomposeConfig(DEFAULT_CONFIG);
   // 空 diff 的全部列表字段应为空
   assert.deepEqual(diff.customRedirectRules, []);
@@ -57,7 +57,7 @@ test('默认配置 decompose 后 apply 往返不变（空 diff）', () => {
   assert.deepEqual(restored, DEFAULT_CONFIG);
 });
 
-test('自定义规则 / 覆盖 / 删除 / 白名单 / 全局设置均可往返', () => {
+test('custom rules, overrides, removals, whitelist, and global settings round-trip', () => {
   const full = clone(DEFAULT_CONFIG);
 
   // 自定义规则
@@ -98,7 +98,7 @@ test('自定义规则 / 覆盖 / 删除 / 白名单 / 全局设置均可往返',
   assert.deepEqual(restored, full);
 });
 
-test('规则字段顺序不影响 diff 判定（canonicalize）', () => {
+test('rule field order does not affect diff detection (canonicalize)', () => {
   const original = DEFAULT_CONFIG.redirectRules.find(r => r.id === 'redirect-juejin');
   const reordered = Object.fromEntries(Object.entries(original).reverse());
   const full = clone(DEFAULT_CONFIG);
@@ -109,26 +109,26 @@ test('规则字段顺序不影响 diff 判定（canonicalize）', () => {
   assert.deepEqual(diff.redirectRuleOverrides, {});
 });
 
-test('非当前版本直接回落默认配置', () => {
+test('non-current storage versions fall back to defaults', () => {
   const invalid = { version: -1, redirectRules: [], trackingRules: [] };
   const restored = applyStoredConfig(DEFAULT_CONFIG, invalid);
   assert.deepEqual(restored, DEFAULT_CONFIG);
 });
 
-test('空/非对象存储数据回落默认配置', () => {
+test('empty or non-object storage data falls back to defaults', () => {
   assert.deepEqual(applyStoredConfig(DEFAULT_CONFIG, null), DEFAULT_CONFIG);
   assert.deepEqual(applyStoredConfig(DEFAULT_CONFIG, {}), DEFAULT_CONFIG);
   assert.deepEqual(applyStoredConfig(DEFAULT_CONFIG, undefined), DEFAULT_CONFIG);
 });
 
-test('findDomainMatch 精确匹配优先于后缀匹配', () => {
+test('findDomainMatch prefers exact matches over suffix matches', () => {
   const domains = ['example.com', 'a.example.com'];
   // 主机名 a.example.com 同时命中两条规则，应返回精确匹配项
   assert.equal(findDomainMatch('a.example.com', domains), 'a.example.com');
   assert.equal(findDomainMatch('example.com', domains), 'example.com');
 });
 
-test('findDomainMatch 后缀匹配覆盖子域名（白名单语义）', () => {
+test('findDomainMatch suffix matching covers subdomains (whitelist semantics)', () => {
   assert.equal(findDomainMatch('chat.deepseek.com', ['deepseek.com']), 'deepseek.com');
   assert.equal(findDomainMatch('links.jianshu.com', ['jianshu.com']), 'jianshu.com');
   // 后缀必须落在域名边界上：notdeepseek.com 不得命中 deepseek.com
@@ -136,19 +136,19 @@ test('findDomainMatch 后缀匹配覆盖子域名（白名单语义）', () => {
   assert.equal(findDomainMatch('deepseek.com.evil.com', ['deepseek.com']), null);
 });
 
-test('findDomainMatch 容忍 IPv6 字面量方括号', () => {
+test('findDomainMatch tolerates IPv6 literal brackets', () => {
   assert.equal(findDomainMatch('[::1]', ['::1']), '::1');
   assert.equal(findDomainMatch('::1', ['[::1]']), '[::1]');
 });
 
-test('findDomainMatch 空列表/空主机名返回 null', () => {
+test('findDomainMatch returns null for empty lists and empty hostnames', () => {
   assert.equal(findDomainMatch('example.com', []), null);
   assert.equal(findDomainMatch('example.com', null), null);
   assert.equal(findDomainMatch('', ['example.com']), null);
   assert.equal(findDomainMatch(null, ['example.com']), null);
 });
 
-test('所有启用且配置了 cleanUrlParams 的内置跟踪规则都进入清洗映射', () => {
+test('all enabled built-in tracking rules with cleanUrlParams enter the sanitize map', () => {
   const hosts = buildSanitizeHostMap(DEFAULT_CONFIG);
   // csdn.net 的 cleanUrlParams 为空数组，不参与地址栏清洗
   assert.deepEqual(Object.keys(hosts), [
@@ -159,7 +159,7 @@ test('所有启用且配置了 cleanUrlParams 的内置跟踪规则都进入清�
   assert.deepEqual(hosts['bilibili.com'], bilibili.cleanUrlParams);
 });
 
-test('buildSanitizeHostMap 排除禁用规则与无参数规则', () => {
+test('buildSanitizeHostMap excludes disabled rules and rules without params', () => {
   const config = clone(DEFAULT_CONFIG);
   const bilibili = config.trackingRules.find(r => r.domain === 'bilibili.com');
   bilibili.enabled = false;
@@ -170,14 +170,14 @@ test('buildSanitizeHostMap 排除禁用规则与无参数规则', () => {
   assert.ok(!('csdn.net' in hosts)); // cleanUrlParams 为空
 });
 
-test('buildSanitizeHostMap 跟随全局跟踪总开关', () => {
+test('buildSanitizeHostMap follows the global tracking toggle', () => {
   const config = clone(DEFAULT_CONFIG);
   config.global.enableTracking = false;
   // 地址栏清洗是跟踪清理的默认行为，总开关关闭时一并停用
   assert.deepEqual(buildSanitizeHostMap(config), {});
 });
 
-test('buildSanitizeHostMap 支持自定义规则且返回参数副本', () => {
+test('buildSanitizeHostMap supports custom rules and returns parameter copies', () => {
   const config = clone(DEFAULT_CONFIG);
   config.trackingRules.push({
     id: 'custom-tracking-example', domain: 'example.org', enabled: true,
@@ -193,7 +193,7 @@ test('buildSanitizeHostMap 支持自定义规则且返回参数副本', () => {
   assert.deepEqual(rule.cleanUrlParams, ['utm_source', 'utm_medium']);
 });
 
-test('buildSanitizeHostMap 合并同域名多条规则的参数', () => {
+test('buildSanitizeHostMap merges parameters from multiple same-domain rules', () => {
   const config = clone(DEFAULT_CONFIG);
   config.trackingRules.push({
     id: 'custom-tracking-bilibili-extra',
@@ -210,12 +210,12 @@ test('buildSanitizeHostMap 合并同域名多条规则的参数', () => {
   assert.equal(hosts['bilibili.com'].filter(p => p === 'spm_id_from').length, 1);
 });
 
-test('buildSanitizeHostMap 容忍空配置', () => {
+test('buildSanitizeHostMap tolerates empty configs', () => {
   assert.deepEqual(buildSanitizeHostMap(null), {});
   assert.deepEqual(buildSanitizeHostMap({}), {});
 });
 
-test('同域名多条自定义规则完整往返', () => {
+test('multiple custom rules for one domain round-trip completely', () => {
   const full = clone(DEFAULT_CONFIG);
   full.redirectRules.push({
     id: 'custom-zhihu-other-path',
@@ -232,7 +232,7 @@ test('同域名多条自定义规则完整往返', () => {
   assert.deepEqual(restored.redirectRules.at(-1), full.redirectRules.at(-1));
 });
 
-test('完整配置校验拒绝会导致处理/渲染失败的形状', () => {
+test('full config validation rejects shapes that break processing or rendering', () => {
   assert.ok(validateConfigStructure(DEFAULT_CONFIG));
 
   const stringParams = clone(DEFAULT_CONFIG);
@@ -260,7 +260,7 @@ test('完整配置校验拒绝会导致处理/渲染失败的形状', () => {
   assert.equal(validateConfigStructure(badGlobal), false);
 });
 
-test('createRuleId 生成互不相同且带类型前缀的 ID', () => {
+test('createRuleId generates distinct IDs with type prefixes', () => {
   const redirectA = createRuleId('redirect');
   const redirectB = createRuleId('redirect');
   const tracking = createRuleId('tracking');
@@ -270,7 +270,7 @@ test('createRuleId 生成互不相同且带类型前缀的 ID', () => {
   assert.ok(tracking.startsWith('custom-tracking-'));
 });
 
-test('saveConfig 拒绝无效配置且不写入存储', async () => {
+test('saveConfig rejects invalid configs without writing storage', async () => {
   let storageSetCalled = false;
   globalThis.chrome = {
     storage: {

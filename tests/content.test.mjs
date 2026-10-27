@@ -146,7 +146,7 @@ function hrefMutation(link) {
   return [{ type: 'attributes', attributeName: 'href', target: link }];
 }
 
-test('解包保留目标 URL 内部已编码的参数', () => {
+test('redirect unwrapping preserves encoded parameters inside the target URL', () => {
   const { api } = createHarness(clone(DEFAULT_CONFIG));
   const target = 'https://example.com/?next=' + encodeURIComponent('https://other.com/?a=1&b=2');
   const link = new FakeLink('https://link.zhihu.com/?target=' + encodeURIComponent(target));
@@ -157,7 +157,7 @@ test('解包保留目标 URL 内部已编码的参数', () => {
   assert.equal(rewritten.searchParams.get('b'), null);
 });
 
-test('整体双重编码的目标仍会被兼容解码一次', () => {
+test('a wholly double-encoded target is still decoded once for compatibility', () => {
   const { api } = createHarness(clone(DEFAULT_CONFIG));
   const target = 'https://example.com/path?next=' + encodeURIComponent('https://other.com/?a=1&b=2');
   const outer = 'https://link.zhihu.com/?target=' + encodeURIComponent(encodeURIComponent(target));
@@ -169,7 +169,7 @@ test('整体双重编码的目标仍会被兼容解码一次', () => {
   assert.equal(rewritten.searchParams.get('b'), null);
 });
 
-test('热更新加入白名单会停止观察器并拒绝新链接', async () => {
+test('adding the live whitelist stops the observer and rejects new links', async () => {
   const stored = clone(DEFAULT_CONFIG);
   const { api, observers, notifyStorage } = createHarness(stored);
   await api.init();
@@ -186,7 +186,7 @@ test('热更新加入白名单会停止观察器并拒绝新链接', async () =>
   assert.equal(link.hasAttribute('data-link-handler-processed'), false);
 });
 
-test('href 删除后重新添加不会漏处理', async () => {
+test('removing and re-adding an href is not missed', async () => {
   const { api, observers } = createHarness(clone(DEFAULT_CONFIG));
   await api.init();
 
@@ -203,7 +203,7 @@ test('href 删除后重新添加不会漏处理', async () => {
   assert.equal(link.hasAttribute('data-link-handler-processed'), true);
 });
 
-test('同域名多条重定向规则按路径分别生效', async () => {
+test('multiple redirect rules for one domain apply by path', async () => {
   const stored = clone(DEFAULT_CONFIG);
   stored.redirectRules.push(
     { id: 'custom-go', domain: 'redirect.test', param: 'to', pathPattern: '/go', enabled: true },
@@ -221,7 +221,7 @@ test('同域名多条重定向规则按路径分别生效', async () => {
   assert.equal(jump.href, 'https://example.com/jump');
 });
 
-test('同域名多条跟踪规则同时清理属性和参数', async () => {
+test('multiple tracking rules for one domain clean attributes and parameters together', async () => {
   const stored = clone(DEFAULT_CONFIG);
   stored.trackingRules.push(
     {
@@ -246,7 +246,7 @@ test('同域名多条跟踪规则同时清理属性和参数', async () => {
   assert.equal(link.hasAttribute('data-b'), false);
 });
 
-test('单条链接异常不会阻塞批处理队列', async () => {
+test('a single failing link does not block the processing queue', async () => {
   const stored = clone(DEFAULT_CONFIG);
   stored.trackingRules.push({
     id: 'custom-bad-attribute', domain: 'first.test', enabled: true,
