@@ -7,6 +7,8 @@
   const LAST_HREF_DATA = 'linkHandlerLastHref';
 
   let config = null;
+  // 当前页是否命中白名单：配置加载/变更时刷新，避免每个链接都重跑一次域名匹配
+  let pageWhitelisted = false;
 
   let pendingLinks = [];
   let processTimer = null;
@@ -32,19 +34,20 @@
   let navigationDebounceTimer = null;
   let lastUrl = location.href;
 
-  function isWhitelisted(hostname) {
+  function refreshPageWhitelisted() {
     // 域名匹配见 config.js 的 findDomainMatch
-    return findDomainMatch(hostname, config && config.whitelist) !== null;
+    pageWhitelisted = findDomainMatch(location.hostname, config && config.whitelist) !== null;
   }
 
   async function init() {
     config = await getConfig();
+    refreshPageWhitelisted();
 
     buildRuleMaps();
     sendSanitizeConfig();
     listenToSPANavigation();
 
-    if (isWhitelisted(location.hostname)) return;
+    if (pageWhitelisted) return;
 
     processAllLinks();
     observeDynamicContent();
@@ -79,9 +82,7 @@
   // 配置通过专用 MessagePort 下发，普通 window 消息不能修改清洗规则
   function sendSanitizeConfig() {
     try {
-      const hosts = isWhitelisted(location.hostname)
-        ? {}
-        : buildSanitizeHostMap(config);
+      const hosts = pageWhitelisted ? {} : buildSanitizeHostMap(config);
 
       if (!sanitizePort) {
         const channel = new MessageChannel();
@@ -103,10 +104,11 @@
     reprocessTimer = setTimeout(async () => {
       reprocessTimer = null;
       config = await getConfig();
+      refreshPageWhitelisted();
       buildRuleMaps();
       sendSanitizeConfig();
 
-      if (isWhitelisted(location.hostname)) {
+      if (pageWhitelisted) {
         stopProcessing();
         return;
       }
@@ -141,7 +143,7 @@
   }
 
   function processAllLinks() {
-    if (isWhitelisted(location.hostname)) return;
+    if (pageWhitelisted) return;
     const nodeList = document.querySelectorAll('a[href]:not([' + PROCESSED_MARK + '])');
     // NodeList 转数组，避免 spread 大集合导致栈溢出
     const links = [];
@@ -151,15 +153,20 @@
     batchProcessLinks(links);
   }
 
+  // 清除所有点击拦截标记（重扫前 / 白名单生效时）
+  function clearPreventedMarks() {
+    document.querySelectorAll('[' + PREVENTED_MARK + ']').forEach(link => {
+      link.removeAttribute(PREVENTED_MARK);
+    });
+  }
+
   function clearProcessedMarksAndReprocess() {
     stats = createEmptyStats();
 
     document.querySelectorAll('[' + PROCESSED_MARK + ']').forEach(link => {
       link.removeAttribute(PROCESSED_MARK);
     });
-    document.querySelectorAll('[' + PREVENTED_MARK + ']').forEach(link => {
-      link.removeAttribute(PREVENTED_MARK);
-    });
+    clearPreventedMarks();
     processAllLinks();
   }
 
@@ -174,9 +181,7 @@
 
     if (contentObserver) contentObserver.disconnect();
     contentObserver = null;
-    document.querySelectorAll('[' + PREVENTED_MARK + ']').forEach(link => {
-      link.removeAttribute(PREVENTED_MARK);
-    });
+    clearPreventedMarks();
   }
 
   const scheduleProcess = typeof requestIdleCallback !== 'undefined'
@@ -187,7 +192,7 @@
     : clearTimeout;
 
   function batchProcessLinks(links) {
-    if (isWhitelisted(location.hostname)) return;
+    if (pageWhitelisted) return;
 
     if (links.length > 0) {
       // 用 concat 而非 spread push，避免超大数组触发参数数量上限
@@ -230,7 +235,7 @@
   }
 
   function processLink(link) {
-    if (isWhitelisted(location.hostname) || !link || !link.href || link.hasAttribute(PROCESSED_MARK)) {
+    if (pageWhitelisted || !link || !link.href || link.hasAttribute(PROCESSED_MARK)) {
       return;
     }
 
@@ -459,7 +464,7 @@
   }
 
   function observeDynamicContent() {
-    if (isWhitelisted(location.hostname)) return;
+    if (pageWhitelisted) return;
 
     // body 不存在时等待其出现
     if (!document.body) {
@@ -478,7 +483,7 @@
     }
 
     contentObserver = new MutationObserver((mutations) => {
-      if (isWhitelisted(location.hostname)) return;
+      if (pageWhitelisted) return;
       const newLinks = [];
       const changedLinks = [];
 
@@ -503,7 +508,7 @@
           const target = mutation.target;
           if (target.tagName === 'A') {
             const currentHref = target.getAttribute('href') || '';
-            const processedHref = target.dataset.linkHandlerLastHref;
+            const processedHref = target.dataset[LAST_HREF_DATA];
             const isProcessed = target.hasAttribute(PROCESSED_MARK);
             // 地址相同且标记仍在，说明是扩展自身写入或重复通知
             if (currentHref !== processedHref || !isProcessed) {
@@ -530,7 +535,7 @@
   }
 
   function onNavigation() {
-    if (isWhitelisted(location.hostname)) return;
+    if (pageWhitelisted) return;
 
     // 地址未变时不重扫：频繁触发的导航事件（如 Bilibili）重跑全量扫描只会卡顿
     const currentUrl = location.href;

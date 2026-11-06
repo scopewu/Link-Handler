@@ -144,6 +144,20 @@
   display: none !important;
 }
 
+/* 通用按钮基样式（options / popup 共用；尺寸与配色由各自样式表覆盖） */
+.btn {
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-display);
+  text-decoration: none;
+}
+
 /* 键盘焦点可见样式（鼠标点击不触发；自带焦点指示的控件由更高优先级规则覆盖） */
 :focus-visible {
   outline: 2px solid var(--primary-500);

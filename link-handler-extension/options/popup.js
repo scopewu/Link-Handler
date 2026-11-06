@@ -16,23 +16,18 @@ async function init() {
 }
 
 async function updateProcessedStats() {
-  // 非扩展环境直接保留占位符 '-'（与 catch 分支的回落一致）
+  // 非扩展环境直接保留占位符 '-'（与取不到统计时的回落一致）
   if (typeof chrome === 'undefined' || !chrome.tabs) return;
   const totalProcessedDom = document.getElementById('totalProcessed');
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab) {
-      const response = await chrome.tabs.sendMessage(tab.id, { action: 'getStats' });
-      if (response && response.totalProcessed > 0) {
-        totalProcessedDom.textContent = response.totalProcessed;
-      } else {
-        totalProcessedDom.textContent = '0';
-      }
-    } else {
-      totalProcessedDom.textContent = '-';
-    }
-  } catch (e) {
-    totalProcessedDom.textContent = '-';
+    if (!tab) return;
+    const response = await chrome.tabs.sendMessage(tab.id, { action: 'getStats' });
+    totalProcessedDom.textContent = response && response.totalProcessed > 0
+      ? response.totalProcessed.toString()
+      : '0';
+  } catch {
+    // 内容脚本未运行（如 chrome:// 页面）时保留 '-'
   }
 }
 

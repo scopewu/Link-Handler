@@ -199,6 +199,12 @@ function handleKeydown(e) {
   }
 }
 
+// 校验失败：标红输入框 + 错误提示
+function fail(input, messageKey) {
+  deps.showInputError(input);
+  deps.showToast(i18n.getMessage(messageKey), 'error');
+}
+
 async function confirm() {
   const body = document.getElementById('ruleModalBody');
   const confirmBtn = document.getElementById('confirmRuleModal');
@@ -223,23 +229,19 @@ async function confirm() {
     const description = descInput.value.trim();
 
     if (!domain) {
-      deps.showInputError(domainInput);
-      deps.showToast(i18n.getMessage('domainRequired'), 'error');
+      fail(domainInput, 'domainRequired');
       return;
     }
     if (!isValidHostname(domain)) {
-      deps.showInputError(domainInput);
-      deps.showToast(i18n.getMessage('domainInvalid'), 'error');
+      fail(domainInput, 'domainInvalid');
       return;
     }
     if (!param) {
-      deps.showInputError(paramInput);
-      deps.showToast(i18n.getMessage('paramRequired'), 'error');
+      fail(paramInput, 'paramRequired');
       return;
     }
     if (pathPattern && !pathPattern.startsWith('/')) {
-      deps.showInputError(pathInput);
-      deps.showToast(i18n.getMessage('pathPatternInvalid'), 'error');
+      fail(pathInput, 'pathPatternInvalid');
       return;
     }
 
@@ -271,21 +273,18 @@ async function confirm() {
     const preventClick = body.querySelector('#modalRulePreventClick').checked;
 
     if (!domain) {
-      deps.showInputError(domainInput);
-      deps.showToast(i18n.getMessage('domainRequired'), 'error');
+      fail(domainInput, 'domainRequired');
       return;
     }
     if (!isValidHostname(domain)) {
-      deps.showInputError(domainInput);
-      deps.showToast(i18n.getMessage('domainInvalid'), 'error');
+      fail(domainInput, 'domainInvalid');
       return;
     }
 
     const removeAttrs = deps.collectTagValues(body, 'modalRemoveAttributes');
     const cleanParams = deps.collectTagValues(body, 'modalCleanUrlParams');
     if (!removeAttrs.every(isValidAttributeName)) {
-      deps.showInputError(body.querySelector('#modalRemoveAttrsInput'));
-      deps.showToast(i18n.getMessage('attributeInvalid'), 'error');
+      fail(body.querySelector('#modalRemoveAttrsInput'), 'attributeInvalid');
       return;
     }
 

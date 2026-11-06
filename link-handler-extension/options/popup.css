@@ -257,18 +257,8 @@ body {
 
 .btn {
   display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 10px;
   padding: 12px 18px;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  text-decoration: none;
-  font-family: var(--font-display);
 
   &.btn-primary {
     background: var(--gradient-primary);

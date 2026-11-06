@@ -13,6 +13,14 @@
   The host map is now a prototype-less object and lookups check own properties only, so domains such
   as `constructor` can no longer hit `Object.prototype` members.
 
+### Internal
+
+- Deduplicated hostname validation (settings page now shares `isValidHostname` with the rule modal),
+  tag-input rendering, click-guard mark cleanup, locale detection, and the whitelist lookup in the
+  content script (cached per config load instead of re-matching for every link).
+- Removed unused styles and the redundant page-level module scripts in favor of the existing
+  `import` graph.
+
 ## Version 2.0.0
 
 ### Breaking

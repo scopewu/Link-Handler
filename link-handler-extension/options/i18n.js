@@ -10,8 +10,6 @@ const I18N_BINDINGS = [
 const i18n = {
   currentLocale: 'en',
 
-  availableLocales: ['en', 'zh_CN', 'zh_TW'],
-
   // 语言映射表（浏览器语言 -> 插件语言）
   localeMapping: {
     'zh': 'zh_CN',
@@ -41,27 +39,18 @@ const i18n = {
   },
 
   detectBrowserLocale: function() {
-    // 扩展环境优先 chrome.i18n
+    // 扩展环境优先 chrome.i18n，失败则回落到 navigator.language
+    const candidates = [];
     if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getUILanguage) {
-      const uiLang = chrome.i18n.getUILanguage();
-      if (this.localeMapping[uiLang]) {
-        return this.localeMapping[uiLang];
-      }
-      // 尝试匹配前缀
-      const langPrefix = uiLang.split('-')[0];
-      if (this.localeMapping[langPrefix]) {
-        return this.localeMapping[langPrefix];
-      }
+      candidates.push(chrome.i18n.getUILanguage());
     }
+    candidates.push(navigator.language || navigator.userLanguage);
 
-    // 备用方案：使用 navigator.language
-    const navLang = navigator.language || navigator.userLanguage;
-    if (this.localeMapping[navLang]) {
-      return this.localeMapping[navLang];
-    }
-    const navPrefix = navLang.split('-')[0];
-    if (this.localeMapping[navPrefix]) {
-      return this.localeMapping[navPrefix];
+    // 先完整匹配，再退一步用语言前缀匹配
+    for (const lang of candidates) {
+      if (!lang) continue;
+      const matched = this.localeMapping[lang] || this.localeMapping[lang.split('-')[0]];
+      if (matched) return matched;
     }
 
     return 'en';

@@ -122,7 +122,7 @@ function renderWhitelist() {
   container.appendChild(fragment);
 }
 
-async function addWhitelistDomain() {
+function addWhitelistDomain() {
   const input = document.getElementById('whitelistDomainInput');
   let domain = input.value.trim().toLowerCase();
 
@@ -134,19 +134,14 @@ async function addWhitelistDomain() {
 
   if (domain.includes('://')) {
     try {
-      const url = new URL(domain);
-      domain = url.hostname;
+      domain = new URL(domain).hostname;
     } catch {
       // 解析失败，保持原值交给后续验证
     }
   }
 
-  const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(domain) && domain.split('.').every(octet => {
-    const n = parseInt(octet, 10);
-    return n >= 0 && n <= 255;
-  }) || /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/.test(domain);
-  const isDomain = /^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)*[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(domain);
-  if (!isIp && !isDomain) {
+  // 与规则弹窗共用同一份主机名校验（见 config.js）
+  if (!isValidHostname(domain)) {
     showInputError(input);
     showToast(i18n.getMessage('domainInvalid'), 'error');
     return;
@@ -172,7 +167,7 @@ async function addWhitelistDomain() {
   debouncedSave();
 }
 
-async function deleteWhitelistDomain(index) {
+function deleteWhitelistDomain(index) {
   if (!currentConfig.whitelist) return;
   currentConfig.whitelist.splice(index, 1);
   renderWhitelist();
@@ -502,7 +497,7 @@ function collectTagValues(body, field) {
 // ---------- 委托事件 ----------
 
 // 委托点击（closest 从自身开始向上查找，天然覆盖按钮与其内部）
-async function handleDelegatedClick(e) {
+function handleDelegatedClick(e) {
   const ruleCard = e.target.closest('.rule-card');
 
   // 删除规则
@@ -540,7 +535,7 @@ async function handleDelegatedClick(e) {
 }
 
 // 委托变更（规则启用开关）
-async function handleDelegatedChange(e) {
+function handleDelegatedChange(e) {
   const ruleCard = e.target.closest('.rule-card');
   if (!ruleCard) return;
 
