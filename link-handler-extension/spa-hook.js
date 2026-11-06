@@ -23,7 +23,8 @@
   }
 
   function getParamsToRemove(hostname) {
-    if (sanitizeParamsByHost[hostname]) return sanitizeParamsByHost[hostname];
+    // 只认自有属性：hostname 可能是 constructor 等原型链上的键
+    if (Object.hasOwn(sanitizeParamsByHost, hostname)) return sanitizeParamsByHost[hostname];
     for (const domain of Object.keys(sanitizeParamsByHost)) {
       if (hostname.endsWith('.' + domain)) {
         return sanitizeParamsByHost[domain];

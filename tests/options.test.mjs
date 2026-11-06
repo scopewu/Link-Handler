@@ -57,8 +57,12 @@ function loadOptionsModule() {
     id: 'globalTrackingParamsInput',
     children: [],
     insertBefore(tag) { container.children.push(tag); },
+    matches(selector) { return selector === '.tags-input'; },
     querySelector() { return container.input; },
-    querySelectorAll() { return container.children.filter(tag => !tag.removed); }
+    querySelectorAll(selector) {
+      if (selector === 'input') return container.inputBound ? [container.input] : [];
+      return container.children.filter(tag => !tag.removed);
+    }
   };
   const trackingPanel = {
     querySelector() { return container; },
@@ -66,9 +70,12 @@ function loadOptionsModule() {
   };
   const input = {
     value: '',
+    listeners: [],
+    addEventListener(type) { input.listeners.push(type); },
     closest() { return container; }
   };
   container.input = input;
+  container.inputBound = true;
 
   const document = {
     getElementById(id) { return id === 'tab-tracking' ? trackingPanel : { textContent: '' }; },
@@ -90,6 +97,7 @@ function loadOptionsModule() {
       this.__test = {
         handleTagInput,
         handleTagRemove,
+        bindTagInputEvents,
         setCurrentConfig: (next) => { currentConfig = next; },
         cancelPendingSave: () => clearTimeout(saveDebounceTimer)
       };`);
@@ -111,7 +119,19 @@ test('submitted global parameter tags save the current tag set', () => {
   assert.deepEqual(Array.from(config.global.globalTrackingParams), ['foo', 'bar']);
   assert.equal(exposed.input.value, '');
 
+  // 新标签必须直接是单个 .tag，不能再嵌套一层（曾导致删除后收集值抛错）
+  const added = exposed.container.children.at(-1);
+  assert.equal(added.className, 'tag');
+  assert.equal(added.innerHTML.includes('class="tag"'), false);
+  assert.match(added.innerHTML, /class="tag-text">bar</);
+
   exposed.cancelPendingSave();
+});
+
+test('tag input listeners bind for the global container and for modal bodies', () => {
+  const exposed = loadOptionsModule();
+  exposed.bindTagInputEvents(exposed.container);
+  assert.deepEqual(exposed.input.listeners, ['keydown']);
 });
 
 test('global parameter tag removal collects values after removing the DOM node', () => {

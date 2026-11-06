@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Bug Fixes
+
+- **Global Tracking Parameter Tags Stay Editable**
+  Pressing Enter in the global parameter field now actually adds the tag (the keydown handler was
+  bound with a selector that could not match the container itself), and newly added tags are no
+  longer nested inside a second `.tag` element, which had made removal throw while collecting the
+  remaining values.
+- **Address-Bar Sanitize Map No Longer Matches Object Prototypes**
+  The host map is now a prototype-less object and lookups check own properties only, so domains such
+  as `constructor` can no longer hit `Object.prototype` members.
+
 ## Version 2.0.0
 
 ### Breaking

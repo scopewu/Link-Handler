@@ -174,7 +174,8 @@ test('buildSanitizeHostMap follows the global tracking toggle', () => {
   const config = clone(DEFAULT_CONFIG);
   config.global.enableTracking = false;
   // 地址栏清洗是跟踪清理的默认行为，总开关关闭时一并停用
-  assert.deepEqual(buildSanitizeHostMap(config), {});
+  // 返回值是无原型对象（防止 constructor 等键误命中），只比较自有键
+  assert.deepEqual(Object.keys(buildSanitizeHostMap(config)), []);
 });
 
 test('buildSanitizeHostMap supports custom rules and returns parameter copies', () => {
@@ -211,8 +212,8 @@ test('buildSanitizeHostMap merges parameters from multiple same-domain rules', (
 });
 
 test('buildSanitizeHostMap tolerates empty configs', () => {
-  assert.deepEqual(buildSanitizeHostMap(null), {});
-  assert.deepEqual(buildSanitizeHostMap({}), {});
+  assert.deepEqual(Object.keys(buildSanitizeHostMap(null)), []);
+  assert.deepEqual(Object.keys(buildSanitizeHostMap({})), []);
 });
 
 test('multiple custom rules for one domain round-trip completely', () => {

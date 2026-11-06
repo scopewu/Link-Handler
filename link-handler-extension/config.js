@@ -400,20 +400,16 @@ function applyStoredConfig(defaults, stored) {
 // 构建「地址栏清洗」主机映射 { domain: [参数] }，供 content.js 下发到 spa-hook.js；
 // 同域名多条跟踪规则的参数取并集，与链接清洗共用参数列表
 function buildSanitizeHostMap(config) {
-  const hosts = {};
+  // 无原型对象：域名可能是 constructor 等 Object.prototype 上的键，普通对象会误命中
+  const hosts = Object.create(null);
   if (!config || !Array.isArray(config.trackingRules)) return hosts;
   // 总开关关闭时地址栏清洗一并停用
   if (config.global && config.global.enableTracking === false) return hosts;
   config.trackingRules.forEach(rule => {
     if (!rule || rule.enabled === false) return;
     if (!Array.isArray(rule.cleanUrlParams) || rule.cleanUrlParams.length === 0) return;
-    const existing = Object.hasOwn(hosts, rule.domain) ? hosts[rule.domain] : [];
-    Object.defineProperty(hosts, rule.domain, {
-      value: [...new Set(existing.concat(rule.cleanUrlParams))],
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
+    const existing = hosts[rule.domain] || [];
+    hosts[rule.domain] = [...new Set(existing.concat(rule.cleanUrlParams))];
   });
   return hosts;
 }

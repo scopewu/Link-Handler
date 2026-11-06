@@ -3,7 +3,7 @@
 import { i18n } from './i18n.js';
 
 // 依赖：{ getConfig, renderAll, saveNow, showToast, showInputError, tagHtml,
-//       bindTagInputEvents, unbindTagInputEvents, collectTagValues }
+//       bindTagInputEvents, collectTagValues }
 let deps = null;
 
 let currentModalType = null;
@@ -159,8 +159,7 @@ function open(type, editIndex = null) {
 }
 
 function close() {
-  const modalBody = document.getElementById('ruleModalBody');
-  deps.unbindTagInputEvents(modalBody);
+  // 弹窗 body 每次 open 都重建，监听器随旧节点一起丢弃，无需逐个解绑
   document.removeEventListener('keydown', handleKeydown, true);
 
   document.getElementById('ruleModal').classList.remove('show');

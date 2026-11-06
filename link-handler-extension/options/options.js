@@ -54,9 +54,15 @@ function escapeHtml(text) {
     .replace(/'/g, '&#39;');
 }
 
-// 生成 tags-input 标签 HTML（全局参数/弹窗/回车新标签共用）
+// 标签内部 HTML（不含 .tag 外壳）：拼字符串与写入已创建节点共用同一份结构，
+// 避免出现 <span class="tag"><span class="tag">…</span></span> 的双层嵌套
+function tagInnerHtml(value) {
+  return `<span class="tag-text">${escapeHtml(value)}</span><button type="button" class="tag-remove" aria-label="${i18n.getMessage('removeTag', [escapeHtml(value)])}">×</button>`;
+}
+
+// 生成 tags-input 标签 HTML（全局参数/弹窗共用）
 function tagHtml(value) {
-  return `<span class="tag"><span class="tag-text">${escapeHtml(value)}</span><button type="button" class="tag-remove" aria-label="${i18n.getMessage('removeTag', [escapeHtml(value)])}">×</button></span>`;
+  return `<span class="tag">${tagInnerHtml(value)}</span>`;
 }
 
 // 重新渲染所有面板
@@ -79,7 +85,6 @@ async function init() {
     showInputError,
     tagHtml,
     bindTagInputEvents,
-    unbindTagInputEvents,
     collectTagValues
   });
 
@@ -436,17 +441,16 @@ function bindEvents() {
 
 // ---------- 标签输入部件（tags-input，全局参数与弹窗共用） ----------
 
-function bindTagInputEvents(container) {
-  const tagInputs = container.querySelectorAll('.tags-input input');
-  tagInputs.forEach(input => {
-    input.addEventListener('keydown', handleTagInput);
-  });
+// 标签输入框查找：容器自身可能就是 .tags-input（全局参数），也可能包含多个（弹窗 body）
+function findTagInputs(container) {
+  return container.matches('.tags-input')
+    ? container.querySelectorAll('input')
+    : container.querySelectorAll('.tags-input input');
 }
 
-function unbindTagInputEvents(container) {
-  const tagInputs = container.querySelectorAll('.tags-input input');
-  tagInputs.forEach(input => {
-    input.removeEventListener('keydown', handleTagInput);
+function bindTagInputEvents(container) {
+  findTagInputs(container).forEach(input => {
+    input.addEventListener('keydown', handleTagInput);
   });
 }
 
@@ -462,7 +466,7 @@ function handleTagInput(e) {
   const tagsInput = input.closest('.tags-input');
   const tag = document.createElement('span');
   tag.className = 'tag';
-  tag.innerHTML = tagHtml(value);
+  tag.innerHTML = tagInnerHtml(value);
   tagsInput.insertBefore(tag, input);
   input.value = '';
   if (tagsInput.id === 'globalTrackingParamsInput') saveGlobalTrackingParams();
