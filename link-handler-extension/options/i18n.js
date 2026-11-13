@@ -6,11 +6,9 @@ const I18N_BINDINGS = [
   { attr: 'data-i18n-aria-label', apply: (el, msg) => { el.setAttribute('aria-label', msg); } }
 ];
 
-// 国际化工具（ES module）
 const i18n = {
   currentLocale: 'en',
 
-  // 语言映射表（浏览器语言 -> 插件语言）
   localeMapping: {
     'zh': 'zh_CN',
     'zh-CN': 'zh_CN',
@@ -87,7 +85,6 @@ const i18n = {
       if (result) return result;
     }
 
-    // 使用本地缓存的翻译
     const messageObj = this.translations[key];
     if (messageObj && messageObj.message) {
       // 与 chrome.i18n 一致，substitutions 允许 string | string[]
@@ -124,7 +121,6 @@ const i18n = {
     return replacePositional(message);
   },
 
-  // 填充页面所有带 data-i18n* 属性的元素
   localizePage: function() {
     I18N_BINDINGS.forEach(({ attr, apply }) => {
       document.querySelectorAll(`[${attr}]`).forEach(el => {
@@ -144,5 +140,4 @@ const i18n = {
 // 模块 defer 语义，DOM 已就绪，直接初始化
 i18n.init();
 
-// 导出
 export { i18n };

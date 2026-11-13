@@ -1,6 +1,4 @@
-// 默认配置 - 链接处理器扩展
 const DEFAULT_CONFIG = {
-  // 重定向链接解析规则
   redirectRules: [
     {
       id: 'redirect-juejin',
@@ -84,7 +82,6 @@ const DEFAULT_CONFIG = {
     }
   ],
 
-  // 跟踪清理规则
   trackingRules: [
     {
       id: 'tracking-bilibili',
@@ -92,7 +89,7 @@ const DEFAULT_CONFIG = {
       enabled: true,
       description: 'Bilibili 跟踪清理',
       removeAttributes: ['data-spmid', 'data-mod', 'data-idx', 'data-report-id'],
-      preventClickRewrite: true,
+      preventClickRewrite: false,
       // 黑名单制：只删跟踪参数，保留 p（分P）、t（时间戳）等功能参数
       cleanUrlParams: [
         'spm_id_from', 'from_spmid', 'vd_source', 'from', 'seid',
@@ -148,10 +145,9 @@ const DEFAULT_CONFIG = {
     },
   ],
 
-  // 白名单（域名后缀匹配，满足白名单的网站不处理链接）
+  // 白名单（域名后缀匹配）
   whitelist: ['localhost', '::1', '127.0.0.1', 'deepseek.com'],
 
-  // 全局设置
   global: {
     removeTargetSameOrigin: true,
     enableRedirect: true,
@@ -424,7 +420,6 @@ async function saveConfig(config) {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
       const dataToSave = decomposeConfig(config);
       await chrome.storage.sync.set({ linkHandlerConfig: dataToSave });
-      // 验证写入内容与预期 diff 一致
       const verify = await chrome.storage.sync.get('linkHandlerConfig');
       if (!verify.linkHandlerConfig || !rulesEqual(verify.linkHandlerConfig, dataToSave)) {
         console.error('[Link Handler] Save verification failed: stored data differs');

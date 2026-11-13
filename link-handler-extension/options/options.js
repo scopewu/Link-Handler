@@ -11,7 +11,6 @@ let trackingSearchKeyword = '';
 let toastTimer = null;
 let saveDebounceTimer = null;
 
-// 常量
 const TIMING = {
   INPUT_ERROR_DURATION: 2000,
   SAVE_DEBOUNCE: 500,
@@ -19,13 +18,11 @@ const TIMING = {
   TOAST_ERROR_DURATION: 5000
 };
 
-// 规则卡片操作图标
 const ICONS = {
   edit: '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
   trash: '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'
 };
 
-// 立即保存配置并按结果显示 Toast（successMessage 可覆盖默认的「保存成功」文案）
 async function saveNow(config, successMessage) {
   const success = await saveConfig(config);
   if (success) {
@@ -60,12 +57,10 @@ function tagInnerHtml(value) {
   return `<span class="tag-text">${escapeHtml(value)}</span><button type="button" class="tag-remove" aria-label="${i18n.getMessage('removeTag', [escapeHtml(value)])}">×</button>`;
 }
 
-// 生成 tags-input 标签 HTML（全局参数/弹窗共用）
 function tagHtml(value) {
   return `<span class="tag">${tagInnerHtml(value)}</span>`;
 }
 
-// 重新渲染所有面板
 function renderAll() {
   renderGlobalSettings();
   renderRedirectRules();
@@ -181,7 +176,6 @@ function renderGlobalSettings() {
   document.getElementById('enableRedirect').checked = global.enableRedirect !== false;
   document.getElementById('enableTracking').checked = global.enableTracking !== false;
 
-  // 渲染全局通用跟踪参数标签（复用 tracking 规则的 .tags-input 结构）
   const params = Array.isArray(global.globalTrackingParams) ? global.globalTrackingParams : [];
   const container = document.getElementById('globalTrackingParamsInput');
   if (container) {
@@ -268,7 +262,6 @@ function createRuleCard(type, rule, index, buildDetails) {
   return card;
 }
 
-// 重定向规则详情行
 function redirectRuleDetails(rule) {
   const details = [];
   if (rule.domain) {
@@ -283,7 +276,6 @@ function redirectRuleDetails(rule) {
   return details;
 }
 
-// 跟踪规则详情行
 function trackingRuleDetails(rule) {
   const details = [];
   if (rule.domain) {
@@ -310,7 +302,6 @@ function renderTrackingRules() {
   renderRuleList('tracking', 'trackingRules', currentConfig.trackingRules, trackingSearchKeyword, trackingRuleDetails);
 }
 
-// 过滤规则（根据域名或描述搜索）
 function filterRules(rules, keyword) {
   if (!keyword || !keyword.trim()) {
     return rules.map((rule, index) => ({ rule, index }));
@@ -408,13 +399,11 @@ function bindEvents() {
     RuleModal.open('tracking');
   });
 
-  // 白名单表单提交（点击按钮或在输入框按回车均触发 submit）
   document.getElementById('whitelistForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     addWhitelistDomain();
   });
 
-  // 全局设置实时保存
   document.getElementById('removeTargetSameOrigin').addEventListener('change', autoSaveGlobalSettings);
   document.getElementById('enableRedirect').addEventListener('change', autoSaveGlobalSettings);
   document.getElementById('enableTracking').addEventListener('change', autoSaveGlobalSettings);
@@ -428,7 +417,6 @@ function bindEvents() {
   });
   document.getElementById('importFile').addEventListener('change', importSettings);
 
-  // 委托事件：删除规则、切换启用状态、编辑规则、标签删除
   document.addEventListener('click', handleDelegatedClick);
   document.addEventListener('change', handleDelegatedChange);
   document.addEventListener('click', handleTagRemove);
@@ -449,7 +437,6 @@ function bindTagInputEvents(container) {
   });
 }
 
-// 处理标签输入（回车/逗号提交）
 function handleTagInput(e) {
   if (e.key !== 'Enter' && e.key !== ',') return;
 
@@ -467,7 +454,6 @@ function handleTagInput(e) {
   if (tagsInput.id === 'globalTrackingParamsInput') saveGlobalTrackingParams();
 }
 
-// 标签删除（document 级委托）
 function handleTagRemove(e) {
   if (!e.target.closest('.tag-remove')) return;
   const tag = e.target.closest('.tag');
@@ -500,7 +486,6 @@ function collectTagValues(body, field) {
 function handleDelegatedClick(e) {
   const ruleCard = e.target.closest('.rule-card');
 
-  // 删除规则
   if (e.target.closest('.delete-rule')) {
     if (!ruleCard) return;
     const index = parseInt(ruleCard.dataset.index, 10);
@@ -517,14 +502,12 @@ function handleDelegatedClick(e) {
     debouncedSave();
   }
 
-  // 编辑规则
   if (e.target.closest('.edit-rule')) {
     if (!ruleCard) return;
     const index = parseInt(ruleCard.dataset.index, 10);
     RuleModal.open(ruleCard.dataset.type, index);
   }
 
-  // 删除白名单域名
   if (e.target.closest('.delete-whitelist')) {
     const whitelistItem = e.target.closest('.whitelist-item');
     if (whitelistItem) {
@@ -534,7 +517,6 @@ function handleDelegatedClick(e) {
   }
 }
 
-// 委托变更（规则启用开关）
 function handleDelegatedChange(e) {
   const ruleCard = e.target.closest('.rule-card');
   if (!ruleCard) return;
@@ -556,7 +538,6 @@ function handleDelegatedChange(e) {
 
 // ---------- 全局设置 ----------
 
-// 自动保存全局设置
 function autoSaveGlobalSettings() {
   // 用 spread 保留 globalTrackingParams 等 UI 未覆盖的字段，
   // 否则重建对象会把这些字段擦掉
@@ -570,7 +551,6 @@ function autoSaveGlobalSettings() {
   debouncedSave();
 }
 
-// 收集并保存全局通用跟踪参数
 function saveGlobalTrackingParams() {
   const values = collectTagValues(document.getElementById('tab-tracking'), 'globalTrackingParams');
   currentConfig.global = { ...currentConfig.global, globalTrackingParams: values };

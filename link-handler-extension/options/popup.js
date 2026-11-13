@@ -1,5 +1,4 @@
-// 弹出窗口逻辑（ES module）
-// getConfig / saveConfig 由 config.js 提供（classic，理由见 options.js 头部）
+// getConfig / saveConfig 由 classic 脚本 config.js 提供（理由见 options.js 头部）
 import { i18n } from './i18n.js';
 
 async function init() {
@@ -43,7 +42,6 @@ async function processCurrentPage() {
       setTimeout(() => updateProcessedStats(), 500);
       setTimeout(() => updateProcessedStats(), 1500);
 
-      // 视觉反馈
       const btn = document.getElementById('processNow');
       const originalText = btn.textContent;
       btn.textContent = i18n.getMessage('processingSuccess');
@@ -80,7 +78,6 @@ async function initWhitelistToggle(config) {
     hostnameEl.textContent = hostname;
     card.hidden = false;
 
-    // 域名匹配见 config.js 的 findDomainMatch
     const matchedDomain = findDomainMatch(hostname, config.whitelist);
     const whitelisted = matchedDomain !== null;
     toggle.checked = whitelisted;

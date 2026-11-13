@@ -10,7 +10,6 @@ let currentModalType = null;
 let currentEditIndex = null; // 当前编辑的规则索引，null 表示添加新模式
 let modalTriggerEl = null; // 打开弹窗的触发元素，关闭弹窗后归还焦点
 
-// 注入依赖并绑定静态按钮事件
 function init(context) {
   deps = context;
 
@@ -146,7 +145,6 @@ function open(type, editIndex = null) {
   if (descInput) descInput.value = isEdit && rule ? (rule.description || '') : '';
 
   modal.classList.add('show');
-  // 弹窗打开期间监听键盘：Esc 关闭、Tab 焦点循环
   document.addEventListener('keydown', handleKeydown, true);
 
   // 仅跟踪规则有标签输入
@@ -199,7 +197,6 @@ function handleKeydown(e) {
   }
 }
 
-// 校验失败：标红输入框 + 错误提示
 function fail(input, messageKey) {
   deps.showInputError(input);
   deps.showToast(i18n.getMessage(messageKey), 'error');
@@ -330,5 +327,4 @@ async function confirm() {
   close();
 }
 
-// 由 options.js `import * as RuleModal` 使用
 export { init, open };

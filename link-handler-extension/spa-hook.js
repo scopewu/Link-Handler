@@ -5,7 +5,6 @@
 (function() {
   'use strict';
 
-  // 防止重复注入
   if (window.__linkHandlerSpaHooked__) return;
   window.__linkHandlerSpaHooked__ = true;
 
@@ -44,7 +43,6 @@
     return true;
   }
 
-  // 清洗 URL 中的跟踪参数；若无需清洗则原样返回
   function sanitizeUrl(urlString, paramsToRemove) {
     try {
       const url = new URL(urlString, location.href);
@@ -74,7 +72,6 @@
     }
   }
 
-  // 清洗 history.pushState/replaceState 的参数列表
   function sanitizeHistoryArgs(args) {
     if (args.length < 3) return args;
     const url = args[2];
@@ -106,7 +103,7 @@
     return result;
   };
 
-  // 清洗当前地址栏；用原生 replaceState 避免进入自己的包装层造成递归
+  // 用原生 replaceState 避免递归进入自己的包装层
   function sanitizeCurrentUrl() {
     const paramsToRemove = getParamsToRemove(location.hostname);
     if (!paramsToRemove) return;

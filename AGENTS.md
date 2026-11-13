@@ -103,6 +103,10 @@ See `processLink()`.
 ## Conventions That Are Easy to Get Wrong
 
 - **Comments are in Chinese (中文).** Top-of-file and inline. Match this — do not switch to English.
+- **Write comments sparingly — only when necessary.** Comment the *why*: non-obvious reasoning,
+  pitfalls, deliberate invariants, and cross-file contracts. Never comment the *what* — if a
+  comment merely restates the following line or the function name, delete it instead of adding
+  it. Working code must never be sacrificed for a comment edit.
 - **`[Link Handler]` log prefix** on every `console.log` / `console.error` — e.g.
   `console.log('[Link Handler]', ...)`.
 - **IIFE + `'use strict'`** for `content.js` and `spa-hook.js` — MV3 content scripts cannot be

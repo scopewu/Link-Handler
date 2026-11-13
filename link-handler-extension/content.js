@@ -1,4 +1,3 @@
-// 内容脚本 - 链接处理器
 (function() {
   'use strict';
 
@@ -30,12 +29,10 @@
   let redirectRuleMap = new Map();
   let trackingRuleMap = new Map();
 
-  // SPA 导航防抖
   let navigationDebounceTimer = null;
   let lastUrl = location.href;
 
   function refreshPageWhitelisted() {
-    // 域名匹配见 config.js 的 findDomainMatch
     pageWhitelisted = findDomainMatch(location.hostname, config && config.whitelist) !== null;
   }
 
@@ -119,7 +116,6 @@
     }, REPROCESS_DEBOUNCE_MS);
   }
 
-  // 监听来自 popup 的配置更新
   if (typeof chrome !== 'undefined' && chrome.runtime) {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.action === 'reprocess') {
@@ -134,7 +130,6 @@
     });
   }
 
-  // 监听配置变化（设置页保存后，已打开的页面实时生效）
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if (areaName !== 'sync' || !changes.linkHandlerConfig) return;
@@ -153,7 +148,6 @@
     batchProcessLinks(links);
   }
 
-  // 清除所有点击拦截标记（重扫前 / 白名单生效时）
   function clearPreventedMarks() {
     document.querySelectorAll('[' + PREVENTED_MARK + ']').forEach(link => {
       link.removeAttribute(PREVENTED_MARK);
@@ -249,7 +243,7 @@
     const rawHref = link.getAttribute('href') || '';
     const isFragmentOnly = rawHref === '' || rawHref.startsWith('#');
 
-    // 阶段1：重定向解析（规则表只含启用规则）
+    // 阶段1：重定向解析
     if (!isFragmentOnly && config.global.enableRedirect !== false) {
       const redirectRule = findRuleFor(redirectRuleMap, link.href, matchRedirectRule);
       if (redirectRule && unwrapRedirectLink(link, redirectRule)) {
@@ -263,7 +257,7 @@
       stats.targetRemoved++;
     }
 
-    // 阶段3：清理跟踪属性（规则表只含启用规则）
+    // 阶段3：清理跟踪属性
     if (!isFragmentOnly && config.global.enableTracking !== false) {
       let trackingCounted = false; // 防止 per-domain 与全局双重计数
       const trackingRules = findRulesFor(trackingRuleMap, link.href, null);
@@ -281,7 +275,6 @@
       });
       if (trackingCounted) stats.trackingCleaned++;
 
-      // 全局通用跟踪参数（与按域名规则叠加）
       const globalParams = config.global.globalTrackingParams;
       if (globalParams && globalParams.length > 0) {
         const globallyCleaned = cleanUrlParams(link, globalParams);
@@ -313,7 +306,6 @@
     return findRulesFor(ruleMap, href, matchFn)[0] || null;
   }
 
-  // 目标参数存在且非空；声明 pathPattern 时路径需以该前缀开头
   function matchRedirectRule(url, rule) {
     if (rule.pathPattern && !url.pathname.startsWith(rule.pathPattern)) return false;
     if (!url.searchParams.has(rule.param)) return false;
@@ -466,7 +458,6 @@
   function observeDynamicContent() {
     if (pageWhitelisted) return;
 
-    // body 不存在时等待其出现
     if (!document.body) {
       const bodyObserver = new MutationObserver(() => {
         if (document.body) {
