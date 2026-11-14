@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 2.2.0
+
+### Changes
+
+- **Removed Click-Rewrite Prevention**
+  Removed the `preventClickRewrite` tracking-rule option and its capture-phase click listener, so
+  link clicks are no longer intercepted. Existing saved rules containing this legacy field are
+  normalized automatically when loaded or saved; URL parameter and attribute cleanup are unchanged.
+
 ## Version 2.1.0
 
 ### Bug Fixes
