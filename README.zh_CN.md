@@ -12,7 +12,6 @@
   <a href="#功能特性">功能特性</a> •
   <a href="#安装">安装</a> •
   <a href="#使用">使用</a> •
-  <a href="#支持站点">支持站点</a>
 </p>
 
 <p align="center">
@@ -147,7 +146,6 @@
   "enabled": true,
   "description": "示例跟踪清理",
   "removeAttributes": ["data-track", "data-analytics"],
-  "preventClickRewrite": true,
   "cleanUrlParams": ["utm_source", "utm_medium"]
 }
 ```

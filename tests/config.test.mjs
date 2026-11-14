@@ -57,6 +57,25 @@ test('default config survives a decompose/apply round trip with an empty diff', 
   assert.deepEqual(restored, DEFAULT_CONFIG);
 });
 
+test('legacy preventClickRewrite fields are discarded during config round trips', () => {
+  const legacy = clone(DEFAULT_CONFIG);
+  legacy.trackingRules[0].preventClickRewrite = true;
+  legacy.trackingRules.push({
+    id: 'custom-legacy-click', domain: 'example.org', enabled: true,
+    removeAttributes: [], cleanUrlParams: [], preventClickRewrite: true
+  });
+
+  assert.ok(validateConfigStructure(legacy));
+  const diff = decomposeConfig(legacy);
+  assert.deepEqual(diff.trackingRuleOverrides, {});
+  assert.equal('preventClickRewrite' in diff.customTrackingRules[0], false);
+
+  // 模拟旧版本已经存入 storage 的内置规则覆盖
+  diff.trackingRuleOverrides['tracking-bilibili'] = clone(legacy.trackingRules[0]);
+  const restored = applyConfigDiff(DEFAULT_CONFIG, diff);
+  assert.ok(restored.trackingRules.every(rule => !('preventClickRewrite' in rule)));
+});
+
 test('custom rules, overrides, removals, whitelist, and global settings round-trip', () => {
   const full = clone(DEFAULT_CONFIG);
 

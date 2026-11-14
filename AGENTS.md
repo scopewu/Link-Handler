@@ -97,8 +97,8 @@ See `processLink()`.
   at most once.
 - SPA navigation handler debounces (100ms) then re-runs at 0 / 300 / 800 ms to catch async loads.
 - Whitelist uses **suffix matching** — `deepseek.com` covers `chat.deepseek.com`. A live whitelist
-  update cancels pending work, disconnects the observer, removes click-guard marks, and stops stats;
-  removing the whitelist restores observation and rescans.
+  update cancels pending work, disconnects the observer, and stops stats; removing the whitelist
+  restores observation and rescans.
 
 ## Conventions That Are Easy to Get Wrong
 

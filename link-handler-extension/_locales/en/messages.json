@@ -125,10 +125,6 @@
     "message": "Remove Attributes",
     "description": "Remove attributes label"
   },
-  "preventClickRewrite": {
-    "message": "Prevent Click Rewrite",
-    "description": "Prevent click rewrite label"
-  },
   "cleanUrlParams": {
     "message": "Clean URL Parameters (use * for all)",
     "description": "Clean URL parameters label"
@@ -246,10 +242,6 @@
   "popupFooterHint": {
     "message": "Link Handler",
     "description": "Popup footer text"
-  },
-  "preventClickRewriteDesc": {
-    "message": "Force direct navigation, bypass click tracking",
-    "description": "Prevent click rewrite description"
   },
   "globalSettingsDesc": {
     "message": "Configure how links are processed across all websites",
@@ -458,10 +450,6 @@
   "helpTrackingFieldRemoveAttrs": {
     "message": "HTML attributes to remove from the link element, such as data-spmid or suda-uatrack.",
     "description": "Tracking rule removeAttributes field help"
-  },
-  "helpTrackingFieldPrevent": {
-    "message": "Block the page from rewriting the link on click, forcing direct navigation instead of a tracked redirect.",
-    "description": "Tracking rule preventClickRewrite field help"
   },
   "helpTrackingFieldParams": {
     "message": "Query parameters to remove from the link URL, such as utm_source or spm_id_from. Enter * to remove all parameters. Keep functional parameters like p and t out of this list.",

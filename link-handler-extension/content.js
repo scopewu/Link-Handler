@@ -2,7 +2,6 @@
   'use strict';
 
   const PROCESSED_MARK = 'data-link-handler-processed';
-  const PREVENTED_MARK = 'data-link-handler-prevented';
   const LAST_HREF_DATA = 'linkHandlerLastHref';
 
   let config = null;
@@ -148,19 +147,12 @@
     batchProcessLinks(links);
   }
 
-  function clearPreventedMarks() {
-    document.querySelectorAll('[' + PREVENTED_MARK + ']').forEach(link => {
-      link.removeAttribute(PREVENTED_MARK);
-    });
-  }
-
   function clearProcessedMarksAndReprocess() {
     stats = createEmptyStats();
 
     document.querySelectorAll('[' + PROCESSED_MARK + ']').forEach(link => {
       link.removeAttribute(PROCESSED_MARK);
     });
-    clearPreventedMarks();
     processAllLinks();
   }
 
@@ -175,7 +167,6 @@
 
     if (contentObserver) contentObserver.disconnect();
     contentObserver = null;
-    clearPreventedMarks();
   }
 
   const scheduleProcess = typeof requestIdleCallback !== 'undefined'
@@ -267,9 +258,6 @@
         let paramsCleaned = false;
         if (rule.cleanUrlParams && rule.cleanUrlParams.length > 0) {
           paramsCleaned = cleanUrlParams(link, rule.cleanUrlParams);
-        }
-        if (rule.preventClickRewrite) {
-          preventClickRewrite(link);
         }
         if (attributesCleaned || paramsCleaned) trackingCounted = true;
       });
@@ -421,31 +409,6 @@
     }
   }
 
-  // 阻止点击重写：document 捕获阶段统一委托拦截（捕获先于目标监听器，可靠打断重写且省内存）
-  let clickRewriteGuardInstalled = false;
-
-  function installClickRewriteGuard() {
-    if (clickRewriteGuardInstalled) return;
-    clickRewriteGuardInstalled = true;
-
-    document.addEventListener('click', (e) => {
-      // 只拦截主按钮点击，保留 Ctrl/Command/Shift/Alt + 点击的默认行为
-      if (e.button !== 0) return;
-
-      const link = e.target && e.target.closest ? e.target.closest('a[' + PREVENTED_MARK + ']') : null;
-      if (!link) return;
-
-      // 只 stopImmediatePropagation 不 preventDefault：打断网站监听器，默认导航照常（Ctrl+Click 仍开新标签）
-      e.stopImmediatePropagation();
-    }, true);
-  }
-
-  function preventClickRewrite(link) {
-    if (link.hasAttribute(PREVENTED_MARK)) return;
-    link.setAttribute(PREVENTED_MARK, 'true');
-    installClickRewriteGuard();
-  }
-
   function isValidUrl(url) {
     try {
       const parsed = new URL(url);
@@ -504,7 +467,6 @@
             // 地址相同且标记仍在，说明是扩展自身写入或重复通知
             if (currentHref !== processedHref || !isProcessed) {
               target.removeAttribute(PROCESSED_MARK);
-              target.removeAttribute(PREVENTED_MARK);
               if (target.href) changedLinks.push(target);
             }
           }

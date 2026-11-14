@@ -122,14 +122,6 @@ function open(type, editIndex = null) {
             </div>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group full-width checkbox-group">
-            <label class="checkbox-label">
-              <input type="checkbox" id="modalRulePreventClick" ${isEdit && rule && rule.preventClickRewrite ? 'checked' : ''}>
-              <span>${i18n.getMessage('preventClickRewriteDesc')}</span>
-            </label>
-          </div>
-        </div>
       </div>
     `;
   }
@@ -267,7 +259,6 @@ async function confirm() {
     const descInput = body.querySelector('#modalRuleDesc');
     const domain = domainInput.value.trim().toLowerCase();
     const description = descInput.value.trim();
-    const preventClick = body.querySelector('#modalRulePreventClick').checked;
 
     if (!domain) {
       fail(domainInput, 'domainRequired');
@@ -293,8 +284,7 @@ async function confirm() {
       enabled,
       description,
       removeAttributes: removeAttrs,
-      cleanUrlParams: cleanParams,
-      preventClickRewrite: preventClick
+      cleanUrlParams: cleanParams
     };
 
     if (isEdit) {

@@ -12,7 +12,6 @@
   <a href="#features">Features</a> •
   <a href="#installation">Installation</a> •
   <a href="#usage">Usage</a> •
-  <a href="#supported-sites">Supported Sites</a>
 </p>
 
 <p align="center">
@@ -148,7 +147,6 @@ prefixes on the same redirect host) and all matching tracking rules are applied.
   "enabled": true,
   "description": "Example tracking cleanup",
   "removeAttributes": ["data-track", "data-analytics"],
-  "preventClickRewrite": true,
   "cleanUrlParams": ["utm_source", "utm_medium"]
 }
 ```

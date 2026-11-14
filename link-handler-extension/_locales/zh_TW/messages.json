@@ -125,10 +125,6 @@
     "message": "移除屬性",
     "description": "移除屬性標籤"
   },
-  "preventClickRewrite": {
-    "message": "阻止點擊重寫",
-    "description": "阻止點擊重寫標籤"
-  },
   "cleanUrlParams": {
     "message": "清理 URL 參數（輸入 * 清除所有）",
     "description": "清理 URL 參數標籤"
@@ -246,10 +242,6 @@
   "popupFooterHint": {
     "message": "Link Handler",
     "description": "彈出視窗底部文字"
-  },
-  "preventClickRewriteDesc": {
-    "message": "強制直接跳轉，阻止點擊統計",
-    "description": "阻止點擊重寫描述"
   },
   "globalSettingsDesc": {
     "message": "設定連結處理的全域行為",
@@ -458,10 +450,6 @@
   "helpTrackingFieldRemoveAttrs": {
     "message": "從連結元素上刪除的 HTML 屬性，如 data-spmid、suda-uatrack 等統計屬性。",
     "description": "跟蹤清理規則 removeAttributes 欄位說明"
-  },
-  "helpTrackingFieldPrevent": {
-    "message": "攔截網站的點擊事件重寫，阻止點擊時把連結替換回帶統計的位址，強制直接跳轉。",
-    "description": "跟蹤清理規則 preventClickRewrite 欄位說明"
   },
   "helpTrackingFieldParams": {
     "message": "從連結 URL 中刪除的查詢參數，如 utm_source、spm_id_from。輸入 * 表示刪除所有參數。功能參數（如 B 站的 p、t）應保留在名單之外。",

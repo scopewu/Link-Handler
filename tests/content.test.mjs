@@ -86,9 +86,6 @@ function createHarness(stored) {
       if (selector === '[data-link-handler-processed]') {
         return elements.filter(el => el.hasAttribute('data-link-handler-processed'));
       }
-      if (selector === '[data-link-handler-prevented]') {
-        return elements.filter(el => el.hasAttribute('data-link-handler-prevented'));
-      }
       return [];
     }
   };

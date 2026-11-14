@@ -288,9 +288,6 @@ function trackingRuleDetails(rule) {
     const paramsDisplay = rule.cleanUrlParams.includes('*') ? '*' : escapeHtml(rule.cleanUrlParams.join(', '));
     details.push(`<span class="rule-detail"><strong>${i18n.getMessage('cleanUrlParamsShort')}:</strong> ${paramsDisplay}</span>`);
   }
-  if (rule.preventClickRewrite) {
-    details.push(`<span class="rule-detail"><strong>${i18n.getMessage('preventClickRewrite')}:</strong> ✓</span>`);
-  }
   return details;
 }
 

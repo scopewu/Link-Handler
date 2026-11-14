@@ -129,14 +129,6 @@
     "message": "移除属性",
     "description": "移除属性标签"
   },
-  "preventClickRewrite": {
-    "message": "阻止点击重写",
-    "description": "阻止点击重写标签"
-  },
-  "preventClickRewriteDesc": {
-    "message": "强制直接跳转，阻止点击统计",
-    "description": "阻止点击重写描述"
-  },
   "cleanUrlParams": {
     "message": "清理 URL 参数（输入 * 清除所有）",
     "description": "清理 URL 参数标签"
@@ -458,10 +450,6 @@
   "helpTrackingFieldRemoveAttrs": {
     "message": "从链接元素上删除的 HTML 属性，如 data-spmid、suda-uatrack 等统计属性。",
     "description": "跟踪清理规则 removeAttributes 字段说明"
-  },
-  "helpTrackingFieldPrevent": {
-    "message": "拦截网站的点击事件重写，阻止点击时把链接替换回带统计的地址，强制直接跳转。",
-    "description": "跟踪清理规则 preventClickRewrite 字段说明"
   },
   "helpTrackingFieldParams": {
     "message": "从链接 URL 中删除的查询参数，如 utm_source、spm_id_from。输入 * 表示删除所有参数。功能参数（如 B 站的 p、t）应保留在名单之外。",

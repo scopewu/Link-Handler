@@ -89,7 +89,6 @@ const DEFAULT_CONFIG = {
       enabled: true,
       description: 'Bilibili 跟踪清理',
       removeAttributes: ['data-spmid', 'data-mod', 'data-idx', 'data-report-id'],
-      preventClickRewrite: false,
       // 黑名单制：只删跟踪参数，保留 p（分P）、t（时间戳）等功能参数
       cleanUrlParams: [
         'spm_id_from', 'from_spmid', 'vd_source', 'from', 'seid',
@@ -104,7 +103,6 @@ const DEFAULT_CONFIG = {
       enabled: true,
       description: '微博跟踪清理',
       removeAttributes: ['suda-uatrack', 'suda-data', 'action-data', 'bpfilter'],
-      preventClickRewrite: true,
       cleanUrlParams: ['weibo_id', 'refer_flag']
     },
     {
@@ -113,7 +111,6 @@ const DEFAULT_CONFIG = {
       enabled: true,
       description: '知乎跟踪清理',
       removeAttributes: ['data-za-detail-view-id', 'data-za-element-name', 'data-za-extra-module'],
-      preventClickRewrite: false,
       cleanUrlParams: ['utm_content', 'utm_medium', 'utm_source']
     },
     {
@@ -122,7 +119,6 @@ const DEFAULT_CONFIG = {
       enabled: true,
       description: '掘金跟踪清理',
       removeAttributes: [],
-      preventClickRewrite: false,
       cleanUrlParams: ['utm_source', 'utm_medium', 'utm_campaign']
     },
     {
@@ -131,7 +127,6 @@ const DEFAULT_CONFIG = {
       enabled: true,
       description: '简书跟踪清理',
       removeAttributes: ['data-original'],
-      preventClickRewrite: false,
       cleanUrlParams: ['utm_source', 'utm_medium']
     },
     {
@@ -140,7 +135,6 @@ const DEFAULT_CONFIG = {
       enabled: true,
       description: 'CSDN 跟踪清理',
       removeAttributes: ['data-report-query', 'data-report-click'],
-      preventClickRewrite: false,
       cleanUrlParams: []
     },
   ],
@@ -165,6 +159,14 @@ const STORAGE_VERSION = 3;
 
 function deepCopy(obj) {
   return JSON.parse(JSON.stringify(obj));
+}
+
+// 兼容仍带有点击拦截字段的旧配置，读取和再次保存时将其移除
+function normalizeTrackingRule(rule) {
+  if (!rule || typeof rule !== 'object') return rule;
+  const normalized = deepCopy(rule);
+  delete normalized.preventClickRewrite;
+  return normalized;
 }
 
 function createRuleId(type) {
@@ -234,7 +236,6 @@ function validateRuleList(rules, type) {
     } else {
       if (!isValidStringList(rule.removeAttributes) || !rule.removeAttributes.every(isValidAttributeName)) return false;
       if (!isValidStringList(rule.cleanUrlParams)) return false;
-      if (rule.preventClickRewrite !== undefined && typeof rule.preventClickRewrite !== 'boolean') return false;
     }
   }
   return true;
@@ -329,8 +330,9 @@ function decomposeConfig(fullConfig) {
     DEFAULT_CONFIG.redirectRules, fullConfig.redirectRules || [],
     diff.customRedirectRules, diff.redirectRuleOverrides, diff.removedBuiltinRedirectRules
   );
+  const trackingRules = (fullConfig.trackingRules || []).map(normalizeTrackingRule);
   diffRules(
-    DEFAULT_CONFIG.trackingRules, fullConfig.trackingRules || [],
+    DEFAULT_CONFIG.trackingRules, trackingRules,
     diff.customTrackingRules, diff.trackingRuleOverrides, diff.removedBuiltinTrackingRules
   );
 
@@ -353,8 +355,8 @@ function applyConfigDiff(defaults, diff) {
   const trackingOverrides = diff.trackingRuleOverrides || {};
   const trackingRules = defaults.trackingRules
     .filter(r => !removedTracking.has(r.id))
-    .map(r => trackingOverrides[r.id] ? deepCopy(trackingOverrides[r.id]) : deepCopy(r))
-    .concat(deepCopy(diff.customTrackingRules || []));
+    .map(r => normalizeTrackingRule(trackingOverrides[r.id] || r))
+    .concat((diff.customTrackingRules || []).map(normalizeTrackingRule));
 
   const removedWhitelist = new Set(diff.whitelistRemoved || []);
   const whitelist = defaults.whitelist
