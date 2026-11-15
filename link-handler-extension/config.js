@@ -161,14 +161,6 @@ function deepCopy(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-// 兼容仍带有点击拦截字段的旧配置，读取和再次保存时将其移除
-function normalizeTrackingRule(rule) {
-  if (!rule || typeof rule !== 'object') return rule;
-  const normalized = deepCopy(rule);
-  delete normalized.preventClickRewrite;
-  return normalized;
-}
-
 function createRuleId(type) {
   const prefix = type === 'tracking' ? 'custom-tracking' : 'custom-redirect';
   if (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') {
@@ -330,9 +322,8 @@ function decomposeConfig(fullConfig) {
     DEFAULT_CONFIG.redirectRules, fullConfig.redirectRules || [],
     diff.customRedirectRules, diff.redirectRuleOverrides, diff.removedBuiltinRedirectRules
   );
-  const trackingRules = (fullConfig.trackingRules || []).map(normalizeTrackingRule);
   diffRules(
-    DEFAULT_CONFIG.trackingRules, trackingRules,
+    DEFAULT_CONFIG.trackingRules, fullConfig.trackingRules || [],
     diff.customTrackingRules, diff.trackingRuleOverrides, diff.removedBuiltinTrackingRules
   );
 
@@ -355,8 +346,8 @@ function applyConfigDiff(defaults, diff) {
   const trackingOverrides = diff.trackingRuleOverrides || {};
   const trackingRules = defaults.trackingRules
     .filter(r => !removedTracking.has(r.id))
-    .map(r => normalizeTrackingRule(trackingOverrides[r.id] || r))
-    .concat((diff.customTrackingRules || []).map(normalizeTrackingRule));
+    .map(r => trackingOverrides[r.id] ? deepCopy(trackingOverrides[r.id]) : deepCopy(r))
+    .concat(deepCopy(diff.customTrackingRules || []));
 
   const removedWhitelist = new Set(diff.whitelistRemoved || []);
   const whitelist = defaults.whitelist

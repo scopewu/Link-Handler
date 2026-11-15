@@ -11,7 +11,7 @@
 <p align="center">
   <a href="#功能特性">功能特性</a> •
   <a href="#安装">安装</a> •
-  <a href="#使用">使用</a> •
+  <a href="#使用">使用</a>
 </p>
 
 <p align="center">
